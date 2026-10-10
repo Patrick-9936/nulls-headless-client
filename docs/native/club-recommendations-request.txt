@@ -1,0 +1,55 @@
+0xc58520 stp      x29, x30, [sp, #-0x30]!
+0xc58524 stp      x22, x21, [sp, #0x10]
+0xc58528 stp      x20, x19, [sp, #0x20]
+0xc5852c mov      x29, sp
+0xc58530 adrp     x22, #0x123d000
+0xc58534 mov      x20, x0
+0xc58538 mov      w21, w1
+0xc5853c ldr      x22, [x22, #0x620]
+0xc58540 ldr      x8, [x22]
+0xc58544 mov      x0, x8
+0xc58548 bl       #0xd5c868
+0xc5854c ldr      x8, [x22]
+0xc58550 mov      x19, x0
+0xc58554 mov      x0, x8
+0xc58558 bl       #0xd5c89c
+0xc5855c cbz      x19, #0xc5859c
+0xc58560 mov      w8, #0x42700000
+0xc58564 fmov     s1, w8
+0xc58568 fcmp     s0, s1
+0xc5856c b.pl     #0xc5859c
+0xc58570 tbnz     w21, #0, #0xc5859c
+0xc58574 ldr      x0, [x22]
+0xc58578 mov      x1, x19
+0xc5857c bl       #0xd5c758
+0xc58580 mov      x0, x19
+0xc58584 bl       #0xf32608
+0xc58588 mov      x1, x0
+0xc5858c mov      x0, x20
+0xc58590 mov      w2, #1
+0xc58594 bl       #0xc5875c
+0xc58598 b        #0xc585cc
+0xc5859c mov      w0, #0x98
+0xc585a0 bl       #0x11a3840
+0xc585a4 mov      x20, x0
+0xc585a8 bl       #0xf313fc
+0xc585ac adrp     x8, #0x123d000
+0xc585b0 mov      x1, x20
+0xc585b4 ldr      x8, [x8, #0x2a0]
+0xc585b8 ldr      x0, [x8]
+0xc585bc ldr      x8, [x0]
+0xc585c0 ldr      x8, [x8, #0x18]
+0xc585c4 blr      x8
+0xc585c8 cbz      x19, #0xc585f8
+0xc585cc ldr      x8, [x19]
+0xc585d0 mov      x0, x19
+0xc585d4 ldr      x8, [x8, #0x38]
+0xc585d8 blr      x8
+0xc585dc ldr      x8, [x19]
+0xc585e0 ldr      x1, [x8, #8]
+0xc585e4 mov      x0, x19
+0xc585e8 ldp      x20, x19, [sp, #0x20]
+0xc585ec ldp      x22, x21, [sp, #0x10]
+0xc585f0 ldp      x29, x30, [sp], #0x30
+0xc585f4 br       x1
+0xc585f8 ldp      x20, x19, [sp, #0x20]

@@ -1,0 +1,3278 @@
+[
+  {
+    "index": 5,
+    "reference": "15:5",
+    "name": "Wanted7",
+    "mode": "Bounty",
+    "map": "Wanted_7"
+  },
+  {
+    "index": 7,
+    "reference": "15:7",
+    "name": "Gemgrab1",
+    "mode": "GemGrab",
+    "map": "Gemgrab_1"
+  },
+  {
+    "index": 8,
+    "reference": "15:8",
+    "name": "Gemgrab2",
+    "mode": "GemGrab",
+    "map": "Gemgrab_2"
+  },
+  {
+    "index": 9,
+    "reference": "15:9",
+    "name": "Gemgrab3",
+    "mode": "GemGrab",
+    "map": "Gemgrab_3"
+  },
+  {
+    "index": 10,
+    "reference": "15:10",
+    "name": "Gemgrab4",
+    "mode": "GemGrab",
+    "map": "Wanted_3"
+  },
+  {
+    "index": 11,
+    "reference": "15:11",
+    "name": "Gemgrab5",
+    "mode": "GemGrab",
+    "map": "Gemgrab_5"
+  },
+  {
+    "index": 18,
+    "reference": "15:18",
+    "name": "Heist2",
+    "mode": "Heist",
+    "map": "Bankheist_2"
+  },
+  {
+    "index": 19,
+    "reference": "15:19",
+    "name": "Heist3",
+    "mode": "Heist",
+    "map": "Bankheist_3"
+  },
+  {
+    "index": 22,
+    "reference": "15:22",
+    "name": "Wanted8",
+    "mode": "Bounty",
+    "map": "Wanted_8"
+  },
+  {
+    "index": 24,
+    "reference": "15:24",
+    "name": "Ball1",
+    "mode": "BrawlBall",
+    "map": "Laserball_1"
+  },
+  {
+    "index": 25,
+    "reference": "15:25",
+    "name": "Ball2",
+    "mode": "BrawlBall",
+    "map": "Laserball_2"
+  },
+  {
+    "index": 26,
+    "reference": "15:26",
+    "name": "Ball3",
+    "mode": "BrawlBall",
+    "map": "Laserball_3"
+  },
+  {
+    "index": 50,
+    "reference": "15:50",
+    "name": "Ball4",
+    "mode": "BrawlBall",
+    "map": "Laserball_4"
+  },
+  {
+    "index": 51,
+    "reference": "15:51",
+    "name": "Ball6",
+    "mode": "BrawlBall",
+    "map": "Laserball_6"
+  },
+  {
+    "index": 53,
+    "reference": "15:53",
+    "name": "Heist8",
+    "mode": "Heist",
+    "map": "Bankheist_8"
+  },
+  {
+    "index": 72,
+    "reference": "15:72",
+    "name": "Heist12",
+    "mode": "Heist",
+    "map": "Bankheist_12"
+  },
+  {
+    "index": 82,
+    "reference": "15:82",
+    "name": "Wanted13",
+    "mode": "Bounty",
+    "map": "Wanted_13"
+  },
+  {
+    "index": 83,
+    "reference": "15:83",
+    "name": "Wanted14",
+    "mode": "Bounty",
+    "map": "Wanted_14"
+  },
+  {
+    "index": 115,
+    "reference": "15:115",
+    "name": "Gemgrab16",
+    "mode": "GemGrab",
+    "map": "Gemgrab_16"
+  },
+  {
+    "index": 118,
+    "reference": "15:118",
+    "name": "Ball9",
+    "mode": "BrawlBall",
+    "map": "Laserball_9"
+  },
+  {
+    "index": 132,
+    "reference": "15:132",
+    "name": "Ball10",
+    "mode": "BrawlBall",
+    "map": "Laserball_10"
+  },
+  {
+    "index": 137,
+    "reference": "15:137",
+    "name": "Heist14",
+    "mode": "Heist",
+    "map": "Bankheist_14"
+  },
+  {
+    "index": 143,
+    "reference": "15:143",
+    "name": "Ball12",
+    "mode": "BrawlBall",
+    "map": "Laserball_12"
+  },
+  {
+    "index": 144,
+    "reference": "15:144",
+    "name": "Ball13",
+    "mode": "BrawlBall",
+    "map": "Laserball_13"
+  },
+  {
+    "index": 292,
+    "reference": "15:292",
+    "name": "KingOfHill12",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_12"
+  },
+  {
+    "index": 293,
+    "reference": "15:293",
+    "name": "KingOfHill13",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_13"
+  },
+  {
+    "index": 295,
+    "reference": "15:295",
+    "name": "Wanted29",
+    "mode": "Bounty",
+    "map": "Wanted_29"
+  },
+  {
+    "index": 300,
+    "reference": "15:300",
+    "name": "KingOfHill16",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_16F"
+  },
+  {
+    "index": 306,
+    "reference": "15:306",
+    "name": "KingOfHill20",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_20F"
+  },
+  {
+    "index": 343,
+    "reference": "15:343",
+    "name": "Gemgrab36",
+    "mode": "GemGrab",
+    "map": "Gemgrab_36"
+  },
+  {
+    "index": 367,
+    "reference": "15:367",
+    "name": "Knockout8",
+    "mode": "Knockout",
+    "map": "Knockout_8"
+  },
+  {
+    "index": 368,
+    "reference": "15:368",
+    "name": "Knockout9",
+    "mode": "Knockout",
+    "map": "Knockout_9"
+  },
+  {
+    "index": 377,
+    "reference": "15:377",
+    "name": "VolleyBrawl1",
+    "mode": "VolleyBrawl",
+    "map": "VolleyBrawl_1"
+  },
+  {
+    "index": 378,
+    "reference": "15:378",
+    "name": "VolleyBrawl2",
+    "mode": "VolleyBrawl",
+    "map": "VolleyBrawl_2"
+  },
+  {
+    "index": 379,
+    "reference": "15:379",
+    "name": "VolleyBrawl3",
+    "mode": "VolleyBrawl",
+    "map": "VolleyBrawl_3"
+  },
+  {
+    "index": 380,
+    "reference": "15:380",
+    "name": "VolleyBrawl4",
+    "mode": "VolleyBrawl",
+    "map": "VolleyBrawl_4"
+  },
+  {
+    "index": 381,
+    "reference": "15:381",
+    "name": "VolleyBrawl5",
+    "mode": "VolleyBrawl",
+    "map": "VolleyBrawl_5"
+  },
+  {
+    "index": 382,
+    "reference": "15:382",
+    "name": "VolleyBrawl6",
+    "mode": "VolleyBrawl",
+    "map": "VolleyBrawl_6"
+  },
+  {
+    "index": 383,
+    "reference": "15:383",
+    "name": "VolleyBrawl7",
+    "mode": "VolleyBrawl",
+    "map": "VolleyBrawl_7"
+  },
+  {
+    "index": 384,
+    "reference": "15:384",
+    "name": "BasketBrawl1",
+    "mode": "BasketBrawl",
+    "map": "BasketBrawl_1"
+  },
+  {
+    "index": 385,
+    "reference": "15:385",
+    "name": "BasketBrawl2",
+    "mode": "BasketBrawl",
+    "map": "BasketBrawl_2"
+  },
+  {
+    "index": 386,
+    "reference": "15:386",
+    "name": "BasketBrawl3",
+    "mode": "BasketBrawl",
+    "map": "BasketBrawl_3"
+  },
+  {
+    "index": 387,
+    "reference": "15:387",
+    "name": "BasketBrawl4",
+    "mode": "BasketBrawl",
+    "map": "BasketBrawl_4"
+  },
+  {
+    "index": 388,
+    "reference": "15:388",
+    "name": "BasketBrawl5",
+    "mode": "BasketBrawl",
+    "map": "BasketBrawl_5"
+  },
+  {
+    "index": 389,
+    "reference": "15:389",
+    "name": "BasketBrawl6",
+    "mode": "BasketBrawl",
+    "map": "BasketBrawl_6"
+  },
+  {
+    "index": 390,
+    "reference": "15:390",
+    "name": "BasketBrawl7",
+    "mode": "BasketBrawl",
+    "map": "BasketBrawl_7"
+  },
+  {
+    "index": 429,
+    "reference": "15:429",
+    "name": "Knockout12",
+    "mode": "Knockout",
+    "map": "Knockout_12"
+  },
+  {
+    "index": 440,
+    "reference": "15:440",
+    "name": "Knockout15",
+    "mode": "Knockout",
+    "map": "Knockout_15"
+  },
+  {
+    "index": 459,
+    "reference": "15:459",
+    "name": "TagTeam1",
+    "mode": "TagTeam",
+    "map": "TagTeam_1"
+  },
+  {
+    "index": 460,
+    "reference": "15:460",
+    "name": "TagTeam2",
+    "mode": "TagTeam",
+    "map": "TagTeam_2"
+  },
+  {
+    "index": 461,
+    "reference": "15:461",
+    "name": "TagTeam3",
+    "mode": "TagTeam",
+    "map": "TagTeam_3"
+  },
+  {
+    "index": 463,
+    "reference": "15:463",
+    "name": "TagTeam5",
+    "mode": "TagTeam",
+    "map": "TagTeam_5"
+  },
+  {
+    "index": 468,
+    "reference": "15:468",
+    "name": "TagTeam10",
+    "mode": "TagTeam",
+    "map": "TagTeam_10"
+  },
+  {
+    "index": 499,
+    "reference": "15:499",
+    "name": "Gemgrab49",
+    "mode": "GemGrab",
+    "map": "Gemgrab_49"
+  },
+  {
+    "index": 502,
+    "reference": "15:502",
+    "name": "Knockout17",
+    "mode": "Knockout",
+    "map": "Knockout_17"
+  },
+  {
+    "index": 527,
+    "reference": "15:527",
+    "name": "KingOfHill33",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_33"
+  },
+  {
+    "index": 528,
+    "reference": "15:528",
+    "name": "Knockout18",
+    "mode": "Knockout",
+    "map": "Knockout_18"
+  },
+  {
+    "index": 548,
+    "reference": "15:548",
+    "name": "Knockout442",
+    "mode": "Knockout",
+    "map": "Knockout_442"
+  },
+  {
+    "index": 553,
+    "reference": "15:553",
+    "name": "Wanted441",
+    "mode": "Bounty",
+    "map": "Wanted_441"
+  },
+  {
+    "index": 554,
+    "reference": "15:554",
+    "name": "Wanted442",
+    "mode": "Bounty",
+    "map": "Wanted_442"
+  },
+  {
+    "index": 581,
+    "reference": "15:581",
+    "name": "Knockout481",
+    "mode": "Knockout",
+    "map": "Knockout_481"
+  },
+  {
+    "index": 645,
+    "reference": "15:645",
+    "name": "Deathmatch5v1",
+    "mode": "Deathmatch5v5",
+    "map": "Wipeout5v5_1_noIce"
+  },
+  {
+    "index": 646,
+    "reference": "15:646",
+    "name": "Deathmatch5v2",
+    "mode": "Deathmatch5v5",
+    "map": "Wipeout5v5_2_noIce"
+  },
+  {
+    "index": 647,
+    "reference": "15:647",
+    "name": "Deathmatch5v3",
+    "mode": "Deathmatch5v5",
+    "map": "Wipeout5v5_3_noIce"
+  },
+  {
+    "index": 703,
+    "reference": "15:703",
+    "name": "Knockout541",
+    "mode": "Knockout",
+    "map": "Knockout_541"
+  },
+  {
+    "index": 734,
+    "reference": "15:734",
+    "name": "Knockout552",
+    "mode": "Knockout",
+    "map": "Knockout_552"
+  },
+  {
+    "index": 748,
+    "reference": "15:748",
+    "name": "Paintball1",
+    "mode": "PaintBall",
+    "map": "PaintBall_1"
+  },
+  {
+    "index": 751,
+    "reference": "15:751",
+    "name": "SurvivalTrio1",
+    "mode": "TrioShowdown",
+    "map": "Survival_1"
+  },
+  {
+    "index": 753,
+    "reference": "15:753",
+    "name": "KillConfirmed1",
+    "mode": "KillConfirmed",
+    "map": "SoulCollector_1"
+  },
+  {
+    "index": 777,
+    "reference": "15:777",
+    "name": "SurvivalTeam562",
+    "mode": "DuoShowdown",
+    "map": "Survival_562"
+  },
+  {
+    "index": 796,
+    "reference": "15:796",
+    "name": "SurvivalTrio573",
+    "mode": "TrioShowdown",
+    "map": "SurvivalTrio_573"
+  },
+  {
+    "index": 819,
+    "reference": "15:819",
+    "name": "KillConfirmed2",
+    "mode": "KillConfirmed",
+    "map": "SoulCollector_2"
+  },
+  {
+    "index": 820,
+    "reference": "15:820",
+    "name": "KillConfirmed3",
+    "mode": "KillConfirmed",
+    "map": "SoulCollector_3"
+  },
+  {
+    "index": 821,
+    "reference": "15:821",
+    "name": "KillConfirmed4",
+    "mode": "KillConfirmed",
+    "map": "SoulCollector_4"
+  },
+  {
+    "index": 822,
+    "reference": "15:822",
+    "name": "KillConfirmed5",
+    "mode": "KillConfirmed",
+    "map": "SoulCollector_5"
+  },
+  {
+    "index": 823,
+    "reference": "15:823",
+    "name": "KillConfirmed6",
+    "mode": "KillConfirmed",
+    "map": "SoulCollector_6"
+  },
+  {
+    "index": 824,
+    "reference": "15:824",
+    "name": "SiegeSmall1",
+    "mode": "Siege",
+    "map": "SiegeSmall_1"
+  },
+  {
+    "index": 825,
+    "reference": "15:825",
+    "name": "SiegeSmall2",
+    "mode": "Siege",
+    "map": "SiegeSmall_2"
+  },
+  {
+    "index": 826,
+    "reference": "15:826",
+    "name": "SiegeSmall3",
+    "mode": "Siege",
+    "map": "SiegeSmall_3"
+  },
+  {
+    "index": 827,
+    "reference": "15:827",
+    "name": "SiegeSmall4",
+    "mode": "Siege",
+    "map": "SiegeSmall_4"
+  },
+  {
+    "index": 828,
+    "reference": "15:828",
+    "name": "SiegeSmall5",
+    "mode": "Siege",
+    "map": "SiegeSmall_5"
+  },
+  {
+    "index": 829,
+    "reference": "15:829",
+    "name": "SiegeSmall6",
+    "mode": "Siege",
+    "map": "SiegeSmall_6"
+  },
+  {
+    "index": 830,
+    "reference": "15:830",
+    "name": "SiegeSmall7",
+    "mode": "Siege",
+    "map": "SiegeSmall_7"
+  },
+  {
+    "index": 831,
+    "reference": "15:831",
+    "name": "SiegeSmall8",
+    "mode": "Siege",
+    "map": "SiegeSmall_8"
+  },
+  {
+    "index": 850,
+    "reference": "15:850",
+    "name": "AirHockey1",
+    "mode": "AirHockey",
+    "map": "AirHockey_1"
+  },
+  {
+    "index": 851,
+    "reference": "15:851",
+    "name": "AirHockey2",
+    "mode": "AirHockey",
+    "map": "AirHockey_2"
+  },
+  {
+    "index": 852,
+    "reference": "15:852",
+    "name": "AirHockey3",
+    "mode": "AirHockey",
+    "map": "AirHockey_3"
+  },
+  {
+    "index": 853,
+    "reference": "15:853",
+    "name": "AirHockey4",
+    "mode": "AirHockey",
+    "map": "AirHockey_4"
+  },
+  {
+    "index": 854,
+    "reference": "15:854",
+    "name": "AirHockey5",
+    "mode": "AirHockey",
+    "map": "AirHockey_5"
+  },
+  {
+    "index": 855,
+    "reference": "15:855",
+    "name": "AirHockey6",
+    "mode": "AirHockey",
+    "map": "AirHockey_6"
+  },
+  {
+    "index": 882,
+    "reference": "15:882",
+    "name": "Knockout591",
+    "mode": "Knockout",
+    "map": "Knockout_591"
+  },
+  {
+    "index": 900,
+    "reference": "15:900",
+    "name": "Heist593",
+    "mode": "Heist",
+    "map": "Bankheist_593"
+  },
+  {
+    "index": 909,
+    "reference": "15:909",
+    "name": "UNO1",
+    "mode": "UNO",
+    "map": "UNO_1"
+  },
+  {
+    "index": 911,
+    "reference": "15:911",
+    "name": "TreasureHunt1",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_1"
+  },
+  {
+    "index": 912,
+    "reference": "15:912",
+    "name": "UNO2",
+    "mode": "UNO",
+    "map": "UNO_2"
+  },
+  {
+    "index": 913,
+    "reference": "15:913",
+    "name": "UNO3",
+    "mode": "UNO",
+    "map": "UNO_3"
+  },
+  {
+    "index": 914,
+    "reference": "15:914",
+    "name": "TreasureHunt2",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_2"
+  },
+  {
+    "index": 915,
+    "reference": "15:915",
+    "name": "TreasureHunt3",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_3"
+  },
+  {
+    "index": 916,
+    "reference": "15:916",
+    "name": "TreasureHunt4",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_4"
+  },
+  {
+    "index": 917,
+    "reference": "15:917",
+    "name": "TreasureHunt5",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_5"
+  },
+  {
+    "index": 918,
+    "reference": "15:918",
+    "name": "TreasureHunt6",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_6"
+  },
+  {
+    "index": 919,
+    "reference": "15:919",
+    "name": "Ball5v702",
+    "mode": "BrawlBall5v5",
+    "map": "BrawlBall_5v5_702"
+  },
+  {
+    "index": 920,
+    "reference": "15:920",
+    "name": "Deathmatch5v701",
+    "mode": "Deathmatch5v5",
+    "map": "Wipeout_5v5_701"
+  },
+  {
+    "index": 923,
+    "reference": "15:923",
+    "name": "Knockout5vd703",
+    "mode": "Knockout5v5",
+    "map": "Wipeout_5v5_703"
+  },
+  {
+    "index": 924,
+    "reference": "15:924",
+    "name": "TreasureHunt7",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_7"
+  },
+  {
+    "index": 925,
+    "reference": "15:925",
+    "name": "AirHockey5v1",
+    "mode": "AirHockey5v5",
+    "map": "AirHockey_5v5_701"
+  },
+  {
+    "index": 927,
+    "reference": "15:927",
+    "name": "KingOfHill602",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_602"
+  },
+  {
+    "index": 928,
+    "reference": "15:928",
+    "name": "Ball601",
+    "mode": "BrawlBall",
+    "map": "Laserball_601"
+  },
+  {
+    "index": 929,
+    "reference": "15:929",
+    "name": "Ball602",
+    "mode": "BrawlBall",
+    "map": "Laserball_602"
+  },
+  {
+    "index": 931,
+    "reference": "15:931",
+    "name": "Gemgrab601",
+    "mode": "GemGrab",
+    "map": "Gemgrab_601"
+  },
+  {
+    "index": 932,
+    "reference": "15:932",
+    "name": "Gemgrab602",
+    "mode": "GemGrab",
+    "map": "Gemgrab_602"
+  },
+  {
+    "index": 933,
+    "reference": "15:933",
+    "name": "Heist601",
+    "mode": "Heist",
+    "map": "Bankheist_601"
+  },
+  {
+    "index": 935,
+    "reference": "15:935",
+    "name": "Wanted601",
+    "mode": "Bounty",
+    "map": "Wanted_601"
+  },
+  {
+    "index": 944,
+    "reference": "15:944",
+    "name": "Survival604",
+    "mode": "Showdown",
+    "map": "Survival_604"
+  },
+  {
+    "index": 945,
+    "reference": "15:945",
+    "name": "SurvivalTeam604",
+    "mode": "DuoShowdown",
+    "map": "Survival_604"
+  },
+  {
+    "index": 946,
+    "reference": "15:946",
+    "name": "SurvivalTrio604",
+    "mode": "TrioShowdown",
+    "map": "Survival_604"
+  },
+  {
+    "index": 947,
+    "reference": "15:947",
+    "name": "Survival605",
+    "mode": "Showdown",
+    "map": "Survival_605"
+  },
+  {
+    "index": 948,
+    "reference": "15:948",
+    "name": "SurvivalTeam605",
+    "mode": "DuoShowdown",
+    "map": "Survival_605"
+  },
+  {
+    "index": 949,
+    "reference": "15:949",
+    "name": "SurvivalTrio605",
+    "mode": "TrioShowdown",
+    "map": "Survival_605"
+  },
+  {
+    "index": 950,
+    "reference": "15:950",
+    "name": "Survival606",
+    "mode": "Showdown",
+    "map": "Survival_606"
+  },
+  {
+    "index": 951,
+    "reference": "15:951",
+    "name": "SurvivalTeam606",
+    "mode": "DuoShowdown",
+    "map": "Survival_606"
+  },
+  {
+    "index": 952,
+    "reference": "15:952",
+    "name": "SurvivalTrio606",
+    "mode": "TrioShowdown",
+    "map": "Survival_606"
+  },
+  {
+    "index": 953,
+    "reference": "15:953",
+    "name": "Survival607",
+    "mode": "Showdown",
+    "map": "Survival_607"
+  },
+  {
+    "index": 954,
+    "reference": "15:954",
+    "name": "SurvivalTeam607",
+    "mode": "DuoShowdown",
+    "map": "Survival_607"
+  },
+  {
+    "index": 955,
+    "reference": "15:955",
+    "name": "SurvivalTrio607",
+    "mode": "TrioShowdown",
+    "map": "Survival_607"
+  },
+  {
+    "index": 956,
+    "reference": "15:956",
+    "name": "Survival608",
+    "mode": "Showdown",
+    "map": "Survival_608"
+  },
+  {
+    "index": 957,
+    "reference": "15:957",
+    "name": "SurvivalTeam608",
+    "mode": "DuoShowdown",
+    "map": "Survival_608"
+  },
+  {
+    "index": 958,
+    "reference": "15:958",
+    "name": "SurvivalTrio608",
+    "mode": "TrioShowdown",
+    "map": "Survival_608"
+  },
+  {
+    "index": 959,
+    "reference": "15:959",
+    "name": "Survival609",
+    "mode": "Showdown",
+    "map": "Survival_609"
+  },
+  {
+    "index": 960,
+    "reference": "15:960",
+    "name": "SurvivalTeam609",
+    "mode": "DuoShowdown",
+    "map": "Survival_609"
+  },
+  {
+    "index": 961,
+    "reference": "15:961",
+    "name": "SurvivalTrio609",
+    "mode": "TrioShowdown",
+    "map": "Survival_609"
+  },
+  {
+    "index": 965,
+    "reference": "15:965",
+    "name": "Survival611",
+    "mode": "Showdown",
+    "map": "Survival_611"
+  },
+  {
+    "index": 966,
+    "reference": "15:966",
+    "name": "SurvivalTeam611",
+    "mode": "DuoShowdown",
+    "map": "Survival_611"
+  },
+  {
+    "index": 967,
+    "reference": "15:967",
+    "name": "SurvivalTrio611",
+    "mode": "TrioShowdown",
+    "map": "Survival_611"
+  },
+  {
+    "index": 968,
+    "reference": "15:968",
+    "name": "Survival612",
+    "mode": "Showdown",
+    "map": "Survival_612"
+  },
+  {
+    "index": 969,
+    "reference": "15:969",
+    "name": "SurvivalTeam612",
+    "mode": "DuoShowdown",
+    "map": "Survival_612"
+  },
+  {
+    "index": 970,
+    "reference": "15:970",
+    "name": "SurvivalTrio612",
+    "mode": "TrioShowdown",
+    "map": "Survival_612"
+  },
+  {
+    "index": 971,
+    "reference": "15:971",
+    "name": "Ball5v703",
+    "mode": "BrawlBall5v5",
+    "map": "BrawlBall_5v5_703"
+  },
+  {
+    "index": 973,
+    "reference": "15:973",
+    "name": "Deathmatch5v705",
+    "mode": "Deathmatch5v5",
+    "map": "Wipeout_5v5_705"
+  },
+  {
+    "index": 975,
+    "reference": "15:975",
+    "name": "Knockout5vd704",
+    "mode": "Knockout5v5",
+    "map": "Wipeout_5v5_704"
+  },
+  {
+    "index": 979,
+    "reference": "15:979",
+    "name": "Gemgrab5v702",
+    "mode": "GemGrab5v5",
+    "map": "GemGrab5v5_702"
+  },
+  {
+    "index": 980,
+    "reference": "15:980",
+    "name": "Gemgrab5v703",
+    "mode": "GemGrab5v5",
+    "map": "GemGrab5v5_703"
+  },
+  {
+    "index": 984,
+    "reference": "15:984",
+    "name": "Survival601",
+    "mode": "Showdown",
+    "map": "Survival_601"
+  },
+  {
+    "index": 985,
+    "reference": "15:985",
+    "name": "SurvivalTeam601",
+    "mode": "DuoShowdown",
+    "map": "Survival_601"
+  },
+  {
+    "index": 986,
+    "reference": "15:986",
+    "name": "SurvivalTrio601",
+    "mode": "TrioShowdown",
+    "map": "Survival_601"
+  },
+  {
+    "index": 987,
+    "reference": "15:987",
+    "name": "Survival602",
+    "mode": "Showdown",
+    "map": "Survival_602"
+  },
+  {
+    "index": 988,
+    "reference": "15:988",
+    "name": "SurvivalTeam602",
+    "mode": "DuoShowdown",
+    "map": "Survival_602"
+  },
+  {
+    "index": 989,
+    "reference": "15:989",
+    "name": "SurvivalTrio602",
+    "mode": "TrioShowdown",
+    "map": "Survival_602"
+  },
+  {
+    "index": 990,
+    "reference": "15:990",
+    "name": "Survival603",
+    "mode": "Showdown",
+    "map": "Survival_603"
+  },
+  {
+    "index": 991,
+    "reference": "15:991",
+    "name": "SurvivalTeam603",
+    "mode": "DuoShowdown",
+    "map": "Survival_603"
+  },
+  {
+    "index": 992,
+    "reference": "15:992",
+    "name": "SurvivalTrio603",
+    "mode": "TrioShowdown",
+    "map": "Survival_603"
+  },
+  {
+    "index": 993,
+    "reference": "15:993",
+    "name": "M003",
+    "mode": "Arena",
+    "map": "M_3"
+  },
+  {
+    "index": 996,
+    "reference": "15:996",
+    "name": "M005",
+    "mode": "Arena",
+    "map": "M_5"
+  },
+  {
+    "index": 997,
+    "reference": "15:997",
+    "name": "M006",
+    "mode": "Arena",
+    "map": "M_6"
+  },
+  {
+    "index": 1012,
+    "reference": "15:1012",
+    "name": "Survival6101",
+    "mode": "Showdown",
+    "map": "Survival_6101"
+  },
+  {
+    "index": 1013,
+    "reference": "15:1013",
+    "name": "SurvivalTeam6101",
+    "mode": "DuoShowdown",
+    "map": "Survival_6101"
+  },
+  {
+    "index": 1014,
+    "reference": "15:1014",
+    "name": "SurvivalTrio6101",
+    "mode": "TrioShowdown",
+    "map": "Survival_6101"
+  },
+  {
+    "index": 1015,
+    "reference": "15:1015",
+    "name": "Survival6102",
+    "mode": "Showdown",
+    "map": "Survival_6102"
+  },
+  {
+    "index": 1016,
+    "reference": "15:1016",
+    "name": "SurvivalTeam6102",
+    "mode": "DuoShowdown",
+    "map": "Survival_6102"
+  },
+  {
+    "index": 1017,
+    "reference": "15:1017",
+    "name": "SurvivalTrio6102",
+    "mode": "TrioShowdown",
+    "map": "Survival_6102"
+  },
+  {
+    "index": 1018,
+    "reference": "15:1018",
+    "name": "Knockout6101",
+    "mode": "Knockout",
+    "map": "Knockout_6101"
+  },
+  {
+    "index": 1019,
+    "reference": "15:1019",
+    "name": "Knockout6102",
+    "mode": "Knockout",
+    "map": "Knockout_6102"
+  },
+  {
+    "index": 1020,
+    "reference": "15:1020",
+    "name": "Ball6101",
+    "mode": "BrawlBall",
+    "map": "Laserball_6101"
+  },
+  {
+    "index": 1021,
+    "reference": "15:1021",
+    "name": "Ball6102",
+    "mode": "BrawlBall",
+    "map": "Laserball_6102"
+  },
+  {
+    "index": 1022,
+    "reference": "15:1022",
+    "name": "KingOfHill6101",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_6101"
+  },
+  {
+    "index": 1023,
+    "reference": "15:1023",
+    "name": "KingOfHill6102",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_6102"
+  },
+  {
+    "index": 1024,
+    "reference": "15:1024",
+    "name": "Heist6101",
+    "mode": "Heist",
+    "map": "Bankheist_6101"
+  },
+  {
+    "index": 1026,
+    "reference": "15:1026",
+    "name": "Gemgrab6101",
+    "mode": "GemGrab",
+    "map": "Gemgrab_6101"
+  },
+  {
+    "index": 1027,
+    "reference": "15:1027",
+    "name": "Gemgrab6102",
+    "mode": "GemGrab",
+    "map": "Gemgrab_6102"
+  },
+  {
+    "index": 1029,
+    "reference": "15:1029",
+    "name": "Dodgeball1",
+    "mode": "Dodgeball",
+    "map": "Dodgeball_M2"
+  },
+  {
+    "index": 1030,
+    "reference": "15:1030",
+    "name": "CaptureTheFlag16",
+    "mode": "CTF",
+    "map": "CaptureTheFlag_16"
+  },
+  {
+    "index": 1031,
+    "reference": "15:1031",
+    "name": "CaptureTheFlag17",
+    "mode": "CTF",
+    "map": "CaptureTheFlag_17"
+  },
+  {
+    "index": 1032,
+    "reference": "15:1032",
+    "name": "Dodgeball2",
+    "mode": "Dodgeball",
+    "map": "Dodgeball_2"
+  },
+  {
+    "index": 1033,
+    "reference": "15:1033",
+    "name": "Dodgeball3",
+    "mode": "Dodgeball",
+    "map": "Dodgeball_M1"
+  },
+  {
+    "index": 1034,
+    "reference": "15:1034",
+    "name": "AirHockey5v2",
+    "mode": "AirHockey5v5",
+    "map": "AirHockey_5v5_702"
+  },
+  {
+    "index": 1035,
+    "reference": "15:1035",
+    "name": "AirHockey5v3",
+    "mode": "AirHockey5v5",
+    "map": "AirHockey_5v5_703"
+  },
+  {
+    "index": 1036,
+    "reference": "15:1036",
+    "name": "CaptureTheFlag18",
+    "mode": "CTF",
+    "map": "CaptureTheFlag_18"
+  },
+  {
+    "index": 1037,
+    "reference": "15:1037",
+    "name": "CaptureTheFlag19",
+    "mode": "CTF",
+    "map": "CaptureTheFlag_19"
+  },
+  {
+    "index": 1038,
+    "reference": "15:1038",
+    "name": "Dodgeball4",
+    "mode": "Dodgeball",
+    "map": "Dodgeball_4"
+  },
+  {
+    "index": 1039,
+    "reference": "15:1039",
+    "name": "Dodgeball5",
+    "mode": "Dodgeball",
+    "map": "Dodgeball_5"
+  },
+  {
+    "index": 1040,
+    "reference": "15:1040",
+    "name": "Dodgeball6",
+    "mode": "Dodgeball",
+    "map": "Dodgeball_6"
+  },
+  {
+    "index": 1041,
+    "reference": "15:1041",
+    "name": "AirHockey5v4",
+    "mode": "AirHockey5v5",
+    "map": "AirHockey_5v5_704"
+  },
+  {
+    "index": 1042,
+    "reference": "15:1042",
+    "name": "TrailRun1",
+    "mode": "TrailRun",
+    "map": "TrailRun_1"
+  },
+  {
+    "index": 1043,
+    "reference": "15:1043",
+    "name": "Ball5v6201",
+    "mode": "BrawlBall5v5",
+    "map": "BrawlBall5v5_6201"
+  },
+  {
+    "index": 1044,
+    "reference": "15:1044",
+    "name": "Ball5v6202",
+    "mode": "BrawlBall5v5",
+    "map": "BrawlBall5v5_6202"
+  },
+  {
+    "index": 1045,
+    "reference": "15:1045",
+    "name": "Gemgrab5v6201",
+    "mode": "GemGrab5v5",
+    "map": "GemGrab5v5_6201"
+  },
+  {
+    "index": 1046,
+    "reference": "15:1046",
+    "name": "Gemgrab5v6202",
+    "mode": "GemGrab5v5",
+    "map": "GemGrab5v5_6202"
+  },
+  {
+    "index": 1047,
+    "reference": "15:1047",
+    "name": "Knockout5v6201",
+    "mode": "Knockout5v5",
+    "map": "Knockout5v5_6201"
+  },
+  {
+    "index": 1048,
+    "reference": "15:1048",
+    "name": "Knockout5v6202",
+    "mode": "Knockout5v5",
+    "map": "Knockout5v5_6202"
+  },
+  {
+    "index": 1049,
+    "reference": "15:1049",
+    "name": "Wipeout5v6201",
+    "mode": "Deathmatch5v5",
+    "map": "Wipeout5v5_6201"
+  },
+  {
+    "index": 1050,
+    "reference": "15:1050",
+    "name": "Wipeout5v6202",
+    "mode": "Deathmatch5v5",
+    "map": "Wipeout5v5_6202"
+  },
+  {
+    "index": 1051,
+    "reference": "15:1051",
+    "name": "Gemgrab6201",
+    "mode": "GemGrab",
+    "map": "Gemgrab_6201"
+  },
+  {
+    "index": 1052,
+    "reference": "15:1052",
+    "name": "Gemgrab6202",
+    "mode": "GemGrab",
+    "map": "Gemgrab_6202"
+  },
+  {
+    "index": 1053,
+    "reference": "15:1053",
+    "name": "Ball6201",
+    "mode": "BrawlBall",
+    "map": "Laserball_6201"
+  },
+  {
+    "index": 1054,
+    "reference": "15:1054",
+    "name": "Ball6202",
+    "mode": "BrawlBall",
+    "map": "Laserball_6202"
+  },
+  {
+    "index": 1055,
+    "reference": "15:1055",
+    "name": "Deathmatch6201",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_6201"
+  },
+  {
+    "index": 1056,
+    "reference": "15:1056",
+    "name": "Deathmatch6202",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_6202"
+  },
+  {
+    "index": 1057,
+    "reference": "15:1057",
+    "name": "KingOfHill6201",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_6201"
+  },
+  {
+    "index": 1058,
+    "reference": "15:1058",
+    "name": "Knockout6201",
+    "mode": "Knockout",
+    "map": "Knockout_6201"
+  },
+  {
+    "index": 1059,
+    "reference": "15:1059",
+    "name": "Knockout6202",
+    "mode": "Knockout",
+    "map": "Knockout_6202"
+  },
+  {
+    "index": 1060,
+    "reference": "15:1060",
+    "name": "TagTeam6201",
+    "mode": "TagTeam",
+    "map": "TagTeam_6201"
+  },
+  {
+    "index": 1061,
+    "reference": "15:1061",
+    "name": "TagTeam6202",
+    "mode": "TagTeam",
+    "map": "TagTeam_6202"
+  },
+  {
+    "index": 1062,
+    "reference": "15:1062",
+    "name": "Heist6201",
+    "mode": "Heist",
+    "map": "Bankheist_6201"
+  },
+  {
+    "index": 1063,
+    "reference": "15:1063",
+    "name": "Heist6202",
+    "mode": "Heist",
+    "map": "Bankheist_6202"
+  },
+  {
+    "index": 1064,
+    "reference": "15:1064",
+    "name": "MobaM1",
+    "mode": "Arena",
+    "map": "moba_m1"
+  },
+  {
+    "index": 1065,
+    "reference": "15:1065",
+    "name": "MobaM2",
+    "mode": "Arena",
+    "map": "moba_m2"
+  },
+  {
+    "index": 1067,
+    "reference": "15:1067",
+    "name": "Wanted6201",
+    "mode": "Bounty",
+    "map": "Wanted_6201"
+  },
+  {
+    "index": 1068,
+    "reference": "15:1068",
+    "name": "CaptureTheFlag20",
+    "mode": "CTF",
+    "map": "CaptureTheFlag_20"
+  },
+  {
+    "index": 1069,
+    "reference": "15:1069",
+    "name": "TrailRun2",
+    "mode": "TrailRun",
+    "map": "TrailRun_2"
+  },
+  {
+    "index": 1070,
+    "reference": "15:1070",
+    "name": "TrailRun3",
+    "mode": "TrailRun",
+    "map": "TrailRun_3"
+  },
+  {
+    "index": 1071,
+    "reference": "15:1071",
+    "name": "TrailRun4",
+    "mode": "TrailRun",
+    "map": "TrailRun_M1"
+  },
+  {
+    "index": 1072,
+    "reference": "15:1072",
+    "name": "TrailRun5",
+    "mode": "TrailRun",
+    "map": "TrailRun_M2"
+  },
+  {
+    "index": 1073,
+    "reference": "15:1073",
+    "name": "TrailRun6",
+    "mode": "TrailRun",
+    "map": "TrailRun_M3"
+  },
+  {
+    "index": 1074,
+    "reference": "15:1074",
+    "name": "UNO_4",
+    "mode": "UNO",
+    "map": "Map1_3lane"
+  },
+  {
+    "index": 1075,
+    "reference": "15:1075",
+    "name": "UNO_5",
+    "mode": "UNO",
+    "map": "Map3_Portals"
+  },
+  {
+    "index": 1076,
+    "reference": "15:1076",
+    "name": "UNO_6",
+    "mode": "UNO",
+    "map": "Map2_maze"
+  },
+  {
+    "index": 1077,
+    "reference": "15:1077",
+    "name": "UNO_7",
+    "mode": "UNO",
+    "map": "Map4_Waterways"
+  },
+  {
+    "index": 1084,
+    "reference": "15:1084",
+    "name": "UNO_8",
+    "mode": "UNO",
+    "map": "Map5_TwoLanes"
+  },
+  {
+    "index": 1085,
+    "reference": "15:1085",
+    "name": "TrailRun7",
+    "mode": "TrailRun",
+    "map": "TrailRun_M4"
+  },
+  {
+    "index": 1086,
+    "reference": "15:1086",
+    "name": "Dodgeball7",
+    "mode": "Dodgeball",
+    "map": "Dodgeball_M3"
+  },
+  {
+    "index": 1087,
+    "reference": "15:1087",
+    "name": "Survival631",
+    "mode": "Showdown",
+    "map": "Survival_631"
+  },
+  {
+    "index": 1088,
+    "reference": "15:1088",
+    "name": "Survival632",
+    "mode": "Showdown",
+    "map": "Survival_632"
+  },
+  {
+    "index": 1089,
+    "reference": "15:1089",
+    "name": "Gemgrab631",
+    "mode": "GemGrab",
+    "map": "Gemgrab_631"
+  },
+  {
+    "index": 1090,
+    "reference": "15:1090",
+    "name": "Gemgrab632",
+    "mode": "GemGrab",
+    "map": "Gemgrab_632"
+  },
+  {
+    "index": 1091,
+    "reference": "15:1091",
+    "name": "KingOfHill631",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_631"
+  },
+  {
+    "index": 1092,
+    "reference": "15:1092",
+    "name": "KingOfHill632",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_632"
+  },
+  {
+    "index": 1093,
+    "reference": "15:1093",
+    "name": "Ball631",
+    "mode": "BrawlBall",
+    "map": "Laserball_631"
+  },
+  {
+    "index": 1094,
+    "reference": "15:1094",
+    "name": "Ball632",
+    "mode": "BrawlBall",
+    "map": "Laserball_632"
+  },
+  {
+    "index": 1095,
+    "reference": "15:1095",
+    "name": "Knockout631",
+    "mode": "Knockout",
+    "map": "Knockout_631"
+  },
+  {
+    "index": 1096,
+    "reference": "15:1096",
+    "name": "Knockout632",
+    "mode": "Knockout",
+    "map": "Knockout_632"
+  },
+  {
+    "index": 1097,
+    "reference": "15:1097",
+    "name": "TagTeam631",
+    "mode": "TagTeam",
+    "map": "TagTeam_631"
+  },
+  {
+    "index": 1098,
+    "reference": "15:1098",
+    "name": "Heist631",
+    "mode": "Heist",
+    "map": "Bankheist_631"
+  },
+  {
+    "index": 1099,
+    "reference": "15:1099",
+    "name": "Heist632",
+    "mode": "Heist",
+    "map": "Bankheist_632"
+  },
+  {
+    "index": 1100,
+    "reference": "15:1100",
+    "name": "Knockout5v631",
+    "mode": "Knockout5v5",
+    "map": "Knockout5v5_631"
+  },
+  {
+    "index": 1101,
+    "reference": "15:1101",
+    "name": "Knockout5v632",
+    "mode": "Knockout5v5",
+    "map": "Knockout5v5_632"
+  },
+  {
+    "index": 1102,
+    "reference": "15:1102",
+    "name": "Knockout5v633",
+    "mode": "Knockout5v5",
+    "map": "Knockout5v5_633"
+  },
+  {
+    "index": 1103,
+    "reference": "15:1103",
+    "name": "Deathmatch631",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_631"
+  },
+  {
+    "index": 1104,
+    "reference": "15:1104",
+    "name": "Deathmatch632",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_632"
+  },
+  {
+    "index": 1105,
+    "reference": "15:1105",
+    "name": "Deathmatch633",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_633"
+  },
+  {
+    "index": 1106,
+    "reference": "15:1106",
+    "name": "Deathmatch634",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_634"
+  },
+  {
+    "index": 1107,
+    "reference": "15:1107",
+    "name": "SurvivalTeam631",
+    "mode": "DuoShowdown",
+    "map": "Survival_631"
+  },
+  {
+    "index": 1108,
+    "reference": "15:1108",
+    "name": "SurvivalTeam632",
+    "mode": "DuoShowdown",
+    "map": "Survival_632"
+  },
+  {
+    "index": 1109,
+    "reference": "15:1109",
+    "name": "SurvivalTrio631",
+    "mode": "TrioShowdown",
+    "map": "Survival_631"
+  },
+  {
+    "index": 1110,
+    "reference": "15:1110",
+    "name": "SurvivalTrio632",
+    "mode": "TrioShowdown",
+    "map": "Survival_632"
+  },
+  {
+    "index": 1111,
+    "reference": "15:1111",
+    "name": "Deathmatch4x3_1",
+    "mode": "Deathmatch4x3",
+    "map": "Wipeout4x3_i_1"
+  },
+  {
+    "index": 1112,
+    "reference": "15:1112",
+    "name": "Deathmatch4x3_2",
+    "mode": "Deathmatch4x3",
+    "map": "Wipeout4x3_i_2"
+  },
+  {
+    "index": 1113,
+    "reference": "15:1113",
+    "name": "Deathmatch4x3_3",
+    "mode": "Deathmatch4x3",
+    "map": "Wipeout4x3_3"
+  },
+  {
+    "index": 1119,
+    "reference": "15:1119",
+    "name": "Survival641",
+    "mode": "Showdown",
+    "map": "Survival_641"
+  },
+  {
+    "index": 1120,
+    "reference": "15:1120",
+    "name": "Survival642",
+    "mode": "Showdown",
+    "map": "Survival_642"
+  },
+  {
+    "index": 1121,
+    "reference": "15:1121",
+    "name": "Survival643",
+    "mode": "Showdown",
+    "map": "Survival_643"
+  },
+  {
+    "index": 1122,
+    "reference": "15:1122",
+    "name": "Survival644",
+    "mode": "Showdown",
+    "map": "Survival_644"
+  },
+  {
+    "index": 1123,
+    "reference": "15:1123",
+    "name": "Gemgrab641",
+    "mode": "GemGrab",
+    "map": "Gemgrab_641"
+  },
+  {
+    "index": 1125,
+    "reference": "15:1125",
+    "name": "KingOfHill641",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_641"
+  },
+  {
+    "index": 1126,
+    "reference": "15:1126",
+    "name": "KingOfHill642",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_642"
+  },
+  {
+    "index": 1127,
+    "reference": "15:1127",
+    "name": "Knockout641",
+    "mode": "Knockout",
+    "map": "Knockout_641"
+  },
+  {
+    "index": 1128,
+    "reference": "15:1128",
+    "name": "GemGrab4x3_1",
+    "mode": "GemGrab4x3",
+    "map": "GemGrab4x3_i_M4"
+  },
+  {
+    "index": 1129,
+    "reference": "15:1129",
+    "name": "GemGrab4x3_2",
+    "mode": "GemGrab4x3",
+    "map": "GemGrab4x3_i_M1"
+  },
+  {
+    "index": 1130,
+    "reference": "15:1130",
+    "name": "GemGrab4x3_3",
+    "mode": "GemGrab4x3",
+    "map": "GemGrab4x3_i_M2"
+  },
+  {
+    "index": 1133,
+    "reference": "15:1133",
+    "name": "SurvivalRoguelite641",
+    "mode": "Roguelite",
+    "map": "Survival_641"
+  },
+  {
+    "index": 1134,
+    "reference": "15:1134",
+    "name": "SurvivalRoguelite642",
+    "mode": "Roguelite",
+    "map": "Survival_642"
+  },
+  {
+    "index": 1135,
+    "reference": "15:1135",
+    "name": "SurvivalRoguelite643",
+    "mode": "Roguelite",
+    "map": "Survival_643"
+  },
+  {
+    "index": 1136,
+    "reference": "15:1136",
+    "name": "GemGrab4x3_4",
+    "mode": "GemGrab4x3",
+    "map": "GemGrab4x3_i_M3"
+  },
+  {
+    "index": 1137,
+    "reference": "15:1137",
+    "name": "Deathmatch4x3_4",
+    "mode": "Deathmatch4x3",
+    "map": "Wipeout4x3_i_4"
+  },
+  {
+    "index": 1138,
+    "reference": "15:1138",
+    "name": "SurvivalTeam641",
+    "mode": "DuoShowdown",
+    "map": "Survival_641"
+  },
+  {
+    "index": 1139,
+    "reference": "15:1139",
+    "name": "SurvivalTeam642",
+    "mode": "DuoShowdown",
+    "map": "Survival_642"
+  },
+  {
+    "index": 1140,
+    "reference": "15:1140",
+    "name": "SurvivalTeam643",
+    "mode": "DuoShowdown",
+    "map": "Survival_643"
+  },
+  {
+    "index": 1141,
+    "reference": "15:1141",
+    "name": "SurvivalTeam644",
+    "mode": "DuoShowdown",
+    "map": "Survival_644"
+  },
+  {
+    "index": 1142,
+    "reference": "15:1142",
+    "name": "SurvivalTrio641",
+    "mode": "TrioShowdown",
+    "map": "Survival_641"
+  },
+  {
+    "index": 1143,
+    "reference": "15:1143",
+    "name": "SurvivalTrio642",
+    "mode": "TrioShowdown",
+    "map": "Survival_642"
+  },
+  {
+    "index": 1144,
+    "reference": "15:1144",
+    "name": "SurvivalTrio643",
+    "mode": "TrioShowdown",
+    "map": "Survival_643"
+  },
+  {
+    "index": 1145,
+    "reference": "15:1145",
+    "name": "SurvivalTrio644",
+    "mode": "TrioShowdown",
+    "map": "Survival_644"
+  },
+  {
+    "index": 1146,
+    "reference": "15:1146",
+    "name": "Dodgeball2v2_1",
+    "mode": "Dodgeball2v2",
+    "map": "Dodgeball2v2_1"
+  },
+  {
+    "index": 1147,
+    "reference": "15:1147",
+    "name": "Dodgeball2v2_2",
+    "mode": "Dodgeball2v2",
+    "map": "Dodgeball2v2_2"
+  },
+  {
+    "index": 1150,
+    "reference": "15:1150",
+    "name": "MegaBossStickyBomb1",
+    "mode": "MegaBoss2P",
+    "map": "MegaBossSqueak_2v1_1"
+  },
+  {
+    "index": 1151,
+    "reference": "15:1151",
+    "name": "MegaBossGhost1",
+    "mode": "MegaBoss2P",
+    "map": "MegaBossShade_2v1_1"
+  },
+  {
+    "index": 1152,
+    "reference": "15:1152",
+    "name": "MegaBossAngelo1",
+    "mode": "MegaBoss2P",
+    "map": "MegaBossAngelo_2v1_1"
+  },
+  {
+    "index": 1153,
+    "reference": "15:1153",
+    "name": "MegaBossRico2",
+    "mode": "MegaBoss2P",
+    "map": "MegaBossRico_2v1_1"
+  },
+  {
+    "index": 1154,
+    "reference": "15:1154",
+    "name": "Dodgeball2v2_3",
+    "mode": "Dodgeball2v2",
+    "map": "Dodgeball2v2_3"
+  },
+  {
+    "index": 1155,
+    "reference": "15:1155",
+    "name": "BombLobbers1",
+    "mode": "BombHeist",
+    "map": "Bombheist_1"
+  },
+  {
+    "index": 1156,
+    "reference": "15:1156",
+    "name": "Swarm1",
+    "mode": "Swarm",
+    "map": "Survival_7"
+  },
+  {
+    "index": 1157,
+    "reference": "15:1157",
+    "name": "BombLobbers2",
+    "mode": "BombHeist",
+    "map": "Bombheist_2"
+  },
+  {
+    "index": 1158,
+    "reference": "15:1158",
+    "name": "Dodgeball2v2_4",
+    "mode": "Dodgeball2v2",
+    "map": "Dodgeball2v2_4"
+  },
+  {
+    "index": 1159,
+    "reference": "15:1159",
+    "name": "BombLobbers3",
+    "mode": "BombHeist",
+    "map": "Bombheist_m1"
+  },
+  {
+    "index": 1160,
+    "reference": "15:1160",
+    "name": "BombLobbers4",
+    "mode": "BombHeist",
+    "map": "Bombheist_m2"
+  },
+  {
+    "index": 1161,
+    "reference": "15:1161",
+    "name": "BombLobbers5",
+    "mode": "BombHeist",
+    "map": "Bombheist_m3"
+  },
+  {
+    "index": 1162,
+    "reference": "15:1162",
+    "name": "Knockout5v651",
+    "mode": "Knockout5v5",
+    "map": "Knockout5v5_651"
+  },
+  {
+    "index": 1163,
+    "reference": "15:1163",
+    "name": "Deathmatch651",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_651"
+  },
+  {
+    "index": 1164,
+    "reference": "15:1164",
+    "name": "Deathmatch652",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_652"
+  },
+  {
+    "index": 1165,
+    "reference": "15:1165",
+    "name": "KingOfHill651",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_651"
+  },
+  {
+    "index": 1166,
+    "reference": "15:1166",
+    "name": "KingOfHill652",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_652"
+  },
+  {
+    "index": 1167,
+    "reference": "15:1167",
+    "name": "Ball651",
+    "mode": "BrawlBall",
+    "map": "Laserball_651"
+  },
+  {
+    "index": 1168,
+    "reference": "15:1168",
+    "name": "Ball652",
+    "mode": "BrawlBall",
+    "map": "Laserball_652"
+  },
+  {
+    "index": 1169,
+    "reference": "15:1169",
+    "name": "Heist651",
+    "mode": "Heist",
+    "map": "Bankheist_651"
+  },
+  {
+    "index": 1170,
+    "reference": "15:1170",
+    "name": "Heist652",
+    "mode": "Heist",
+    "map": "Bankheist_652"
+  },
+  {
+    "index": 1171,
+    "reference": "15:1171",
+    "name": "Gemgrab651",
+    "mode": "GemGrab",
+    "map": "Gemgrab_651"
+  },
+  {
+    "index": 1172,
+    "reference": "15:1172",
+    "name": "Gemgrab652",
+    "mode": "GemGrab",
+    "map": "Gemgrab_652"
+  },
+  {
+    "index": 1173,
+    "reference": "15:1173",
+    "name": "Knockout651",
+    "mode": "Knockout",
+    "map": "Knockout_651"
+  },
+  {
+    "index": 1174,
+    "reference": "15:1174",
+    "name": "TagTeam651",
+    "mode": "TagTeam",
+    "map": "TagTeam_651"
+  },
+  {
+    "index": 1175,
+    "reference": "15:1175",
+    "name": "Wanted651",
+    "mode": "Bounty",
+    "map": "Wanted_651"
+  },
+  {
+    "index": 1176,
+    "reference": "15:1176",
+    "name": "Wanted652",
+    "mode": "Bounty",
+    "map": "Wanted_652"
+  },
+  {
+    "index": 1177,
+    "reference": "15:1177",
+    "name": "AirHockey651",
+    "mode": "AirHockey",
+    "map": "AirHockey_651"
+  },
+  {
+    "index": 1178,
+    "reference": "15:1178",
+    "name": "AirHockey652",
+    "mode": "AirHockey",
+    "map": "AirHockey_652"
+  },
+  {
+    "index": 1179,
+    "reference": "15:1179",
+    "name": "Knockout652",
+    "mode": "Knockout",
+    "map": "Knockout_652"
+  },
+  {
+    "index": 1180,
+    "reference": "15:1180",
+    "name": "Survival651",
+    "mode": "Showdown",
+    "map": "Survival_651"
+  },
+  {
+    "index": 1181,
+    "reference": "15:1181",
+    "name": "SurvivalTeam651",
+    "mode": "DuoShowdown",
+    "map": "Survival_651"
+  },
+  {
+    "index": 1182,
+    "reference": "15:1182",
+    "name": "SurvivalTrio651",
+    "mode": "TrioShowdown",
+    "map": "Survival_651"
+  },
+  {
+    "index": 1188,
+    "reference": "15:1188",
+    "name": "ShadowSmash1",
+    "mode": "ShadowSmash",
+    "map": "ShadowSmash_1"
+  },
+  {
+    "index": 1189,
+    "reference": "15:1189",
+    "name": "ShadowSmash2",
+    "mode": "ShadowSmash",
+    "map": "ShadowSmash_2"
+  },
+  {
+    "index": 1190,
+    "reference": "15:1190",
+    "name": "ShadowSmash3",
+    "mode": "ShadowSmash",
+    "map": "ShadowSmash_3"
+  },
+  {
+    "index": 1191,
+    "reference": "15:1191",
+    "name": "ShadowSmash4",
+    "mode": "ShadowSmash",
+    "map": "ShadowSmash_4"
+  },
+  {
+    "index": 1192,
+    "reference": "15:1192",
+    "name": "TreasureHunt661",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_661"
+  },
+  {
+    "index": 1193,
+    "reference": "15:1193",
+    "name": "TreasureHunt662",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_662"
+  },
+  {
+    "index": 1194,
+    "reference": "15:1194",
+    "name": "LoadedShowdown1",
+    "mode": "LoadedShowdown",
+    "map": "Survival_604"
+  },
+  {
+    "index": 1195,
+    "reference": "15:1195",
+    "name": "LoadedShowdown2",
+    "mode": "LoadedShowdown",
+    "map": "Survival_605"
+  },
+  {
+    "index": 1196,
+    "reference": "15:1196",
+    "name": "LoadedShowdown3",
+    "mode": "LoadedShowdown",
+    "map": "Survival_607"
+  },
+  {
+    "index": 1197,
+    "reference": "15:1197",
+    "name": "LoadedShowdown4",
+    "mode": "LoadedShowdown",
+    "map": "Survival_12"
+  },
+  {
+    "index": 1198,
+    "reference": "15:1198",
+    "name": "TreasureHunt663",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_663"
+  },
+  {
+    "index": 1199,
+    "reference": "15:1199",
+    "name": "TreasureHunt664",
+    "mode": "TreasureHunt",
+    "map": "TreasureHunt_664"
+  },
+  {
+    "index": 1200,
+    "reference": "15:1200",
+    "name": "Deathmatch661",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_661"
+  },
+  {
+    "index": 1201,
+    "reference": "15:1201",
+    "name": "Deathmatch662",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_662"
+  },
+  {
+    "index": 1202,
+    "reference": "15:1202",
+    "name": "KingOfHill661",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_661"
+  },
+  {
+    "index": 1203,
+    "reference": "15:1203",
+    "name": "KingOfHill662",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_662"
+  },
+  {
+    "index": 1204,
+    "reference": "15:1204",
+    "name": "Ball661",
+    "mode": "BrawlBall",
+    "map": "Laserball_661"
+  },
+  {
+    "index": 1205,
+    "reference": "15:1205",
+    "name": "Ball662",
+    "mode": "BrawlBall",
+    "map": "Laserball_662"
+  },
+  {
+    "index": 1206,
+    "reference": "15:1206",
+    "name": "Heist661",
+    "mode": "Heist",
+    "map": "Bankheist_661"
+  },
+  {
+    "index": 1207,
+    "reference": "15:1207",
+    "name": "Heist662",
+    "mode": "Heist",
+    "map": "Bankheist_662"
+  },
+  {
+    "index": 1208,
+    "reference": "15:1208",
+    "name": "Gemgrab661",
+    "mode": "GemGrab",
+    "map": "Gemgrab_661"
+  },
+  {
+    "index": 1209,
+    "reference": "15:1209",
+    "name": "Gemgrab662",
+    "mode": "GemGrab",
+    "map": "Gemgrab_662"
+  },
+  {
+    "index": 1210,
+    "reference": "15:1210",
+    "name": "Knockout661",
+    "mode": "Knockout",
+    "map": "Knockout_661"
+  },
+  {
+    "index": 1211,
+    "reference": "15:1211",
+    "name": "Knockout662",
+    "mode": "Knockout",
+    "map": "Knockout_662"
+  },
+  {
+    "index": 1212,
+    "reference": "15:1212",
+    "name": "TagTeam661",
+    "mode": "TagTeam",
+    "map": "TagTeam_661"
+  },
+  {
+    "index": 1213,
+    "reference": "15:1213",
+    "name": "Survival661",
+    "mode": "Showdown",
+    "map": "Survival_661"
+  },
+  {
+    "index": 1214,
+    "reference": "15:1214",
+    "name": "SurvivalTeam661",
+    "mode": "DuoShowdown",
+    "map": "Survival_661"
+  },
+  {
+    "index": 1215,
+    "reference": "15:1215",
+    "name": "SurvivalTrio661",
+    "mode": "TrioShowdown",
+    "map": "Survival_661"
+  },
+  {
+    "index": 1216,
+    "reference": "15:1216",
+    "name": "Survival662",
+    "mode": "Showdown",
+    "map": "Survival_662"
+  },
+  {
+    "index": 1217,
+    "reference": "15:1217",
+    "name": "SurvivalTeam662",
+    "mode": "DuoShowdown",
+    "map": "Survival_662"
+  },
+  {
+    "index": 1218,
+    "reference": "15:1218",
+    "name": "SurvivalTrio662",
+    "mode": "TrioShowdown",
+    "map": "Survival_662"
+  },
+  {
+    "index": 1219,
+    "reference": "15:1219",
+    "name": "Wanted661",
+    "mode": "Bounty",
+    "map": "Wanted_661"
+  },
+  {
+    "index": 1220,
+    "reference": "15:1220",
+    "name": "Wanted662",
+    "mode": "Bounty",
+    "map": "Wanted_662"
+  },
+  {
+    "index": 1221,
+    "reference": "15:1221",
+    "name": "AirHockey661",
+    "mode": "AirHockey",
+    "map": "AirHockey_661"
+  },
+  {
+    "index": 1222,
+    "reference": "15:1222",
+    "name": "AirHockey662",
+    "mode": "AirHockey",
+    "map": "AirHockey_662"
+  },
+  {
+    "index": 1223,
+    "reference": "15:1223",
+    "name": "ShadowSmash5v1",
+    "mode": "ShadowSmash5v5",
+    "map": "ShadowSmash5v5_1"
+  },
+  {
+    "index": 1224,
+    "reference": "15:1224",
+    "name": "ShadowSmash5v2",
+    "mode": "ShadowSmash5v5",
+    "map": "ShadowSmash5v5_2"
+  },
+  {
+    "index": 1225,
+    "reference": "15:1225",
+    "name": "ShadowSmash5v3",
+    "mode": "ShadowSmash5v5",
+    "map": "ShadowSmash5v5_3"
+  },
+  {
+    "index": 1226,
+    "reference": "15:1226",
+    "name": "ShadowSmash5v4",
+    "mode": "ShadowSmash5v5",
+    "map": "ShadowSmash5v5_4"
+  },
+  {
+    "index": 1227,
+    "reference": "15:1227",
+    "name": "LoadedShowdown5",
+    "mode": "LoadedShowdown",
+    "map": "Survival_661"
+  },
+  {
+    "index": 1228,
+    "reference": "15:1228",
+    "name": "LoadedShowdown6",
+    "mode": "LoadedShowdown",
+    "map": "Survival_662"
+  },
+  {
+    "index": 1229,
+    "reference": "15:1229",
+    "name": "LargeShowdown1",
+    "mode": "LargeShowdown",
+    "map": "LargeSurvivalSolo_1"
+  },
+  {
+    "index": 1230,
+    "reference": "15:1230",
+    "name": "SuperBall1",
+    "mode": "BrawlBallV2",
+    "map": "BrawlBallV2_1"
+  },
+  {
+    "index": 1231,
+    "reference": "15:1231",
+    "name": "SuperBall2",
+    "mode": "BrawlBallV2",
+    "map": "BrawlBallV2_2"
+  },
+  {
+    "index": 1232,
+    "reference": "15:1232",
+    "name": "SuperBall3",
+    "mode": "BrawlBallV2",
+    "map": "BrawlBallV2_3"
+  },
+  {
+    "index": 1233,
+    "reference": "15:1233",
+    "name": "SuperBall4",
+    "mode": "BrawlBallV2",
+    "map": "BrawlBallV2_M4"
+  },
+  {
+    "index": 1236,
+    "reference": "15:1236",
+    "name": "SuperBall5",
+    "mode": "BrawlBallV2",
+    "map": "BrawlBallV2_M1"
+  },
+  {
+    "index": 1237,
+    "reference": "15:1237",
+    "name": "SuperBall6",
+    "mode": "BrawlBallV2",
+    "map": "BrawlBallV2_M2"
+  },
+  {
+    "index": 1238,
+    "reference": "15:1238",
+    "name": "SuperBall7",
+    "mode": "BrawlBallV2",
+    "map": "BrawlBallV2_M3"
+  },
+  {
+    "index": 1239,
+    "reference": "15:1239",
+    "name": "LoadedDuoShowdown1",
+    "mode": "LoadedDuoShowdown",
+    "map": "Survival_604"
+  },
+  {
+    "index": 1240,
+    "reference": "15:1240",
+    "name": "SuperHockey1",
+    "mode": "SuperHockey",
+    "map": "SuperHockey_1"
+  },
+  {
+    "index": 1241,
+    "reference": "15:1241",
+    "name": "Moba671",
+    "mode": "Arena",
+    "map": "Moba_671"
+  },
+  {
+    "index": 1242,
+    "reference": "15:1242",
+    "name": "Moba672",
+    "mode": "Arena",
+    "map": "Moba_672"
+  },
+  {
+    "index": 1243,
+    "reference": "15:1243",
+    "name": "SuperBall8",
+    "mode": "BrawlBallV2",
+    "map": "BrawlBallV2_M8"
+  },
+  {
+    "index": 1244,
+    "reference": "15:1244",
+    "name": "Deathmatch671",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_671"
+  },
+  {
+    "index": 1245,
+    "reference": "15:1245",
+    "name": "Heist671",
+    "mode": "Heist",
+    "map": "Bankheist_671"
+  },
+  {
+    "index": 1246,
+    "reference": "15:1246",
+    "name": "Gemgrab671",
+    "mode": "GemGrab",
+    "map": "Gemgrab_671"
+  },
+  {
+    "index": 1247,
+    "reference": "15:1247",
+    "name": "Knockout671",
+    "mode": "Knockout",
+    "map": "Knockout_671"
+  },
+  {
+    "index": 1248,
+    "reference": "15:1248",
+    "name": "AirHockey671",
+    "mode": "AirHockey",
+    "map": "AirHockey_671"
+  },
+  {
+    "index": 1249,
+    "reference": "15:1249",
+    "name": "AirHockey672",
+    "mode": "AirHockey",
+    "map": "AirHockey_672"
+  },
+  {
+    "index": 1250,
+    "reference": "15:1250",
+    "name": "LoadedDuoShowdown2",
+    "mode": "LoadedDuoShowdown",
+    "map": "Survival_605"
+  },
+  {
+    "index": 1251,
+    "reference": "15:1251",
+    "name": "LoadedDuoShowdown3",
+    "mode": "LoadedDuoShowdown",
+    "map": "Survival_607"
+  },
+  {
+    "index": 1252,
+    "reference": "15:1252",
+    "name": "LoadedDuoShowdown4",
+    "mode": "LoadedDuoShowdown",
+    "map": "Survival_12"
+  },
+  {
+    "index": 1253,
+    "reference": "15:1253",
+    "name": "Cooking1",
+    "mode": "Cooking",
+    "map": "Cooking_M3"
+  },
+  {
+    "index": 1255,
+    "reference": "15:1255",
+    "name": "MechaVan681",
+    "mode": "MechaVan",
+    "map": "MechaVan_1"
+  },
+  {
+    "index": 1257,
+    "reference": "15:1257",
+    "name": "Cooking2",
+    "mode": "Cooking",
+    "map": "Cooking_M4"
+  },
+  {
+    "index": 1258,
+    "reference": "15:1258",
+    "name": "CoopCooking3",
+    "mode": "CoopCooking",
+    "map": "CoopCooking_M3"
+  },
+  {
+    "index": 1259,
+    "reference": "15:1259",
+    "name": "Cooking3",
+    "mode": "Cooking",
+    "map": "Cooking_M1"
+  },
+  {
+    "index": 1260,
+    "reference": "15:1260",
+    "name": "Cooking4",
+    "mode": "Cooking",
+    "map": "Cooking_M2"
+  },
+  {
+    "index": 1261,
+    "reference": "15:1261",
+    "name": "MechaVan682",
+    "mode": "MechaVan",
+    "map": "MechaVan_2"
+  },
+  {
+    "index": 1262,
+    "reference": "15:1262",
+    "name": "CoopCooking1",
+    "mode": "CoopCooking",
+    "map": "CoopCooking_1"
+  },
+  {
+    "index": 1264,
+    "reference": "15:1264",
+    "name": "CoopCooking2",
+    "mode": "CoopCooking",
+    "map": "CoopCooking_M2"
+  },
+  {
+    "index": 1265,
+    "reference": "15:1265",
+    "name": "AirHockey681",
+    "mode": "AirHockey",
+    "map": "AirHockey_681"
+  },
+  {
+    "index": 1266,
+    "reference": "15:1266",
+    "name": "AirHockey682",
+    "mode": "AirHockey",
+    "map": "AirHockey_682"
+  },
+  {
+    "index": 1267,
+    "reference": "15:1267",
+    "name": "Deathmatch681",
+    "mode": "Deathmatch",
+    "map": "Deathmatch_681"
+  },
+  {
+    "index": 1268,
+    "reference": "15:1268",
+    "name": "KingOfHill681",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_681"
+  },
+  {
+    "index": 1269,
+    "reference": "15:1269",
+    "name": "KingOfHill682",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_682"
+  },
+  {
+    "index": 1270,
+    "reference": "15:1270",
+    "name": "Ball681",
+    "mode": "BrawlBall",
+    "map": "Laserball_681"
+  },
+  {
+    "index": 1271,
+    "reference": "15:1271",
+    "name": "Ball682",
+    "mode": "BrawlBall",
+    "map": "Laserball_682"
+  },
+  {
+    "index": 1272,
+    "reference": "15:1272",
+    "name": "Heist681",
+    "mode": "Heist",
+    "map": "Bankheist_681"
+  },
+  {
+    "index": 1273,
+    "reference": "15:1273",
+    "name": "Heist682",
+    "mode": "Heist",
+    "map": "Bankheist_682"
+  },
+  {
+    "index": 1274,
+    "reference": "15:1274",
+    "name": "Gemgrab681",
+    "mode": "GemGrab",
+    "map": "Gemgrab_681"
+  },
+  {
+    "index": 1275,
+    "reference": "15:1275",
+    "name": "Gemgrab682",
+    "mode": "GemGrab",
+    "map": "Gemgrab_682"
+  },
+  {
+    "index": 1276,
+    "reference": "15:1276",
+    "name": "Knockout681",
+    "mode": "Knockout",
+    "map": "Knockout_681"
+  },
+  {
+    "index": 1277,
+    "reference": "15:1277",
+    "name": "Knockout682",
+    "mode": "Knockout",
+    "map": "Knockout_682"
+  },
+  {
+    "index": 1278,
+    "reference": "15:1278",
+    "name": "Survival681",
+    "mode": "Showdown",
+    "map": "Survival_681"
+  },
+  {
+    "index": 1279,
+    "reference": "15:1279",
+    "name": "SurvivalTeam681",
+    "mode": "DuoShowdown",
+    "map": "Survival_681"
+  },
+  {
+    "index": 1280,
+    "reference": "15:1280",
+    "name": "SurvivalTrio681",
+    "mode": "TrioShowdown",
+    "map": "Survival_681"
+  },
+  {
+    "index": 1281,
+    "reference": "15:1281",
+    "name": "Survival682",
+    "mode": "Showdown",
+    "map": "Survival_682"
+  },
+  {
+    "index": 1282,
+    "reference": "15:1282",
+    "name": "SurvivalTeam682",
+    "mode": "DuoShowdown",
+    "map": "Survival_682"
+  },
+  {
+    "index": 1283,
+    "reference": "15:1283",
+    "name": "SurvivalTrio682",
+    "mode": "TrioShowdown",
+    "map": "Survival_682"
+  },
+  {
+    "index": 1284,
+    "reference": "15:1284",
+    "name": "Survival683",
+    "mode": "Showdown",
+    "map": "Survival_683"
+  },
+  {
+    "index": 1285,
+    "reference": "15:1285",
+    "name": "SurvivalTeam683",
+    "mode": "DuoShowdown",
+    "map": "Survival_683"
+  },
+  {
+    "index": 1286,
+    "reference": "15:1286",
+    "name": "SurvivalTrio683",
+    "mode": "TrioShowdown",
+    "map": "Survival_683"
+  },
+  {
+    "index": 1287,
+    "reference": "15:1287",
+    "name": "Wanted681",
+    "mode": "Bounty",
+    "map": "Wanted_681"
+  },
+  {
+    "index": 1288,
+    "reference": "15:1288",
+    "name": "Wanted682",
+    "mode": "Bounty",
+    "map": "Wanted_682"
+  },
+  {
+    "index": 1289,
+    "reference": "15:1289",
+    "name": "CoopCooking4",
+    "mode": "CoopCooking",
+    "map": "CoopCooking_M4"
+  },
+  {
+    "index": 1290,
+    "reference": "15:1290",
+    "name": "MechaVan683",
+    "mode": "MechaVan",
+    "map": "MechaVan_3"
+  },
+  {
+    "index": 1293,
+    "reference": "15:1293",
+    "name": "HunterSurvivor1",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M1"
+  },
+  {
+    "index": 1294,
+    "reference": "15:1294",
+    "name": "HunterSurvivor2",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M2"
+  },
+  {
+    "index": 1295,
+    "reference": "15:1295",
+    "name": "SuperHockey2",
+    "mode": "SuperHockey",
+    "map": "SuperHockey_2"
+  },
+  {
+    "index": 1296,
+    "reference": "15:1296",
+    "name": "SuperHockey3",
+    "mode": "SuperHockey",
+    "map": "SuperHockey_M1"
+  },
+  {
+    "index": 1297,
+    "reference": "15:1297",
+    "name": "SuperHockey4",
+    "mode": "SuperHockey",
+    "map": "SuperHockey_M2"
+  },
+  {
+    "index": 1298,
+    "reference": "15:1298",
+    "name": "MegaBossDuo1",
+    "mode": "MegaBoss",
+    "map": "MegaBossDuo_M1"
+  },
+  {
+    "index": 1299,
+    "reference": "15:1299",
+    "name": "MegaBossDuo2",
+    "mode": "MegaBoss5P",
+    "map": "MegaBossDuo_M2"
+  },
+  {
+    "index": 1300,
+    "reference": "15:1300",
+    "name": "MegaBossDuo3",
+    "mode": "MegaBoss20P",
+    "map": "MegaBossDuo_M3"
+  },
+  {
+    "index": 1301,
+    "reference": "15:1301",
+    "name": "Survival69DUO1",
+    "mode": "Showdown",
+    "map": "Survival_6"
+  },
+  {
+    "index": 1302,
+    "reference": "15:1302",
+    "name": "SurvivalTeam69DUO1",
+    "mode": "DuoShowdown",
+    "map": "Survival_6"
+  },
+  {
+    "index": 1303,
+    "reference": "15:1303",
+    "name": "SurvivalTrio69DUO1",
+    "mode": "TrioShowdown",
+    "map": "Survival_6"
+  },
+  {
+    "index": 1304,
+    "reference": "15:1304",
+    "name": "Survival69DUO2",
+    "mode": "Showdown",
+    "map": "Survival_5"
+  },
+  {
+    "index": 1305,
+    "reference": "15:1305",
+    "name": "SurvivalTeam69DUO2",
+    "mode": "DuoShowdown",
+    "map": "Survival_5"
+  },
+  {
+    "index": 1306,
+    "reference": "15:1306",
+    "name": "SurvivalTrio69DUO2",
+    "mode": "TrioShowdown",
+    "map": "Survival_5"
+  },
+  {
+    "index": 1307,
+    "reference": "15:1307",
+    "name": "Survival69DUO3",
+    "mode": "Showdown",
+    "map": "Survival_3"
+  },
+  {
+    "index": 1308,
+    "reference": "15:1308",
+    "name": "SurvivalTeam69DUO3",
+    "mode": "DuoShowdown",
+    "map": "Survival_3"
+  },
+  {
+    "index": 1309,
+    "reference": "15:1309",
+    "name": "SurvivalTrio69DUO3",
+    "mode": "TrioShowdown",
+    "map": "Survival_3"
+  },
+  {
+    "index": 1310,
+    "reference": "15:1310",
+    "name": "Ball69DUO1",
+    "mode": "BrawlBall",
+    "map": "Laserball_12"
+  },
+  {
+    "index": 1311,
+    "reference": "15:1311",
+    "name": "Ball69DUO2",
+    "mode": "BrawlBall",
+    "map": "Laserball_4"
+  },
+  {
+    "index": 1312,
+    "reference": "15:1312",
+    "name": "Ball69DUO3",
+    "mode": "BrawlBall",
+    "map": "Laserball_2"
+  },
+  {
+    "index": 1313,
+    "reference": "15:1313",
+    "name": "Ball5v69DUO1",
+    "mode": "BrawlBall5v5",
+    "map": "BrawlBall5v5_6201"
+  },
+  {
+    "index": 1314,
+    "reference": "15:1314",
+    "name": "Ball5v69DUO2",
+    "mode": "BrawlBall5v5",
+    "map": "BrawlBall_5v5_703"
+  },
+  {
+    "index": 1315,
+    "reference": "15:1315",
+    "name": "Ball5v69DUO3",
+    "mode": "BrawlBall5v5",
+    "map": "BrawlBall_5v5_702"
+  },
+  {
+    "index": 1316,
+    "reference": "15:1316",
+    "name": "Knockout69DUO1",
+    "mode": "Knockout",
+    "map": "Knockout_8"
+  },
+  {
+    "index": 1317,
+    "reference": "15:1317",
+    "name": "Knockout69DUO2",
+    "mode": "Knockout",
+    "map": "Knockout_9"
+  },
+  {
+    "index": 1318,
+    "reference": "15:1318",
+    "name": "Knockout69DUO3",
+    "mode": "Knockout",
+    "map": "Knockout_442"
+  },
+  {
+    "index": 1319,
+    "reference": "15:1319",
+    "name": "Gemgrab69DUO1",
+    "mode": "GemGrab",
+    "map": "Gemgrab_1"
+  },
+  {
+    "index": 1320,
+    "reference": "15:1320",
+    "name": "Gemgrab69DUO2",
+    "mode": "GemGrab",
+    "map": "Gemgrab_16"
+  },
+  {
+    "index": 1321,
+    "reference": "15:1321",
+    "name": "Gemgrab69DUO3",
+    "mode": "GemGrab",
+    "map": "Gemgrab_5"
+  },
+  {
+    "index": 1322,
+    "reference": "15:1322",
+    "name": "HunterSurvivor3",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M3"
+  },
+  {
+    "index": 1323,
+    "reference": "15:1323",
+    "name": "Moba691",
+    "mode": "Arena",
+    "map": "Moba_691"
+  },
+  {
+    "index": 1324,
+    "reference": "15:1324",
+    "name": "Moba692",
+    "mode": "Arena",
+    "map": "Moba_692"
+  },
+  {
+    "index": 1325,
+    "reference": "15:1325",
+    "name": "HunterSurvivor4",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M4"
+  },
+  {
+    "index": 1326,
+    "reference": "15:1326",
+    "name": "SuperBall691",
+    "mode": "BrawlBallV2",
+    "map": "SuperBall_691"
+  },
+  {
+    "index": 1327,
+    "reference": "15:1327",
+    "name": "SuperBall692",
+    "mode": "BrawlBallV2",
+    "map": "SuperBall_692"
+  },
+  {
+    "index": 1328,
+    "reference": "15:1328",
+    "name": "HunterSurvivor5",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M5"
+  },
+  {
+    "index": 1329,
+    "reference": "15:1329",
+    "name": "KingOfHill691",
+    "mode": "KingOfHill",
+    "map": "KingOfHill_691"
+  },
+  {
+    "index": 1330,
+    "reference": "15:1330",
+    "name": "Ball691",
+    "mode": "BrawlBall",
+    "map": "Laserball_691"
+  },
+  {
+    "index": 1331,
+    "reference": "15:1331",
+    "name": "Ball692",
+    "mode": "BrawlBall",
+    "map": "Laserball_692"
+  },
+  {
+    "index": 1332,
+    "reference": "15:1332",
+    "name": "Gemgrab691",
+    "mode": "GemGrab",
+    "map": "Gemgrab_691"
+  },
+  {
+    "index": 1333,
+    "reference": "15:1333",
+    "name": "Knockout691",
+    "mode": "Knockout",
+    "map": "Knockout_691"
+  },
+  {
+    "index": 1334,
+    "reference": "15:1334",
+    "name": "TagTeam691",
+    "mode": "TagTeam",
+    "map": "TagTeam_691"
+  },
+  {
+    "index": 1335,
+    "reference": "15:1335",
+    "name": "TagTeam692",
+    "mode": "TagTeam",
+    "map": "TagTeam_692"
+  },
+  {
+    "index": 1336,
+    "reference": "15:1336",
+    "name": "Wanted691",
+    "mode": "Bounty",
+    "map": "Wanted_691"
+  },
+  {
+    "index": 1337,
+    "reference": "15:1337",
+    "name": "HunterSurvivor6",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M6"
+  },
+  {
+    "index": 1338,
+    "reference": "15:1338",
+    "name": "AirHockey691",
+    "mode": "AirHockey",
+    "map": "AirHockey_691"
+  },
+  {
+    "index": 1339,
+    "reference": "15:1339",
+    "name": "HunterSurvivor1_Loc2",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M1"
+  },
+  {
+    "index": 1340,
+    "reference": "15:1340",
+    "name": "HunterSurvivor2_Loc2",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M2"
+  },
+  {
+    "index": 1341,
+    "reference": "15:1341",
+    "name": "HunterSurvivor3_Loc2",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M3"
+  },
+  {
+    "index": 1342,
+    "reference": "15:1342",
+    "name": "HunterSurvivor4_Loc2",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M4"
+  },
+  {
+    "index": 1343,
+    "reference": "15:1343",
+    "name": "HunterSurvivor5_Loc2",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M5"
+  },
+  {
+    "index": 1344,
+    "reference": "15:1344",
+    "name": "HunterSurvivor6_Loc2",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M6"
+  },
+  {
+    "index": 1345,
+    "reference": "15:1345",
+    "name": "HunterSurvivor1_Loc3",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M1"
+  },
+  {
+    "index": 1346,
+    "reference": "15:1346",
+    "name": "HunterSurvivor2_Loc3",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M2"
+  },
+  {
+    "index": 1347,
+    "reference": "15:1347",
+    "name": "HunterSurvivor3_Loc3",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M3"
+  },
+  {
+    "index": 1348,
+    "reference": "15:1348",
+    "name": "HunterSurvivor4_Loc3",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M4"
+  },
+  {
+    "index": 1349,
+    "reference": "15:1349",
+    "name": "HunterSurvivor5_Loc3",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M5"
+  },
+  {
+    "index": 1350,
+    "reference": "15:1350",
+    "name": "HunterSurvivor6_Loc3",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M6"
+  },
+  {
+    "index": 1351,
+    "reference": "15:1351",
+    "name": "HunterSurvivor1_Loc4",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M1"
+  },
+  {
+    "index": 1352,
+    "reference": "15:1352",
+    "name": "HunterSurvivor2_Loc4",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M2"
+  },
+  {
+    "index": 1353,
+    "reference": "15:1353",
+    "name": "HunterSurvivor3_Loc4",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M3"
+  },
+  {
+    "index": 1354,
+    "reference": "15:1354",
+    "name": "HunterSurvivor4_Loc4",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M4"
+  },
+  {
+    "index": 1355,
+    "reference": "15:1355",
+    "name": "HunterSurvivor5_Loc4",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M5"
+  },
+  {
+    "index": 1356,
+    "reference": "15:1356",
+    "name": "HunterSurvivor6_Loc4",
+    "mode": "HunterSurvivor",
+    "map": "HunterSurvivor_M6"
+  }
+]

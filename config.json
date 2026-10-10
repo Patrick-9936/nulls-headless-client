@@ -1,0 +1,59 @@
+{
+  "host": "brawl.server.dnull.xyz",
+  "port": 9339,
+  "appBinaryVersion": "69.252",
+  "fingerprintHash": "3fdf5cce6f891db81386ddc74bed42b8647e7f9c",
+  "major": 69,
+  "minor": 252,
+  "build": 44,
+  "protocolVersion": 2,
+  "keyVersion": 59,
+  "serverPublicKeyHex": "656AA590749960FCFD2A8567A21AC610753DDCF37CA185966F2AEC372B0E8656",
+  "cryptoMode": "nulls-native19",
+  "loginLayout": "legacy",
+  "deviceType": 2,
+  "appStore": 2,
+  "promonPadSize": 0,
+  "preferredLanguage": "en",
+  "storefrontCountryCode": "",
+  "storefrontId": "",
+  "postLoginDelayMs": 1200,
+  "usePackedHeaderVersion": false,
+  "packetIds": {
+    "clientHello": 10100,
+    "login": 10101,
+    "addFriend": 10502,
+    "startSpectate": 14104,
+    "serverHello": 20100,
+    "loginFailed": 20103,
+    "loginOk": 20104,
+    "loginOkCandidates": [
+      20104,
+      25220
+    ],
+    "ownHomeData": 24101,
+    "ownHomeCandidates": [
+      24101,
+      24180
+    ],
+    "friendList": 20105,
+    "friendListUpdate": 20106,
+    "addFriendFailed": 20112,
+    "spectateFailed": 24105
+  },
+  "notes": {
+    "status": "See docs/VERIFICATION.md for live results and unsupported operations. No accounts bundled.",
+    "sdk": "Nulls Native19 protocol; no official Supercell SDK."
+  },
+  "bootstrapKeyVersion": 59,
+  "bootstrapProtocolVersion": 2,
+  "clientMajor": 69,
+  "clientMinor": 0,
+  "clientBuild": 252,
+  "bootstrapContentHash": "lilmuff1",
+  "loginHeaderVersion": 10,
+  "defaultAge": null,
+  "appPackage": "daniillnull.nulls.brawlstars",
+  "apkSize": 1267993744,
+  "clientLicensePath": "client-license.bin"
+}

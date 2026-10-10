@@ -1,0 +1,41 @@
+0xf28534 stp      x29, x30, [sp, #-0x30]!
+0xf28538 str      x21, [sp, #0x10]
+0xf2853c stp      x20, x19, [sp, #0x20]
+0xf28540 mov      x29, sp
+0xf28544 mov      x20, x0
+0xf28548 ldr      x0, [x0]
+0xf2854c mov      w21, w2
+0xf28550 mov      x19, x1
+0xf28554 ldr      x8, [x0]
+0xf28558 ldr      x8, [x8, #0x28]
+0xf2855c blr      x8
+0xf28560 ldr      x8, [x19]
+0xf28564 mov      w1, w0
+0xf28568 mov      x0, x19
+0xf2856c ldr      x8, [x8, #0x88]
+0xf28570 blr      x8
+0xf28574 tbz      w21, #0, #0xf28588
+0xf28578 ldr      x0, [x20]
+0xf2857c ldr      x8, [x0]
+0xf28580 ldr      x8, [x8, #0x10]
+0xf28584 blr      x8
+0xf28588 ldr      x0, [x20]
+0xf2858c bl       #0x6672cc
+0xf28590 ldr      x8, [x19]
+0xf28594 mov      w21, w0
+0xf28598 mov      x0, x19
+0xf2859c mov      w1, w21
+0xf285a0 ldr      x8, [x8, #0x88]
+0xf285a4 blr      x8
+0xf285a8 ldr      x0, [x20]
+0xf285ac bl       #0x6672c4
+0xf285b0 bl       #0x5b7c20
+0xf285b4 ldr      x8, [x19]
+0xf285b8 mov      x1, x0
+0xf285bc mov      x0, x19
+0xf285c0 ldr      x3, [x8, #0x138]
+0xf285c4 mov      w2, w21
+0xf285c8 ldp      x20, x19, [sp, #0x20]
+0xf285cc ldr      x21, [sp, #0x10]
+0xf285d0 ldp      x29, x30, [sp], #0x30
+0xf285d4 br       x3

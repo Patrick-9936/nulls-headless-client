@@ -1,0 +1,482 @@
+[
+  {
+    "Name": "clan_badge_01_01",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_01",
+    "Category": "",
+    "index": 0,
+    "reference": "8:0"
+  },
+  {
+    "Name": "clan_badge_01_02",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_02",
+    "Category": "",
+    "index": 1,
+    "reference": "8:1"
+  },
+  {
+    "Name": "clan_badge_01_03",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_03",
+    "Category": "",
+    "index": 2,
+    "reference": "8:2"
+  },
+  {
+    "Name": "clan_badge_01_04",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_04",
+    "Category": "",
+    "index": 3,
+    "reference": "8:3"
+  },
+  {
+    "Name": "clan_badge_02_01",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_01",
+    "Category": "",
+    "index": 4,
+    "reference": "8:4"
+  },
+  {
+    "Name": "clan_badge_02_02",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_02",
+    "Category": "",
+    "index": 5,
+    "reference": "8:5"
+  },
+  {
+    "Name": "clan_badge_02_03",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_03",
+    "Category": "",
+    "index": 6,
+    "reference": "8:6"
+  },
+  {
+    "Name": "clan_badge_02_04",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_04",
+    "Category": "",
+    "index": 7,
+    "reference": "8:7"
+  },
+  {
+    "Name": "clan_badge_03_01",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_01",
+    "Category": "",
+    "index": 8,
+    "reference": "8:8"
+  },
+  {
+    "Name": "clan_badge_03_02",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_02",
+    "Category": "",
+    "index": 9,
+    "reference": "8:9"
+  },
+  {
+    "Name": "clan_badge_03_03",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_03",
+    "Category": "",
+    "index": 10,
+    "reference": "8:10"
+  },
+  {
+    "Name": "clan_badge_03_04",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_04",
+    "Category": "",
+    "index": 11,
+    "reference": "8:11"
+  },
+  {
+    "Name": "clan_badge_04_01",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_01",
+    "Category": "",
+    "index": 12,
+    "reference": "8:12"
+  },
+  {
+    "Name": "clan_badge_04_02",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_02",
+    "Category": "",
+    "index": 13,
+    "reference": "8:13"
+  },
+  {
+    "Name": "clan_badge_04_03",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_03",
+    "Category": "",
+    "index": 14,
+    "reference": "8:14"
+  },
+  {
+    "Name": "clan_badge_04_04",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_04",
+    "Category": "",
+    "index": 15,
+    "reference": "8:15"
+  },
+  {
+    "Name": "clan_badge_05_01",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_01",
+    "Category": "",
+    "index": 16,
+    "reference": "8:16"
+  },
+  {
+    "Name": "clan_badge_05_02",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_02",
+    "Category": "",
+    "index": 17,
+    "reference": "8:17"
+  },
+  {
+    "Name": "clan_badge_05_03",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_03",
+    "Category": "",
+    "index": 18,
+    "reference": "8:18"
+  },
+  {
+    "Name": "clan_badge_05_04",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_04",
+    "Category": "",
+    "index": 19,
+    "reference": "8:19"
+  },
+  {
+    "Name": "clan_badge_01_05",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_05",
+    "Category": "",
+    "index": 20,
+    "reference": "8:20"
+  },
+  {
+    "Name": "clan_badge_01_06",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_06",
+    "Category": "",
+    "index": 21,
+    "reference": "8:21"
+  },
+  {
+    "Name": "clan_badge_02_05",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_05",
+    "Category": "",
+    "index": 22,
+    "reference": "8:22"
+  },
+  {
+    "Name": "clan_badge_02_06",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_06",
+    "Category": "",
+    "index": 23,
+    "reference": "8:23"
+  },
+  {
+    "Name": "clan_badge_03_05",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_05",
+    "Category": "",
+    "index": 24,
+    "reference": "8:24"
+  },
+  {
+    "Name": "clan_badge_03_06",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_06",
+    "Category": "",
+    "index": 25,
+    "reference": "8:25"
+  },
+  {
+    "Name": "clan_badge_04_05",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_05",
+    "Category": "",
+    "index": 26,
+    "reference": "8:26"
+  },
+  {
+    "Name": "clan_badge_04_06",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_06",
+    "Category": "",
+    "index": 27,
+    "reference": "8:27"
+  },
+  {
+    "Name": "clan_badge_05_05",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_05",
+    "Category": "",
+    "index": 28,
+    "reference": "8:28"
+  },
+  {
+    "Name": "clan_badge_05_06",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_06",
+    "Category": "",
+    "index": 29,
+    "reference": "8:29"
+  },
+  {
+    "Name": "clan_badge_01_07",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_07",
+    "Category": "",
+    "index": 30,
+    "reference": "8:30"
+  },
+  {
+    "Name": "clan_badge_01_08",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_08",
+    "Category": "",
+    "index": 31,
+    "reference": "8:31"
+  },
+  {
+    "Name": "clan_badge_01_09",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_09",
+    "Category": "",
+    "index": 32,
+    "reference": "8:32"
+  },
+  {
+    "Name": "clan_badge_01_10",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_01_10",
+    "Category": "",
+    "index": 33,
+    "reference": "8:33"
+  },
+  {
+    "Name": "clan_badge_02_07",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_07",
+    "Category": "",
+    "index": 34,
+    "reference": "8:34"
+  },
+  {
+    "Name": "clan_badge_02_08",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_08",
+    "Category": "",
+    "index": 35,
+    "reference": "8:35"
+  },
+  {
+    "Name": "clan_badge_02_09",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_09",
+    "Category": "",
+    "index": 36,
+    "reference": "8:36"
+  },
+  {
+    "Name": "clan_badge_02_10",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_02_10",
+    "Category": "",
+    "index": 37,
+    "reference": "8:37"
+  },
+  {
+    "Name": "clan_badge_03_07",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_07",
+    "Category": "",
+    "index": 38,
+    "reference": "8:38"
+  },
+  {
+    "Name": "clan_badge_03_08",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_08",
+    "Category": "",
+    "index": 39,
+    "reference": "8:39"
+  },
+  {
+    "Name": "clan_badge_03_09",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_09",
+    "Category": "",
+    "index": 40,
+    "reference": "8:40"
+  },
+  {
+    "Name": "clan_badge_03_10",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_03_10",
+    "Category": "",
+    "index": 41,
+    "reference": "8:41"
+  },
+  {
+    "Name": "clan_badge_04_07",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_07",
+    "Category": "",
+    "index": 42,
+    "reference": "8:42"
+  },
+  {
+    "Name": "clan_badge_04_08",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_08",
+    "Category": "",
+    "index": 43,
+    "reference": "8:43"
+  },
+  {
+    "Name": "clan_badge_04_09",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_09",
+    "Category": "",
+    "index": 44,
+    "reference": "8:44"
+  },
+  {
+    "Name": "clan_badge_04_10",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_04_10",
+    "Category": "",
+    "index": 45,
+    "reference": "8:45"
+  },
+  {
+    "Name": "clan_badge_05_07",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_07",
+    "Category": "",
+    "index": 46,
+    "reference": "8:46"
+  },
+  {
+    "Name": "clan_badge_05_08",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_08",
+    "Category": "",
+    "index": 47,
+    "reference": "8:47"
+  },
+  {
+    "Name": "clan_badge_05_09",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_09",
+    "Category": "",
+    "index": 48,
+    "reference": "8:48"
+  },
+  {
+    "Name": "clan_badge_05_10",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_05_10",
+    "Category": "",
+    "index": 49,
+    "reference": "8:49"
+  },
+  {
+    "Name": "clan_badge_06_01",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_01",
+    "Category": "",
+    "index": 50,
+    "reference": "8:50"
+  },
+  {
+    "Name": "clan_badge_06_02",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_02",
+    "Category": "",
+    "index": 51,
+    "reference": "8:51"
+  },
+  {
+    "Name": "clan_badge_06_03",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_03",
+    "Category": "",
+    "index": 52,
+    "reference": "8:52"
+  },
+  {
+    "Name": "clan_badge_06_04",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_04",
+    "Category": "",
+    "index": 53,
+    "reference": "8:53"
+  },
+  {
+    "Name": "clan_badge_06_05",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_05",
+    "Category": "",
+    "index": 54,
+    "reference": "8:54"
+  },
+  {
+    "Name": "clan_badge_06_06",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_06",
+    "Category": "",
+    "index": 55,
+    "reference": "8:55"
+  },
+  {
+    "Name": "clan_badge_06_07",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_07",
+    "Category": "",
+    "index": 56,
+    "reference": "8:56"
+  },
+  {
+    "Name": "clan_badge_06_08",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_08",
+    "Category": "",
+    "index": 57,
+    "reference": "8:57"
+  },
+  {
+    "Name": "clan_badge_06_09",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_09",
+    "Category": "",
+    "index": 58,
+    "reference": "8:58"
+  },
+  {
+    "Name": "clan_badge_06_10",
+    "IconSWF": "sc/ui.sc",
+    "IconExportName": "clan_badge_06_10",
+    "Category": "",
+    "index": 59,
+    "reference": "8:59"
+  }
+]

@@ -1,0 +1,29 @@
+0xc58c60 stp      x29, x30, [sp, #-0x30]!
+0xc58c64 str      x21, [sp, #0x10]
+0xc58c68 stp      x20, x19, [sp, #0x20]
+0xc58c6c mov      x29, sp
+0xc58c70 ldr      x8, [x1]
+0xc58c74 mov      x19, x0
+0xc58c78 mov      x0, x1
+0xc58c7c mov      x20, x1
+0xc58c80 ldr      x8, [x8, #0x28]
+0xc58c84 blr      x8
+0xc58c88 mov      w8, #0x5ef0
+0xc58c8c cmp      w0, w8
+0xc58c90 b.ne     #0xc58ce0
+0xc58c94 adrp     x21, #0x123d000
+0xc58c98 mov      x1, x20
+0xc58c9c ldr      x21, [x21, #0x620]
+0xc58ca0 ldr      x0, [x21]
+0xc58ca4 bl       #0xd5c758
+0xc58ca8 ldr      x0, [x21]
+0xc58cac bl       #0xd5c878
+0xc58cb0 mov      x0, x20
+0xc58cb4 bl       #0xf32608
+0xc58cb8 mov      x1, x0
+0xc58cbc mov      x0, x19
+0xc58cc0 mov      w2, #1
+0xc58cc4 mov      w19, #1
+0xc58cc8 bl       #0xc5875c
+0xc58ccc mov      w0, w19
+0xc58cd0 ldp      x20, x19, [sp, #0x20]

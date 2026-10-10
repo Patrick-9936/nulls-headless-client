@@ -1,0 +1,622 @@
+[
+  {
+    "index": 0,
+    "name": "ShotgunGirl",
+    "skin": 0
+  },
+  {
+    "index": 1,
+    "name": "Gunslinger",
+    "skin": 1
+  },
+  {
+    "index": 2,
+    "name": "BullDude",
+    "skin": 3
+  },
+  {
+    "index": 3,
+    "name": "RocketGirl",
+    "skin": 4
+  },
+  {
+    "index": 4,
+    "name": "TrickshotDude",
+    "skin": 9
+  },
+  {
+    "index": 5,
+    "name": "Cactus",
+    "skin": 10
+  },
+  {
+    "index": 6,
+    "name": "Barkeep",
+    "skin": 12
+  },
+  {
+    "index": 7,
+    "name": "Mechanic",
+    "skin": 13
+  },
+  {
+    "index": 8,
+    "name": "Shaman",
+    "skin": 14
+  },
+  {
+    "index": 9,
+    "name": "TntDude",
+    "skin": 6
+  },
+  {
+    "index": 10,
+    "name": "Luchador",
+    "skin": 7
+  },
+  {
+    "index": 11,
+    "name": "Undertaker",
+    "skin": 18
+  },
+  {
+    "index": 12,
+    "name": "Crow",
+    "skin": 19
+  },
+  {
+    "index": 13,
+    "name": "DeadMariachi",
+    "skin": 21
+  },
+  {
+    "index": 14,
+    "name": "BowDude",
+    "skin": 22
+  },
+  {
+    "index": 15,
+    "name": "Sniper",
+    "skin": 23
+  },
+  {
+    "index": 16,
+    "name": "MinigunDude",
+    "skin": 24
+  },
+  {
+    "index": 17,
+    "name": "BlackHole",
+    "skin": 32
+  },
+  {
+    "index": 18,
+    "name": "BarrelBot",
+    "skin": 34
+  },
+  {
+    "index": 19,
+    "name": "ArtilleryDude",
+    "skin": 41
+  },
+  {
+    "index": 20,
+    "name": "HammerDude",
+    "skin": 42
+  },
+  {
+    "index": 21,
+    "name": "HookDude",
+    "skin": 67
+  },
+  {
+    "index": 22,
+    "name": "ClusterBombDude",
+    "skin": 86
+  },
+  {
+    "index": 23,
+    "name": "Ninja",
+    "skin": 62
+  },
+  {
+    "index": 24,
+    "name": "Rosa",
+    "skin": 77
+  },
+  {
+    "index": 25,
+    "name": "Whirlwind",
+    "skin": 73
+  },
+  {
+    "index": 26,
+    "name": "Baseball",
+    "skin": 81
+  },
+  {
+    "index": 27,
+    "name": "Arcade",
+    "skin": 106
+  },
+  {
+    "index": 28,
+    "name": "Sandstorm",
+    "skin": 113
+  },
+  {
+    "index": 29,
+    "name": "BeeSniper",
+    "skin": 114
+  },
+  {
+    "index": 30,
+    "name": "Mummy",
+    "skin": 119
+  },
+  {
+    "index": 31,
+    "name": "SpawnerDude",
+    "skin": 121
+  },
+  {
+    "index": 32,
+    "name": "Speedy",
+    "skin": 127
+  },
+  {
+    "index": 33,
+    "name": "07220d24fa2e06c356cad4e7c6037d70b265010e",
+    "skin": 0
+  },
+  {
+    "index": 34,
+    "name": "Driller",
+    "skin": 142
+  },
+  {
+    "index": 35,
+    "name": "Blower",
+    "skin": 155
+  },
+  {
+    "index": 36,
+    "name": "Controller",
+    "skin": 156
+  },
+  {
+    "index": 37,
+    "name": "Wally",
+    "skin": 157
+  },
+  {
+    "index": 38,
+    "name": "PowerLeveler",
+    "skin": 186
+  },
+  {
+    "index": 39,
+    "name": "Percenter",
+    "skin": 210
+  },
+  {
+    "index": 40,
+    "name": "FireDude",
+    "skin": 211
+  },
+  {
+    "index": 41,
+    "name": "IceDude",
+    "skin": 239
+  },
+  {
+    "index": 42,
+    "name": "SnakeOil",
+    "skin": 249
+  },
+  {
+    "index": 43,
+    "name": "Enrager",
+    "skin": 250
+  },
+  {
+    "index": 44,
+    "name": "Ruffs",
+    "skin": 272
+  },
+  {
+    "index": 45,
+    "name": "Roller",
+    "skin": 277
+  },
+  {
+    "index": 46,
+    "name": "ElectroSniper",
+    "skin": 284
+  },
+  {
+    "index": 47,
+    "name": "StickyBomb",
+    "skin": 285
+  },
+  {
+    "index": 48,
+    "name": "CrossBomber",
+    "skin": 292
+  },
+  {
+    "index": 49,
+    "name": "RopeDude",
+    "skin": 303
+  },
+  {
+    "index": 50,
+    "name": "AssaultShotgun",
+    "skin": 304
+  },
+  {
+    "index": 51,
+    "name": "Knight",
+    "skin": 374
+  },
+  {
+    "index": 52,
+    "name": "MechaDude",
+    "skin": 384
+  },
+  {
+    "index": 53,
+    "name": "Duplicator",
+    "skin": 424
+  },
+  {
+    "index": 54,
+    "name": "KickerDude",
+    "skin": 446
+  },
+  {
+    "index": 55,
+    "name": "4f7b8a8fb970bd4cb356d59fd76bb5fb64e5797a",
+    "skin": 0
+  },
+  {
+    "index": 56,
+    "name": "Flea",
+    "skin": 491
+  },
+  {
+    "index": 57,
+    "name": "JetpackGirl",
+    "skin": 528
+  },
+  {
+    "index": 58,
+    "name": "CannonGirl",
+    "skin": 530
+  },
+  {
+    "index": 59,
+    "name": "Silencer",
+    "skin": 570
+  },
+  {
+    "index": 60,
+    "name": "WeaponThrower",
+    "skin": 600
+  },
+  {
+    "index": 61,
+    "name": "SoulCollector",
+    "skin": 601
+  },
+  {
+    "index": 62,
+    "name": "ShieldTank",
+    "skin": 630
+  },
+  {
+    "index": 63,
+    "name": "Jester",
+    "skin": 642
+  },
+  {
+    "index": 64,
+    "name": "DoorMan",
+    "skin": 645
+  },
+  {
+    "index": 65,
+    "name": "Beamer",
+    "skin": 649
+  },
+  {
+    "index": 66,
+    "name": "Splitter",
+    "skin": 679
+  },
+  {
+    "index": 67,
+    "name": "Puppeteer",
+    "skin": 681
+  },
+  {
+    "index": 68,
+    "name": "Maisie",
+    "skin": 719
+  },
+  {
+    "index": 69,
+    "name": "FishTank",
+    "skin": 720
+  },
+  {
+    "index": 70,
+    "name": "Duelist",
+    "skin": 732
+  },
+  {
+    "index": 71,
+    "name": "Reviver",
+    "skin": 733
+  },
+  {
+    "index": 72,
+    "name": "Cooker",
+    "skin": 755
+  },
+  {
+    "index": 73,
+    "name": "Conductor",
+    "skin": 756
+  },
+  {
+    "index": 74,
+    "name": "Cocooner",
+    "skin": 780
+  },
+  {
+    "index": 75,
+    "name": "Leaper",
+    "skin": 802
+  },
+  {
+    "index": 76,
+    "name": "Attacher",
+    "skin": 803
+  },
+  {
+    "index": 77,
+    "name": "Twins",
+    "skin": 813
+  },
+  {
+    "index": 78,
+    "name": "AxeJuggler",
+    "skin": 846
+  },
+  {
+    "index": 79,
+    "name": "InsectMan",
+    "skin": 850
+  },
+  {
+    "index": 80,
+    "name": "DragonRider",
+    "skin": 946
+  },
+  {
+    "index": 81,
+    "name": "Ambusher",
+    "skin": 947
+  },
+  {
+    "index": 82,
+    "name": "Painter",
+    "skin": 1021
+  },
+  {
+    "index": 83,
+    "name": "Crab",
+    "skin": 1022
+  },
+  {
+    "index": 84,
+    "name": "Digger",
+    "skin": 1048
+  },
+  {
+    "index": 85,
+    "name": "Samurai",
+    "skin": 1078
+  },
+  {
+    "index": 86,
+    "name": "Ghost",
+    "skin": 1147
+  },
+  {
+    "index": 87,
+    "name": "Voodoo",
+    "skin": 1148
+  },
+  {
+    "index": 89,
+    "name": "Meeple",
+    "skin": 1217
+  },
+  {
+    "index": 90,
+    "name": "Skater",
+    "skin": 1218
+  },
+  {
+    "index": 91,
+    "name": "Morningstar",
+    "skin": 1226
+  },
+  {
+    "index": 92,
+    "name": "Chronomancer",
+    "skin": 1227
+  },
+  {
+    "index": 93,
+    "name": "Alternator",
+    "skin": 1299
+  },
+  {
+    "index": 94,
+    "name": "Geisha",
+    "skin": 1300
+  },
+  {
+    "index": 95,
+    "name": "Stalker",
+    "skin": 1407
+  },
+  {
+    "index": 96,
+    "name": "Domain",
+    "skin": 1410
+  },
+  {
+    "index": 97,
+    "name": "Dancer",
+    "skin": 1454
+  },
+  {
+    "index": 98,
+    "name": "Fury",
+    "skin": 1455
+  },
+  {
+    "index": 99,
+    "name": "Bulletstorm",
+    "skin": 1507
+  },
+  {
+    "index": 100,
+    "name": "Daredevil",
+    "skin": 1508
+  },
+  {
+    "index": 101,
+    "name": "Mender",
+    "skin": 1573
+  },
+  {
+    "index": 102,
+    "name": "Shadowdemon",
+    "skin": 1574
+  },
+  {
+    "index": 103,
+    "name": "Redirecter",
+    "skin": 1699
+  },
+  {
+    "index": 104,
+    "name": "Gladiator",
+    "skin": 1761
+  },
+  {
+    "index": 105,
+    "name": "MagicalGirl",
+    "skin": 1796
+  },
+  {
+    "index": 106,
+    "name": "Rock",
+    "skin": 1824
+  },
+  {
+    "index": 107,
+    "name": "KatanaKid",
+    "skin": 1850
+  },
+  {
+    "index": 108,
+    "name": "FutureGirl",
+    "skin": 1863
+  },
+  {
+    "index": 109,
+    "name": "Attractor",
+    "skin": 1978
+  },
+  {
+    "index": 110,
+    "name": "Stacker",
+    "skin": 1979
+  },
+  {
+    "index": 172,
+    "name": "49c039b18c82880638cd3ba472dc5db3e8cc6f8b",
+    "skin": 0
+  },
+  {
+    "index": 174,
+    "name": "4028aae4a6bbbdea17608222005fefc028ff7c45",
+    "skin": 0
+  },
+  {
+    "index": 182,
+    "name": "037424c2385e031824f496c787e2ab8f473b70f8",
+    "skin": 0
+  },
+  {
+    "index": 201,
+    "name": "MechaDudeBig",
+    "skin": 385
+  },
+  {
+    "index": 204,
+    "name": "f12191a373cbc743d1f7554b27999006a017d2eb",
+    "skin": 0
+  },
+  {
+    "index": 213,
+    "name": "CannonGirlSmall",
+    "skin": 531
+  },
+  {
+    "index": 239,
+    "name": "Godzilla",
+    "skin": 948
+  },
+  {
+    "index": 242,
+    "name": "DiggerDrill",
+    "skin": 1049
+  },
+  {
+    "index": 269,
+    "name": "GeishaTransformed",
+    "skin": 1301
+  },
+  {
+    "index": 363,
+    "name": "SuperNovaCactus",
+    "skin": 1856
+  },
+  {
+    "index": 364,
+    "name": "SuperNovaBeeSniper",
+    "skin": 1855
+  },
+  {
+    "index": 365,
+    "name": "SuperNovaFireDude",
+    "skin": 1858
+  },
+  {
+    "index": 366,
+    "name": "SuperNovaVoodoo",
+    "skin": 1857
+  },
+  {
+    "index": 369,
+    "name": "SuperNovaMagicalGirl",
+    "skin": 1797
+  }
+]

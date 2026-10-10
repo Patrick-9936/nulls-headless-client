@@ -1,0 +1,22 @@
+{
+  "name": "nulls-headless-client",
+  "version": "0.2.6",
+  "private": true,
+  "description": "Nulls headless client with account sessions, club and team commands, fleet control and explicit server confirmation.",
+  "main": "Program.js",
+  "scripts": {
+    "start": "node Program.js help",
+    "check": "node --check Program.js && node --check lib/Client.js && node --check lib/Fleet.js && node --check tools/fleet.js && node Program.js info && node --check tools/candidates.js && node --check tools/proxy-watch.js && node --check tools/test-session.js",
+    "test": "node --test tests/*.test.js",
+    "update": "node tools/update.js",
+    "update:check": "node tools/update.js --check",
+    "update:watch": "node tools/update.js --watch",
+    "fleet": "node tools/fleet.js",
+    "features": "node Program.js features"
+  },
+  "dependencies": {
+    "blakejs": "^1.2.1",
+    "colors": "^1.4.0",
+    "tweetnacl": "^1.0.3"
+  }
+}

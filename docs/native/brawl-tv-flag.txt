@@ -1,0 +1,10 @@
+0x7adde4 bl       #0x11a3840
+0x7adde8 mov      x1, x19
+0x7addec mov      w2, #1
+0x7addf0 mov      x21, x0
+0x7addf4 bl       #0xf6c008
+0x7addf8 ldr      x8, [x20]
+0x7addfc mov      x0, x20
+0x7ade00 mov      x1, x21
+0x7ade04 ldr      x8, [x8, #0x18]
+0x7ade08 blr      x8

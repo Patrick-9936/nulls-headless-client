@@ -1,0 +1,88 @@
+#!/usr/bin/env node
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),zlib=require('node:zlib'),crypto=require('node:crypto');
+const {spawn}=require('node:child_process'),vm=require('node:vm'),Module=require('node:module');
+const VERSION='0.2.6';
+const PAYLOAD='__PAYLOAD__',DIGEST='__DIGEST__';
+let decoded;
+function readBundle(){
+ if(decoded)return decoded;
+ const bytes=zlib.gunzipSync(Buffer.from(PAYLOAD,'base64'),{maxOutputLength:32*1024*1024});
+ if(crypto.createHash('sha256').update(bytes).digest('hex')!==DIGEST)throw Error('Повреждён встроенный клиент');
+ const bundle=JSON.parse(bytes);
+ if(bundle.version!==VERSION || !Array.isArray(bundle.files))throw Error('Неверный формат сборки');
+ const seen=new Set();
+ for(const entry of bundle.files){
+  const name=entry.path;
+  if(typeof name!=='string'||!name||name.includes('\\')||path.posix.isAbsolute(name)||name.split('/').some(p=>!p||p==='.'||p==='..')||seen.has(name))throw Error('Неверный путь в сборке');
+  seen.add(name);entry.bytes=Buffer.from(entry.base64,'base64');
+  if(crypto.createHash('sha256').update(entry.bytes).digest('hex')!==entry.sha256)throw Error('Повреждён файл '+name);
+ }
+ decoded=bundle;return bundle;
+}
+function ensureNoSymlink(file){
+ let current=path.parse(file).root;
+ for(const part of file.slice(current.length).split(path.sep).filter(Boolean)){
+  current=path.join(current,part);
+  if(fs.existsSync(current)&&fs.lstatSync(current).isSymbolicLink())throw Error('Путь содержит символьную ссылку: '+current);
+ }
+}
+function extract(directory){
+ const root=path.resolve(directory),bundle=readBundle();
+ ensureNoSymlink(root);
+ if(fs.existsSync(root)&&!fs.statSync(root).isDirectory())throw Error('Рабочий путь должен быть папкой');
+ // Validate destinations before extraction; preserve existing config.
+ for(const entry of bundle.files){
+  const file=path.join(root,entry.path);ensureNoSymlink(file);
+  if(fs.existsSync(file) && entry.path!=='config.json'){
+   if(!fs.statSync(file).isFile()||crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')!==entry.sha256)
+    throw Error('Файл уже существует и отличается: '+file+'. Выберите пустую папку через --state-dir.');
+  }
+ }
+ fs.mkdirSync(root,{recursive:true,mode:0o700});
+ for(const entry of bundle.files){
+  const file=path.join(root,entry.path);
+  if(fs.existsSync(file))continue;
+  fs.mkdirSync(path.dirname(file),{recursive:true,mode:0o700});
+  fs.writeFileSync(file,entry.bytes,{flag:'wx',mode:0o600});
+ }
+ return root;
+}
+async function child(root,file,args=[],nodeArgs=[]){
+ const processChild=spawn(process.execPath,[...nodeArgs,path.join(root,file),...args],{cwd:root,stdio:'inherit'});
+ const interrupt=()=>processChild.kill('SIGINT'),terminate=()=>processChild.kill('SIGTERM');
+ process.on('SIGINT',interrupt);process.on('SIGTERM',terminate);
+ try{
+  const result=await new Promise((resolve,reject)=>{processChild.once('error',reject);processChild.once('exit',(code,signal)=>resolve({code,signal}));});
+  process.exitCode=result.code??(result.signal==='SIGINT'?130:result.signal==='SIGTERM'?143:1);
+ }finally{process.removeListener('SIGINT',interrupt);process.removeListener('SIGTERM',terminate);}
+}
+async function main(argv=process.argv.slice(2)){
+ if(argv.includes('--self-test')){
+  const bundle=readBundle();let scripts=0;
+  for(const file of bundle.files)if(file.path.endsWith('.js')){
+   new vm.Script(Module.wrap(file.bytes.toString('utf8').replace(/^#![^\n]*\n/,'')),{filename:file.path});scripts++;
+  }
+  console.log(JSON.stringify({ok:true,version:VERSION,files:bundle.files.length,scripts,sha256:DIGEST}));return;
+ }
+ let directory=path.join(__dirname,'.nulls-single-'+VERSION);argv=[...argv];
+ const i=argv.indexOf('--state-dir');
+ if(i!==-1){if(!argv[i+1]||argv[i+1].startsWith('--'))throw Error('--state-dir требует путь');directory=path.resolve(argv[i+1]);argv.splice(i,2);}
+ if(argv[0]==='--extract'){if(!argv[1])throw Error('--extract требует путь');console.log(extract(argv[1]));return;}
+ const root=extract(directory);
+ if(argv[0]==='--test'){
+  const tests=fs.readdirSync(path.join(root,'tests')).filter(n=>n.endsWith('.test.js')).map(n=>path.join(root,'tests',n));
+  const c=spawn(process.execPath,['--test',...tests],{cwd:root,stdio:'inherit'});
+  const code=await new Promise((resolve,reject)=>{c.once('error',reject);c.once('exit',resolve);});process.exitCode=code??1;return;
+ }
+ if(argv[0]==='--tool'){
+  const name=argv[1];
+  if(!name||!/^[a-z][a-z0-9-]*$/.test(name)||!fs.existsSync(path.join(root,'tools',name+'.js')))throw Error('Неизвестная утилита; примеры: --tool fleet status, --tool update --check');
+  await child(root,'tools/'+name+'.js',argv.slice(2));return;
+ }
+ if(!argv.length||argv[0]==='tui'||argv[0]==='--tui'){await child(root,'TUI.js',argv.slice(1));return;}
+ if(argv[0]==='help')console.log('TUI: node Nulls.js\nРабочая папка: '+root+'\nУтилиты: node Nulls.js --tool fleet status\nВсе тесты: node Nulls.js --test\n');
+ await child(root,'Program.js',argv);
+}
+module.exports={readBundle,extract,main};
+if(require.main===module)main().catch(e=>{console.error(e.message);process.exitCode=1;});

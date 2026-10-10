@@ -1,0 +1,346 @@
+{
+  "version": "0.2.6",
+  "date": "2026-10-09",
+  "notes": "See VERIFICATION.md for conditions and server refusals. Loading does not implement gameplay.",
+  "commands": [
+    {
+      "command": "login",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "create-account",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "account-region",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "accept-friend",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "remove-friend",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "decline-friend",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "friend",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "friends",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "friends-online",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "spectate",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "stop-spectate",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "create-club",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "join-club",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "leave-club",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-info",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-members",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-online",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-chat",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-stream",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-requests",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-settings",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-description",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-trophies",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-role",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-promote",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-demote",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-kick",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-invite",
+      "status": "tested-unconfirmed",
+      "experimental": true
+    },
+    {
+      "command": "club-request",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "club-answer",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "create-room",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "join-room",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "leave-room",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-info",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "chat",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "ready",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "unready",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "matchmake",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "cancel-matchmake",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-brawler",
+      "status": "unavailable",
+      "experimental": false
+    },
+    {
+      "command": "team-mode",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-map",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-event",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-location",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-invite",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-answer",
+      "status": "experimental",
+      "experimental": true
+    },
+    {
+      "command": "invite-answer",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "accept-invite",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "decline-invite",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-request",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-cancel-request",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-request-answer",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-cancel-invite",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-kick",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-advertise",
+      "status": "tested-unconfirmed",
+      "experimental": true
+    },
+    {
+      "command": "team-status",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "invitations",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "team-bot",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "practice",
+      "status": "tested-unconfirmed",
+      "experimental": true
+    },
+    {
+      "command": "player-status",
+      "status": "tested-unconfirmed",
+      "experimental": true
+    },
+    {
+      "command": "top",
+      "status": "live-verified",
+      "experimental": false
+    },
+    {
+      "command": "brawl-tv",
+      "status": "native-recovered",
+      "experimental": true
+    },
+    {
+      "command": "brawl-tv-channels",
+      "status": "native-recovered",
+      "experimental": true
+    },
+    {
+      "command": "brawl-tv-next",
+      "status": "native-recovered",
+      "experimental": true
+    },
+    {
+      "command": "club-recommendations",
+      "status": "live-verified",
+      "experimental": false
+    }
+  ],
+  "removed": {
+    "rename": "Server application not confirmed; removed at user request"
+  },
+  "conditions": {
+    "club-stream": "Server-pushed stream, known entry types only; --refresh reconnects",
+    "club-request": "Pending stage; text verified with club owner in same fleet",
+    "team-request": "Outgoing request/cancellation verified by owner in same fleet; otherwise unconfirmed",
+    "team-invite": "Friends and clubmate routes tested; same-fleet recipient delivery awaited",
+    "account-region": "24178 success code and matching region DataReference; Home persistence not decoded",
+    "team-event": "Current server event IDs required; no complete Home event catalogue",
+    "team-bot": "Friendly lobby only",
+    "team-status": "Numeric member status in 24124; labels not inferred",
+    "club-recommendations": "14303 → 24304; server order retained, empty list valid, malformed response rejected"
+  }
+}
