@@ -31,9 +31,31 @@ module.exports = class LoginOkMessage {
 
   decode(){
     const original=Buffer.from(this.ByteStream.payload);
+    this.extractBindToken(original);
     try { this.ByteStream.set(original); this.decodeModern(); return; } catch {}
     try { this.ByteStream.set(original); this.decodeLegacy(); return; } catch {}
     this.parsed=false;
+  }
+
+  extractBindToken(payload){
+    const zlib=require('zlib');
+    const stream=Buffer.from([0x78,0x9c]);
+    let at=payload.indexOf(stream);
+    while(at>=0){
+      try {
+        const token=zlib.inflateSync(payload.slice(at)).toString('utf8').trim();
+        if(/^eyJ[\w-]+\.[\w-]+\.[\w-]+$/.test(token)){          // header.payload.signature JWT
+          this.bindToken=token;
+          try {
+            const json=Buffer.from(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'),'base64').toString('utf8');
+            this.bindInfo=JSON.parse(json);                     // {game,bind,pid,exp}
+          } catch {}
+          return;
+        }
+      } catch {}
+      at=payload.indexOf(stream,at+1);
+    }
+    this.bindToken=null; this.bindInfo=null;
   }
 
   process(messaging) {
@@ -41,6 +63,9 @@ module.exports = class LoginOkMessage {
       messaging.account.hi=this.hi;
       messaging.account.lo=this.lo;
       if(this.token){ messaging.account.passToken=this.token; messaging.account.token=this.token; }
+      if(this.bindToken){
+        messaging.account.bindToken={token:this.bindToken, pid:this.bindInfo?.pid ?? null, exp:this.bindInfo?.exp ?? null, at:Date.now()};
+      }
       messaging.saveAccount();
       Debugger.info(`Login OK (${this.layout}): account=${this.hi}:${this.lo}`);
     } else {
