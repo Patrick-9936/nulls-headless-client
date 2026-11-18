@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-10",
-  "version": "0.2.6",
+  "date": "2026-11-18",
+  "version": "0.2.7",
   "command": "npm test",
   "tests": 82,
   "passed": 82,

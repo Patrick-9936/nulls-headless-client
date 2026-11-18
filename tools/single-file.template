@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),zlib=require('node:zlib'),crypto=require('node:crypto');
 const {spawn}=require('node:child_process'),vm=require('node:vm'),Module=require('node:module');
-const VERSION='0.2.6';
+const VERSION='__VERSION__';
 const PAYLOAD='__PAYLOAD__',DIGEST='__DIGEST__';
 let decoded;
 function readBundle(){

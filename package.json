@@ -1,6 +1,6 @@
 {
   "name": "nulls-headless-client",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "private": true,
   "description": "Nulls headless client with account sessions, club and team commands, fleet control and explicit server confirmation.",
   "main": "Program.js",

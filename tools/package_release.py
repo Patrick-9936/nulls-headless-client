@@ -43,9 +43,9 @@ bundle = json.dumps({'version': version, 'files': entries}, separators=(',', ':'
 payload = base64.b64encode(gzip.compress(bundle, mtime=0)).decode('ascii')
 digest = hashlib.sha256(bundle).hexdigest()
 template = (root / 'tools/single-file.template').read_text()
-assert template.count('__PAYLOAD__') == 1 and template.count('__DIGEST__') == 1
+assert template.count('__PAYLOAD__') == 1 and template.count('__DIGEST__') == 1 and template.count('__VERSION__') == 1
 single = root.parent / 'Nulls.js'
-single.write_text(template.replace('__PAYLOAD__', payload).replace('__DIGEST__', digest))
+single.write_text(template.replace('__PAYLOAD__', payload).replace('__DIGEST__', digest).replace('__VERSION__', version))
 (root / 'Nulls.js').write_bytes(single.read_bytes())
 single_hash = hashlib.sha256(single.read_bytes()).hexdigest()
 single.with_suffix('.js.sha256').write_text(single_hash + '  ' + single.name + '\n')

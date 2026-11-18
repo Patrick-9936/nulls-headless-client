@@ -1,16 +1,16 @@
-# nulls headless client 0.2.6
+# nulls headless client 0.2.7
 
 клиент протокола nulls brawl v69.252: аккаунты, клубы, лобби, друзья, наблюдение и несколько онлайн-сессий. результаты проверок 8–9 октября 2026: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 ## один файл с меню
 
-скачайте `Nulls.js` из [релиза 0.2.6](https://github.com/Patrick-9936/nulls-headless-client/releases/tag/v0.2.6) и запустите:
+скачайте `Nulls.js` из [релиза 0.2.7](https://github.com/Patrick-9936/nulls-headless-client/releases/tag/v0.2.7) и запустите:
 
 ```sh
 node Nulls.js
 ```
 
-нужен Node.js 20+. зависимости встроены. управление: стрелки, enter, esc; ctrl+c завершает сессии меню. при первом запуске рядом появится `.nulls-single-0.2.6` с настройками и аккаунтами. сохраняйте эту папку для повторного входа. подробнее: [docs/TUI.md](docs/TUI.md).
+нужен Node.js 20+. зависимости встроены. управление: стрелки, enter, esc; ctrl+c завершает сессии меню. при первом запуске рядом появится `.nulls-single-0.2.7` с настройками и аккаунтами. сохраняйте эту папку для повторного входа. подробнее: [docs/TUI.md](docs/TUI.md).
 
 для запуска из git:
 
@@ -27,8 +27,8 @@ node TUI.js
 
 ```sh
 pkg install nodejs unzip
-unzip /sdcard/Download/nulls-headless-client-0.2.6.zip -d "$HOME"
-cd ~/nulls-headless-client-0.2.6
+unzip /sdcard/Download/nulls-headless-client-0.2.7.zip -d "$HOME"
+cd ~/nulls-headless-client-0.2.7
 node Program.js create-account --account accounts/bot-1.json --name 'МойБот' --once
 node Program.js login --account accounts/bot-1.json
 ```
