@@ -55,9 +55,14 @@ jobs:
       - name: install
         run: npm ci --ignore-scripts
       - name: committed Nulls.js is up to date
+        # Сравнивается хеш содержимого: gzip-обёртка зависит от версии zlib,
+        # поэтому байты файла могут отличаться между ARM и x64 при тех же исходниках.
         run: python3 tools/package_release.py --check
-      - name: rebuild and verify no tracked file changed
+      - name: release archive is reproducible
         run: |
-          python3 tools/package_release.py
-          git status --porcelain
-          git diff --exit-code -- Nulls.js
+          python3 tools/package_release.py > /dev/null
+          first=$(sha256sum ../nulls-headless-client-*.zip | cut -d' ' -f1)
+          python3 tools/package_release.py > /dev/null
+          second=$(sha256sum ../nulls-headless-client-*.zip | cut -d' ' -f1)
+          test "$first" = "$second"
+          echo "zip sha256: $first"

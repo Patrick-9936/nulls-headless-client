@@ -242,10 +242,12 @@ npm run bundle        # zip + Nulls.js + sha256
 npm run bundle:check  # пересобрать в $TMPDIR и сверить с закоммиченным Nulls.js
 ```
 
-Сборка детерминирована: одинаковое дерево даёт одинаковые sha256 у zip и бандла, поэтому
-CI сравнивает бандл с исходниками и падает при расхождении. `Nulls.js` в корне — готовая
-сборка, шаблон запуска — `tools/single-file.template`. Тег `vX.Y.Z` запускает релизный
-workflow; пошагово — [`docs/RELEASING.md`](docs/RELEASING.md).
+Сборка воспроизводима: `node_modules/.package-lock.json`, npm-кэши и `node_modules/.bin`
+в бандл не попадают, отметки времени в zip фиксированы, поэтому архив собирается
+байт-в-байт. Содержимое `Nulls.js` CI сверяет по хешу (а не по байтам файла: сам gzip
+зависит от версии zlib в системе). Расхождение — красный CI. `Nulls.js` в корне —
+готовая сборка, шаблон запуска — `tools/single-file.template`. Тег `vX.Y.Z` запускает
+релизный workflow; пошагово — [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## Документация
 

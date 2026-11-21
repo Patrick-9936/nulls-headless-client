@@ -86,13 +86,17 @@ def verify_zip(archive: Path, prefix: str, config: dict, license_path: Path) -> 
     return len(names)
 
 
-def build_bundle(version: str, entries) -> bytes:
+def bundle_bytes(version: str, entries) -> bytes:
     payload_entries = [{
         'path': rel.as_posix(),
         'base64': base64.b64encode(data).decode('ascii'),
         'sha256': hashlib.sha256(data).hexdigest(),
     } for rel, data in entries]
-    bundle = json.dumps({'version': version, 'files': payload_entries}, separators=(',', ':'), ensure_ascii=False).encode('utf-8')
+    return json.dumps({'version': version, 'files': payload_entries}, separators=(',', ':'), ensure_ascii=False).encode('utf-8')
+
+
+def build_bundle(version: str, entries) -> bytes:
+    bundle = bundle_bytes(version, entries)
     payload = base64.b64encode(gzip.compress(bundle, mtime=0)).decode('ascii')
     digest = hashlib.sha256(bundle).hexdigest()
     template = (ROOT / 'tools/single-file.template').read_text()
@@ -102,14 +106,15 @@ def build_bundle(version: str, entries) -> bytes:
 
 
 def read_committed(path: Path):
-    """Return (version, {path: sha256}) from an already built Nulls.js."""
+    """Return (version, {path: sha256}, content digest) from an already built Nulls.js."""
     text = path.read_text()
     payload = re.search(r"const PAYLOAD='([A-Za-z0-9+/=]+)'", text)
     version = re.search(r"const VERSION='([^']*)'", text)
-    if not payload or not version:
+    digest = re.search(r"const PAYLOAD='[^']*',DIGEST='([0-9a-f]{64})'", text)
+    if not payload or not version or not digest:
         raise SystemExit(f'cannot read bundle payload from {path}')
     bundle = json.loads(gzip.decompress(base64.b64decode(payload.group(1))))
-    return version.group(1), {entry['path']: entry['sha256'] for entry in bundle['files']}
+    return version.group(1), {entry['path']: entry['sha256'] for entry in bundle['files']}, digest.group(1)
 
 
 def write_single(single: Path, single_bytes: bytes) -> str:
@@ -124,9 +129,10 @@ def check(version: str, entries, single_bytes: bytes) -> int:
     if not committed.is_file():
         print(json.dumps({'check': 'failed', 'reason': 'Nulls.js is not committed'}))
         return 1
-    committed_version, committed_entries = read_committed(committed)
+    committed_version, committed_entries, committed_digest = read_committed(committed)
     expected_hash = hashlib.sha256(single_bytes).hexdigest()
     committed_hash = hashlib.sha256(committed.read_bytes()).hexdigest()
+    expected_digest = hashlib.sha256(bundle_bytes(version, entries)).hexdigest()
     license_path = Path(license_path_value())
     config = json.loads((ROOT / 'config.json').read_text())
     prefix = prefix_value(version)
@@ -143,18 +149,26 @@ def check(version: str, entries, single_bytes: bytes) -> int:
 
     expected = {rel.as_posix(): hashlib.sha256(data).hexdigest() for rel, data in entries}
     changed = sorted(p for p in set(expected) | set(committed_entries) if expected.get(p) != committed_entries.get(p))
-    ok = expected_hash == committed_hash and committed_version == version and not changed
+    # Сравниваем хеш содержимого, а не байты обёртки: gzip-поток зависит от версии
+    # zlib в системе, поэтому base64-payload и sha256 файла различаются между
+    # Termux/ARM и ubuntu/x64 при полностью идентичных исходниках.
+    content_ok = expected_digest == committed_digest
+    ok = content_ok and committed_version == version and not changed
     result = {
         'check': 'ok' if ok else 'failed',
         'version': version,
         'committed_version': committed_version,
         'files': len(expected),
         'committed_files': len(committed_entries),
+        'content_sha256': expected_digest,
+        'committed_content_sha256': committed_digest,
         'expected_sha256': expected_hash,
         'committed_sha256': committed_hash,
         'zip_sha256': zip_hash,
         'changed': changed[:20],
     }
+    if ok and expected_hash != committed_hash:
+        result['note'] = 'обёртка пересобрана другой версией zlib; содержимое совпадает'
     print(json.dumps(result))
     return 0 if ok else 1
 
