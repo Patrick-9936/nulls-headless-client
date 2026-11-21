@@ -1,0 +1,8 @@
+theme: jekyll-theme-cayman
+title: nulls headless client
+description: Headless Node.js client for the Nulls Brawl protocol
+show_downloads: true
+github:
+  repository_url: https://github.com/Patrick-9936/nulls-headless-client
+  zip_url: https://github.com/Patrick-9936/nulls-headless-client/archive/refs/heads/main.zip
+  tar_url: https://github.com/Patrick-9936/nulls-headless-client/archive/refs/heads/main.tar.gz
