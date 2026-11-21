@@ -1,17 +1,21 @@
 const zlib = require('node:zlib');
 const ByteStream = require('../../../DataStream/ByteStream');
 
-// LoginOk на Nulls 69.252 (снято с живого сервера, два пакета, см.
+// LoginOk на Nulls 69.252 (снято с живого сервера, 8 пакетов, см.
 // tests/fixtures/login-ok-69.bin и docs/PROTOCOL-MAP.md). Раскладка «nulls-69»
 // плоская, без VInt-заголовка: 32-битные id, потом строки с 4-байтной длиной.
-// В конце пакета лежит zlib-поток (маркер 78 9c) с JWT Nulls Connect — именно
-// поэтому поиск токена в открытом ASCII в 0.3.0 не находил его на живом сервере.
+// В конце пакета лежит «сжатая строка» с JWT Nulls Connect: VInt mode, int32 BE
+// длина blob, blob = u32 LE длина распакованного + zlib-поток (маркер 78 9c).
+// Именно поэтому поиск токена в открытом ASCII в 0.3.0 не находил его на живом
+// сервере. Раскладка хвоста разобрана по декодеру LoginOk в libg.so (0xf2cd80).
 const ZLIB_MAGIC = 0x78;
 const ZLIB_HEADER = 0x9c;
 const MAX_INFLATE_BYTES = 8192;
 const MAX_TOKEN_LENGTH = 4096;
 const MAX_URL_COUNT = 8;
 const MAX_SCAN_AHEAD = 16;
+// Верхняя граница буфера «сжатая строка» с JWT: 4 байта длины + zlib-поток.
+const MAX_TOKEN_BLOB = 4096;
 
 const JWT_PATTERN = /^eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}$/;
 const JWT_SCAN_PATTERN = /eyJ[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9_-]{2,}/g;
@@ -38,10 +42,9 @@ function printable(value, max = 512) {
   return !/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value);
 }
 
-// JWT лежит в zlib-потоке, который сервер дописывает в конец LoginOk. Поток
-// последний, поэтому его длина не нужна: ищем маркер в пределах хвоста и
-// проверяем распаковку. Смещение 0 — нормальный случай, остальное — запас на
-// неопознанные поля между URL и токеном.
+// Запасной путь: длина и смещение blob из раскладки не сошлись или хвост
+// обрезан — ищем маркер 78 9c в пределах хвоста и проверяем распаковку.
+// Смещение 0 — нормальный случай для будущих раскладок без заголовка.
 function inflateBindToken(rest) {
   if (!rest || rest.length < 8) return null;
   const offsets = [];
@@ -73,14 +76,15 @@ module.exports = class LoginOkMessage {
   // Живая раскладка Nulls 69.252. Смещения от начала payload:
   //   0   u32 accountId.hi              8   u32 homeId.hi
   //   4   u32 accountId.lo              12  u32 homeId.lo
-  //   16  string passToken              36  u64 -1 (неизвестный id)
-  //   44  u32 clientMajor (69)          48  u32 contentVersion (414)
-  //   52  u32 1                         56  string environment ("prod")
-  //   60  u32 1   64 u32 1   68 u32 1
-  //   72  string buildTag ("103121310241222")
+  //   16  string passToken              40  2 × optional string (обе -1)
+  //   48  u32 clientMajor (69)          52  u32 contentVersion (414)
+  //   56  u32 1                         60  string environment ("prod")
+  //   68  u32 1   72 u32 1   76 u32 1
+  //   80  string buildTag ("103121310241222")
   //   ... string serverTime, string secondaryTime, u32 0, i32 -1, string country,
   //   i32 -1, u32 1, i32 -1, u32 patchUrlCount, patchUrl..., u32 eventUrlCount,
-  //   eventUrl..., u32 0, VInt tokenHint (1365/1366), u16 0, затем zlib-JWT.
+  //   eventUrl..., VInt tokenBlobMode, i32 tokenBlobLength, blob:
+  //   u32 LE tokenRawLength + zlib-поток с JWT.
   decodeNulls69() {
     const s = this.ByteStream;
     this.hi = s.readUInt32();
@@ -89,7 +93,9 @@ module.exports = class LoginOkMessage {
     this.homeLo = s.readUInt32();
     this.token = s.readString();
     if (!printable(this.token, 256)) throw new Error('passToken вне допустимой длины');
-    this.unknownLong = Buffer.from(s.readBytes(8)).toString('hex');
+    // Декодер LoginOk в libg.so (0xf2cd80) читает здесь две строки обычным
+    // readString; на проводе это 0xffffffff 0xffffffff, то есть обе отсутствуют.
+    this.optionalStrings = [s.readOptionalString(), s.readOptionalString()];
     this.clientMajor = s.readInt();
     this.contentVersion = s.readInt();
     this.unknownOne = s.readInt();
@@ -112,13 +118,66 @@ module.exports = class LoginOkMessage {
     const eventCount = s.readInt();
     if (eventCount < 0 || eventCount > MAX_URL_COUNT) throw new Error(`eventUrlCount ${eventCount}`);
     this.eventUrls = Array.from({ length: eventCount }, () => s.readString());
-    this.tailZero = s.readInt();
-    this.tokenHint = s.readVInt();
-    this.tailPadding = Buffer.from(s.readBytes(2)).readUInt16BE(0);
-    const rest = Buffer.from(s.readBytes(s.remaining()));
     this.layout = 'nulls-69';
     this.parsed = true;
-    this.applyBindToken(inflateBindToken(rest));
+    let found = false;
+    try {
+      found = !!this.decodeBindTokenTail();
+    } catch {
+      found = false;
+    }
+    // Запасной путь: если длины хвоста не сошлись, ищем zlib-поток в остатке.
+    if (!found && s.remaining() > 0) {
+      this.applyBindToken(inflateBindToken(Buffer.from(s.payload.slice(s.offset))));
+    }
+  }
+
+  // Хвост LoginOk после eventUrls — «сжатая строка» в терминах клиента.
+  // Разобрано по декодеру LoginOk в libg.so (APK 69.252, base.apk →
+  // lib/arm64-v8a/libg.so, функция 0xf2cd80, id 0x4e88 = 20104):
+  //   0xf2d130  readVInt                       → поле объекта +0x154
+  //   0xf2d148  bl 0x5fa58c                    → readInt(len) + readBytes(len)
+  //   0x5fa69c  сборка u32 LE из первых 4 байт  → ldrh + byte2<<16 + byte3<<24
+  //   0x5fa714  bl 0x1183cb4(dst, &size, blob+4, len-4)
+  //             (0x1183b04 → 0x117e808 с версией "1.3.1" по 0x1a092e — это
+  //             zlib 1.3.1 uncompress/inflateInit2_)
+  // То есть blob — это [u32 LE длина распакованного][zlib-поток], а поле перед
+  // ним — int32 BE длина самого blob. Восемь живых захватов: mode = 0,
+  // blobLength = 4 + длина потока (148/149/151), u32 LE = 149 (длина JWT),
+  // поток начинается с 78 9c. Отсюда же «VInt 1365/1366» в старой раскладке:
+  // это один лишний байт смещения (readUInt32(0) вместо readVInt), из-за
+  // которого 0x94/0x95/0x97 склеивались со старшим байтом длины blob.
+  decodeBindTokenTail() {
+    const s = this.ByteStream;
+    if (s.remaining() < 5) return null;
+    this.tokenBlobMode = s.readVInt();
+    this.tokenBlobLength = s.readInt();
+    if (this.tokenBlobLength < 4 || this.tokenBlobLength > MAX_TOKEN_BLOB) return null;
+    if (this.tokenBlobLength > s.remaining()) return null;
+    const blob = Buffer.from(s.readBytes(this.tokenBlobLength));
+    this.tokenRawLength = blob.readUInt32LE(0);
+    if (this.tokenRawLength === 0 || this.tokenRawLength > MAX_INFLATE_BYTES) return null;
+    let inflated;
+    try {
+      inflated = zlib.inflateSync(blob.subarray(4), { maxOutputLength: MAX_INFLATE_BYTES });
+    } catch {
+      return null;
+    }
+    this.tokenInflatedLength = inflated.length;
+    if (inflated.length !== this.tokenRawLength) {
+      globalThis.Debugger?.warn?.(
+        `LoginOk: длина JWT не совпала с заголовком (${inflated.length} != ${this.tokenRawLength})`,
+      );
+      return null;
+    }
+    const token = inflated.toString('utf8').trim();
+    if (!isBindToken(token)) return null;
+    this.applyBindToken({
+      token,
+      claims: decodeClaims(token),
+      frame: { offset: 4, blob: blob.length, compressed: blob.length - 4, raw: inflated.length },
+    });
+    return this.bindToken;
   }
 
   decodeModern() {

@@ -8,9 +8,9 @@
 
 | Команда | Параметры / результат |
 |---|---|
-| create-account | `--name 'Бот' --account accounts/new.json --once`; отдельный новый файл |
+| create-account | `--name 'Бот' [--region KZ] --account accounts/new.json --once`; отдельный новый файл, регион применяется после входа |
 | login | повторный вход, без `--once` удерживает сессию |
-| account-region | `--region US` / `KZ` / `14:N`; подтверждение 24178/0 и той же страны |
+| account-region | `--region US` / `KZ` / `Kazakhstan` / `125` / `14:125`; 12998 → 24178/0, затем сверка страны в Home |
 | account-info | публичный тег, имя, сохранённый клуб без токена |
 | friend | `--tag '#TAG'`; отправить заявку по игровому тегу |
 | accept-friend | `--tag '#TAG'`; проверяет relationship=4 |
@@ -26,6 +26,20 @@
 | brawl-tv-next | `--experimental --channel ID`; следующая трансляция, ответ 24701 |
 
 Подробности Brawl TV: [BRAWL_TV.md](BRAWL_TV.md). Для `spectate` есть флаг `--brawl-tv`; старое имя `--after-death` сохранено для совместимости.
+
+### Регион аккаунта
+
+```sh
+node Program.js account-region --account accounts/bot-1.json --region KZ --once
+node Program.js account-region --account accounts/bot-1.json --region 14:249 --no-verify
+node Program.js create-account --account accounts/new.json --name 'Бот' --region KE --once
+```
+
+`--region` принимает код страны (`KZ`, `KE`), `DisplayName` (`Kazakhstan`), индекс (`125`) или ссылку `14:N`. Неизвестное значение даёт ошибку со списком стран; каталог — `node Program.js regions`.
+
+Пакет 12998 несёт только `DataReference` класса 14: VInt класс + VInt индекс. Ответ 24178 — VInt код + `DataReference`. После кода 0 и совпавшей ссылки клиент перезапрашивает Home и сверяет страну: в ответе `countryVerified` и `homeCountry`. `--no-verify` отключает сверку; у постоянного бота fleet переподключение выполняется только с явным `--verify`, чтобы не обрывать сессию. Код отказа сервера попадает в текст ошибки.
+
+`LoginOk.countryCode` — страна по IP: после смены региона она остаётся прежней (в живой проверке `RU`). Ориентироваться на неё нельзя; фактическая страна аккаунта — в HomeData рядом с хостом региона. `create-account --region` применяет и проверяет регион сам, уже после подтверждения ника и Home.
 
 ## Клуб
 
@@ -103,3 +117,27 @@ node Program.js club-recommendations --account accounts/bot-1.json --once
 Возвращает clubs: тег, название, эмблему, регион, тип, число участников, трофеи и порог входа. Запрос 14303 version 9 с VInt(0), ответ 24304. Порядок списка задаёт сервер; пустой список допустим. Наличие клуба в списке не подтверждает возможность вступления: используйте join-club отдельно. Проверка выполняется по новому ответу сервера.
 
 Проверено 9 октября: получены 50 рекомендаций. Если регион равен null, сервер его не указал.
+
+## Машинный вывод и живой дашборд
+
+Глобальные флаги работают с любой командой.
+
+| Флаг | Поведение |
+| --- | --- |
+| `--json` | ровно один JSON-объект `{"ok":true,"result":…}` в stdout, без баннеров и подсказок; ошибка — `{"ok":false,"error":{"message","code?"}}` в stderr; код 2 для ошибок аргументов, иначе 1; `confirmed:false` — тоже код 2, `error.code="unconfirmed"` |
+| `--json=false` | вернуть обычный pretty-JSON (для обёрток и скриптов) |
+| `--quiet` | подавить подсказки, предупреждения `client.on('warning')` и строки `Debugger` (он становится no-op); результат и ошибки остаются |
+
+Флаги вынимаются из `argv` до `lib/Args.js`, следующий аргумент не съедается.
+
+| Команда | Назначение |
+| --- | --- |
+| `node Program.js watch` | живой дашборд флота: перерисовка раз в `--interval`, без интерактива |
+| `watch --once` | один кадр и выход |
+| `watch --json` | один кадр объектом (равносильно `--once`) |
+| `watch --interval 2000 --log-lines 5 --bots 1:13 --no-color` | период, хвост `fleet.log`, фильтр ботов, без ANSI |
+
+Дашборд читает `fleet-status.json`, `fleet.pid`, `fleet.log`, `accounts/index.json` и
+`.runtime/results`; отсутствие файлов и «флот не запущен» показываются явно. Подробности:
+[WATCH.md](WATCH.md). Реестр аккаунтов и `prune`: [ACCOUNTS.md](ACCOUNTS.md). Коды ошибок
+для скриптов: [ERRORS.md](ERRORS.md).

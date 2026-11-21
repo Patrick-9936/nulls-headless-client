@@ -1,6 +1,6 @@
 {
   "name": "nulls-headless-client",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "description": "Headless Node.js client for the Nulls Brawl protocol: accounts, clubs, lobby and bot fleets.",
   "license": "MIT",
@@ -28,10 +28,10 @@
   "scripts": {
     "start": "node Program.js help",
     "check": "node --check Program.js && node --check TUI.js && node --check lib/Client.js && node --check lib/CLI.js && node --check lib/i18n.js && node --check lib/Connect.js && node --check lib/Fleet.js && node --check tools/fleet.js && node --check tools/connect.js && node --check tools/i18n-check.js && node Program.js info && node tools/i18n-check.js && node --check tools/candidates.js && node --check tools/proxy-watch.js && node --check tools/test-session.js",
-    "lint": "npm run check",
-    "lint:eslint": "npx --yes eslint@9 .",
-    "format": "npx --yes prettier@3 --write .",
-    "format:check": "npx --yes prettier@3 --check .",
+    "lint": "eslint .",
+    "lint:eslint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "node --test tests/*.test.js",
     "update": "node tools/update.js",
     "update:check": "node tools/update.js --check",
@@ -45,5 +45,10 @@
     "blakejs": "^1.2.1",
     "colors": "^1.4.0",
     "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1"
   }
 }

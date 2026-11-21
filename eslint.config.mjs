@@ -1,8 +1,8 @@
 // Плоский конфиг ESLint (flat config) для проекта на CommonJS / Node 20+.
-// Внешние плагины не используются: только встроенные правила ESLint.
-// Пакет eslint в package.json не добавлен намеренно — конфиг лежит и подхватится,
-// когда eslint установят (локально или в CI): `npx eslint .`
-// Импортов нет, чтобы конфиг можно было загрузить без установленных зависимостей.
+// Плагины не используются: только встроенные правила ESLint и пакет `globals`.
+// Запуск: `npm run lint` (eslint .).
+
+import globals from 'globals';
 
 /** Файлы, которые не проверяем: сборка, шаблон бандла, фикстуры тестов. */
 const IGNORED = [
@@ -10,65 +10,72 @@ const IGNORED = [
   'Nulls.js',
   'tools/single-file.template',
   'tests/fixtures/**',
-  'accounts/**',
-  '.runtime/**',
   'data/**',
+  'docs/**',
+  '.runtime/**',
+  'accounts/**',
   'PacketsDumps/**',
+  '.verification/**',
+  '.updates/**',
+  '.updates-*/**',
+  '.nulls-single-*/**',
 ];
+
+/** Общие для Node.js глобалы проекта; `Debugger` объявляется в utils/Debugger.js. */
+const NODE_GLOBALS = {
+  ...globals.node,
+  // `self` используется вендорным портом TweetNaCl для доступа к WebCrypto.
+  self: 'readonly',
+  Debugger: 'readonly',
+};
 
 export default [
   { ignores: IGNORED },
   {
-    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    files: ['**/*.js', '**/*.cjs'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'commonjs',
-      globals: {
-        // Node.js
-        process: 'readonly',
-        Buffer: 'readonly',
-        console: 'readonly',
-        global: 'writable',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-        setImmediate: 'readonly',
-        queueMicrotask: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        module: 'writable',
-        exports: 'writable',
-        require: 'readonly',
-        URL: 'readonly',
-        URLSearchParams: 'readonly',
-        TextEncoder: 'readonly',
-        TextDecoder: 'readonly',
-        AbortController: 'readonly',
-        AbortSignal: 'readonly',
-        fetch: 'readonly',
-        performance: 'readonly',
-        structuredClone: 'readonly',
-        // Глобал проекта: инициализируется в utils/Debugger.js и в lib/Client.js.
-        // Модули, которые могут загрузиться раньше, обязаны иметь фолбэк на console.
-        Debugger: 'readonly',
-      },
+      globals: NODE_GLOBALS,
     },
     rules: {
-      // no-undef выключен: глобалы объявлены выше, а часть модулей использует
-      // динамические поля, поэтому правило даёт ложные срабатывания без плагина globals.
-      'no-undef': 'off',
-
-      'no-unused-vars': ['warn', { args: 'none', ignoreRestSiblings: true }],
-      eqeqeq: ['warn', 'always'],
+      'no-unused-vars': ['warn', { args: 'none', caughtErrors: 'none' }],
+      'no-undef': 'error',
       'no-var': 'error',
       'prefer-const': 'warn',
+      eqeqeq: ['warn', 'smart'],
       'no-throw-literal': 'error',
-      'no-empty': ['error', { allowEmptyCatch: false }],
+      // Пустой `catch {}` в проекте встречается как осознанная best-effort очистка
+      // (закрытие сокета, таймеры) в файлах вне текущей правки; блоки по-прежнему ловим.
+      'no-empty': ['warn', { allowEmptyCatch: false }],
       'no-cond-assign': 'error',
       'no-self-assign': 'error',
       'no-unreachable': 'error',
       'no-dupe-keys': 'error',
+      'no-redeclare': 'error',
+    },
+  },
+  {
+    // Сам конфиг — ESM, его проверяем как модуль.
+    files: ['**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: 'module',
+      globals: globals.node,
+    },
+    rules: {
+      'no-unused-vars': ['warn', { args: 'none', caughtErrors: 'none' }],
+      'no-undef': 'error',
+      'no-var': 'error',
+      'prefer-const': 'warn',
+      eqeqeq: ['warn', 'smart'],
+    },
+  },
+  {
+    // Вендорный порт TweetNaCl (public domain, 2014): стиль `var` сохраняем как есть.
+    files: ['Crypto/NaClNative19.js'],
+    rules: {
+      'no-var': 'warn',
     },
   },
 ];

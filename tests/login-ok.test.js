@@ -5,6 +5,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const zlib = require('node:zlib');
 const ByteStream = require('../DataStream/ByteStream');
 const LoginOkMessage = require('../Messaging/Messages/Server/LoginOkMessage');
 
@@ -33,8 +34,13 @@ test('живой LoginOk 69.252 разбирается по точной рас�
   assert.equal(message.countryCode, 'RU');
   assert.deepEqual(message.patchUrls, ['https://watt.yellowwarmsand.com/patch-bs', 'http://45.95.201.23/patch-bs']);
   assert.deepEqual(message.eventUrls, ['https://watt.yellowwarmsand.com/events-bs', 'http://45.95.201.23/events-bs']);
-  assert.equal(message.tailZero, 0);
-  assert.equal(message.tailPadding, 0);
+  assert.deepEqual(message.optionalStrings, [null, null]);
+  // Хвост «сжатая строка»: VInt mode, int32 BE длина blob, blob = u32 LE
+  // длина JWT + zlib-поток (см. декодер LoginOk в libg.so по 0xf2cd80).
+  assert.equal(message.tokenBlobMode, 0);
+  assert.equal(message.tokenBlobLength, 159);
+  assert.equal(message.tokenRawLength, 165);
+  assert.equal(message.tokenInflatedLength, 165);
 });
 
 test('bind-токен извлекается из zlib-хвоста вместе с claims', () => {
@@ -44,8 +50,31 @@ test('bind-токен извлекается из zlib-хвоста вместе
   assert.equal(message.bindClaims.bind, true);
   assert.equal(message.bindClaims.pid, '123456789');
   assert.equal(message.bindClaims.exp, 1893456000);
-  assert.equal(message.bindFrame.offset, 0);
-  assert.ok(message.bindFrame.compressed > 0);
+  assert.deepEqual(message.bindFrame, { offset: 4, blob: 159, compressed: 155, raw: 165 });
+});
+
+test('длины хвоста читаются из пакета, а не угадываются', () => {
+  // Собираем пакет с другим по длине (синтетическим) JWT и пересчитываем
+  // int32-длину blob и u32 LE длину распаковки — парсер обязан взять обе.
+  const source = fs.readFileSync(path.join(FIXTURES, 'login-ok-69.bin'));
+  const header = source.subarray(0, 315);
+  const payload = Buffer.from(
+    'eyJhbGciOiJIUzI1NiJ9.' + Buffer.from('{"game":"laser","bind":true,"pid":"1"}').toString('base64url') + '.c2ln',
+  );
+  const stream = zlib.deflateSync(payload);
+  const tail = Buffer.alloc(9);
+  tail[0] = 0;
+  tail.writeInt32BE(4 + stream.length, 1);
+  tail.writeUInt32LE(payload.length, 5);
+  const message = new LoginOkMessage();
+  message.ByteStream.set(Buffer.concat([header, tail, stream]));
+  message.decode();
+  assert.equal(message.layout, 'nulls-69');
+  assert.equal(message.tokenBlobMode, 0);
+  assert.equal(message.tokenBlobLength, 4 + stream.length);
+  assert.equal(message.tokenRawLength, payload.length);
+  assert.equal(message.tokenInflatedLength, payload.length);
+  assert.equal(message.bindToken, payload.toString());
 });
 
 test('пакет без хвоста разбирается, но токена не даёт', () => {
@@ -58,7 +87,7 @@ test('пакет без хвоста разбирается, но токена �
 
 test('битый zlib-хвост не ломает разбор и не подсовывает токен', () => {
   const bytes = Buffer.from(fs.readFileSync(path.join(FIXTURES, 'login-ok-69.bin')));
-  bytes.fill(0x2a, 324);
+  bytes.fill(0x2a, 328); // 328 — начало zlib-потока внутри blob
   const message = new LoginOkMessage();
   message.ByteStream.set(bytes);
   message.decode();

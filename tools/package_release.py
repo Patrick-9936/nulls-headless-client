@@ -7,8 +7,9 @@ Two modes:
                                             compare the bundle hash with the committed
                                             Nulls.js; exit code 1 on any difference
 
-The bundle is deterministic: npm-generated files inside node_modules are excluded and
-gzip is written with mtime=0, so the same sources always produce the same sha256.
+The bundle is deterministic: npm-generated files inside node_modules are excluded, only
+production packages from package-lock.json are shipped (devDependencies are dropped),
+and gzip is written with mtime=0, so the same sources always produce the same sha256.
 """
 import base64
 import gzip
@@ -24,7 +25,7 @@ from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 
 ROOT = Path(__file__).resolve().parents[1]
 
-DIRECTORIES = {'Crypto', 'DataStream', 'Messaging', 'TcpSocket', 'utils', 'lib', 'data', 'docs', 'tools', 'tests', 'node_modules', '.devcontainer'}
+DIRECTORIES = {'Crypto', 'DataStream', 'Messaging', 'utils', 'lib', 'data', 'docs', 'tools', 'tests', 'node_modules', '.devcontainer'}
 FILES = {'Program.js', 'TUI.js', 'package.json', 'package-lock.json', 'config.json', 'client-license.bin', 'README.md', 'PROTOCOL-MAP.md', '.gitignore'}
 EXCLUDED_DIRS = {'.git', '__pycache__', 'PacketsDumps', '.verification', '.runtime', '.updates'}
 EXCLUDED_SUFFIXES = {'.zip', '.pyc', '.log', '.pid', '.lock', '.raw'}
@@ -45,7 +46,39 @@ def npm_artifact(rel: Path) -> bool:
     return any(part == '.cache' for part in tail[1:])
 
 
-def collect(root: Path, files: set, directories: set):
+def production_packages(root: Path) -> set:
+    """Package keys from package-lock.json that belong to production dependencies.
+
+    npm marks dev-only entries with `dev: true`; `devOptional` marks optional
+    packages that npm also assigns to the dev tree. Everything else, including
+    the transitive closure of `dependencies`, is production.
+    """
+    lock = json.loads((root / 'package-lock.json').read_text())
+    production = set()
+    for key, meta in lock.get('packages', {}).items():
+        if not key or not meta:
+            continue
+        if meta.get('dev') or meta.get('devOptional'):
+            continue
+        production.add(key)
+    return production
+
+
+def package_keys(rel: Path) -> list:
+    """Lockfile keys of the package(s) owning a node_modules path, outermost first."""
+    parts = rel.parts
+    keys = []
+    for index, part in enumerate(parts):
+        if part != 'node_modules' or index + 1 >= len(parts):
+            continue
+        name_end = index + 2
+        if parts[index + 1].startswith('@') and name_end < len(parts):
+            name_end += 1
+        keys.append('/'.join(parts[:name_end]))
+    return keys
+
+
+def collect(root: Path, files: set, directories: set, production: set):
     entries = []
     # Sort by POSIX path, not by Path object, so the order is identical on every OS.
     for p in sorted(root.rglob('*'), key=lambda item: item.relative_to(root).as_posix()):
@@ -60,6 +93,9 @@ def collect(root: Path, files: set, directories: set):
             continue
         if npm_artifact(rel):
             continue
+        keys = package_keys(rel)
+        if keys and any(key not in production for key in keys):
+            continue
         entries.append((rel, p.read_bytes()))
     return entries
 
@@ -73,7 +109,7 @@ def write_zip(archive: Path, prefix: str, entries) -> None:
             z.writestr(info, data)
 
 
-def verify_zip(archive: Path, prefix: str, config: dict, license_path: Path) -> int:
+def verify_zip(archive: Path, prefix: str, config: dict, license_path: Path, production: set) -> int:
     with ZipFile(archive) as z:
         assert z.testzip() is None
         names = z.namelist()
@@ -83,6 +119,17 @@ def verify_zip(archive: Path, prefix: str, config: dict, license_path: Path) -> 
         assert json.loads(z.read(f'{prefix}/config.json'))['host'] == 'brawl.server.dnull.xyz'
         assert f'{prefix}/lib/Client.js' in names and f'{prefix}/docs/VERIFICATION.md' in names
         assert f'{prefix}/node_modules/.package-lock.json' not in names
+        assert not any('/node_modules/.bin/' in name for name in names)
+        # Inside node_modules only production packages may appear; dev trees stay out.
+        top_level = {key for key in production if key.startswith('node_modules/') and key.count('node_modules') == 1}
+        for key in sorted(top_level):
+            assert f'{prefix}/{key}/package.json' in names, f'missing production package {key}'
+        for name in names:
+            rel = Path(name[len(prefix) + 1:])
+            if 'node_modules' not in rel.parts:
+                continue
+            keys = package_keys(rel)
+            assert keys and all(key in production for key in keys), f'unexpected dependency file {name}'
     return len(names)
 
 
@@ -141,7 +188,7 @@ def check(version: str, entries, single_bytes: bytes) -> int:
         # The whole release is built here; nothing in the working tree is touched.
         archive = tmp / f'{prefix}.zip'
         write_zip(archive, prefix, entries)
-        verify_zip(archive, prefix, config, license_path)
+        verify_zip(archive, prefix, config, license_path, production_packages(ROOT))
         write_single(tmp / 'Nulls.js', single_bytes)
         zip_hash = hashlib.sha256(archive.read_bytes()).hexdigest()
     finally:
@@ -188,7 +235,7 @@ def main(argv) -> int:
     license_path = Path(config['clientLicensePath'])
     assert not license_path.is_absolute() and '..' not in license_path.parts
 
-    entries = collect(ROOT, set(FILES) | {license_path.as_posix()}, DIRECTORIES)
+    entries = collect(ROOT, set(FILES) | {license_path.as_posix()}, DIRECTORIES, production_packages(ROOT))
     single_bytes = build_bundle(version, entries)
 
     if '--check' in argv:
@@ -196,7 +243,7 @@ def main(argv) -> int:
 
     archive = ROOT.parent / f'{prefix}.zip'
     write_zip(archive, prefix, entries)
-    names = verify_zip(archive, prefix, config, license_path)
+    names = verify_zip(archive, prefix, config, license_path, production_packages(ROOT))
     checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
     archive.with_suffix('.zip.sha256').write_text(checksum + '  ' + archive.name + '\n')
     print(json.dumps({'archive': str(archive), 'bytes': archive.stat().st_size, 'files': names, 'sha256': checksum}))

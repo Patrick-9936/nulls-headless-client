@@ -373,7 +373,18 @@
     "encode": "0xf69ee8",
     "decode": "0xf69f10",
     "getter": "0xf69f3c",
+    "factory": "0xf25580",
+    "layout": "DataReference class 14: VInt class + VInt index",
     "source": "country popup send at 0xce80b4"
+  },
+  "24178": {
+    "version": 9,
+    "encode": "0xf69fdc",
+    "decode": "0xf6a010",
+    "getter": "0xf6a048",
+    "factory": "0xf23464",
+    "layout": "VInt code + DataReference class 14",
+    "source": "live reply to 12998, payload 00 0e bd 01 for 14:125"
   },
   "14356": {
     "version": 23,

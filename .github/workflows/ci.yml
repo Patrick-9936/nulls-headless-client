@@ -34,7 +34,8 @@ jobs:
         run: npm test
       - name: syntax and info
         run: npm run check
-      - name: lint (syntax only)
+      - name: eslint
+        # Ошибки валят job; предупреждения (нет неиспользуемых и т.п.) — нет.
         run: npm run lint
       - name: bundle self-test
         run: node Nulls.js --self-test

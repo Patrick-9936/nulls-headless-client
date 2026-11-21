@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 
 const Connect = require('../lib/Connect');
 const LoginOkMessage = require('../Messaging/Messages/Server/LoginOkMessage');
@@ -272,4 +273,25 @@ test('LoginOk without a JWT leaves bindToken undefined and decode errors do not 
   const { saved, loggedIn } = processMessage(broken);
   assert.equal(saved, 0);
   assert.equal(loggedIn, 1);
+});
+
+test('tools/connect.js принимает голый --json и печатает одну строку', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nulls-connect-cli-'));
+  try {
+    const output = execFileSync(
+      process.execPath,
+      [path.join(__dirname, '..', 'tools', 'connect.js'), 'status', '--json'],
+      {
+        encoding: 'utf8',
+        env: { ...process.env, NC_STATE_FILE: path.join(dir, 'connect.json') },
+        timeout: 10000,
+      },
+    );
+    const parsed = JSON.parse(output.trim());
+    assert.equal(parsed.ok, true);
+    assert.equal(typeof parsed.result.hasToken, 'boolean');
+    assert.equal(output.trim().split('\n').length, 1);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

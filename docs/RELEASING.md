@@ -29,8 +29,11 @@ npm run bundle        # python3 tools/package_release.py
   в родительской папке репозитория (рядом с клоном, не внутри него);
 - `Nulls.js` в корне репозитория и в родительской папке плюс `Nulls.js.sha256`.
 
-Сборка воспроизводима: `node_modules/.package-lock.json`, npm-кэши и
-`node_modules/.bin` в бандл не попадают, gzip пишется с `mtime=0`, отметки
+Сборка воспроизводима: в бандл и zip попадают только production-зависимости из
+`dependencies` (`blakejs`, `colors`, `tweetnacl` и их транзитивное дерево); пакеты с
+`dev: true`/`devOptional` из `package-lock.json` исключаются целиком, поэтому
+`eslint`, `globals` и их зависимости релиз не раздувают. `node_modules/.package-lock.json`,
+npm-кэши и `node_modules/.bin` тоже не попадают, gzip пишется с `mtime=0`, отметки
 времени в zip фиксированы, поэтому архив собирается байт-в-байт на любой машине.
 Содержимое `Nulls.js` сверяется по хешу распакованного бандла: сам gzip-поток
 зависит от версии zlib, поэтому байты файла на ARM и x64 могут отличаться при
@@ -52,7 +55,8 @@ sha256 с `Nulls.js` в корне и печатает JSON с полями `che
 ```sh
 npm test                       # node --test, все тесты должны быть зелёными
 npm run check                  # синтаксис + node Program.js info
-npm run lint                   # только проверка синтаксиса
+npm run lint                   # eslint, 0 ошибок (предупреждения не валят)
+npm run format:check           # prettier 3, проверка форматирования
 node Nulls.js --self-test      # проверка payload и всех .js внутри бандла
 python3 tools/package_release.py --check
 ```
@@ -83,7 +87,7 @@ git push origin v0.2.8
 1. `actions/checkout` (полная история — нужна для запасного тела релиза),
    `actions/setup-node` 22, `actions/setup-python` 3.12;
 2. сверяет тег с версией в `package.json` и падает при расхождении;
-3. `npm ci --ignore-scripts`, `npm test`, `npm run check`,
+3. `npm ci --ignore-scripts`, `npm test`, `npm run check`, `npm run lint`,
    `node Nulls.js --self-test`;
 4. `python3 tools/package_release.py` — сборка zip и бандла;
 5. складывает в `dist/` zip, его `.sha256`, `Nulls.js` и `Nulls.js.sha256` и

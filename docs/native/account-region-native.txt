@@ -104,3 +104,30 @@
 0xf6a04c ret 
 0xf6a050 mov w0, #9
 0xf6a054 ret 
+
+# --- Проверка формата 12998 / 24178, 21.11.2026 ---
+#
+# 12998 (клиент -> сервер), фабрика сообщений: case 0xf22e20 (mov w9,#0x32c6) -> 0xf25580
+#   0xf25580 alloc 0x98; ctor 0xf69e7c; vtable 0x1229ff0
+#   vtable 0x1229ff0: [2]=0xf69ee8 encode, [3]=0xf69f10 decode,
+#                      [4]=0xf69f44 version=9, [5]=0xf69f3c type=0x32c6 (12998)
+#   0xf69ee8: ldr x1,[x19,#0x90] -> b 0xfcfd34
+#   0xfcfd34 — не строка, а writeDataReference:
+#     0xe037a0  ldr w0,[x0,#0x20]   ; packed-ссылка объекта
+#     0xf14010  packed / 1000000    ; класс
+#     0xf1402c  packed % 1000000    ; индекс
+#     оба значения пишутся VInt через vtable+0x88 = 0x5b7c78
+#   0xf69f10: 0xfcfe8c — readDataReference (два VInt -> объект 0xf13fe4)
+#   => payload 12998 = VInt(класс) + VInt(индекс), класс 14. Строки/int32 в 12998 нет.
+#   Живая проба 14:125: 0e bd 01; сервер ответил 24178, страна в Home сменилась.
+#
+# 24178 (сервер -> клиент, ответ), ctor вызывается на 0xf23464; vtable 0x122a040
+#   vtable: [2]=0xf69fdc encode, [3]=0xf6a010 decode,
+#           [4]=0xf6a050 version=9, [5]=0xf6a048 type=0x5e72 (24178)
+#   0xf69fdc: 0x5b7c78 = writeVInt (код) -> 0xfcfd34 = writeDataReference
+#   0xf6a010: 0x5b7fc4 = readVInt (код) -> 0xfcfe8c = readDataReference
+#   => payload 24178 = VInt(код) + DataReference.
+#   Живой ответ на 14:125: 00 0e bd 01 (код 0, ссылка 14:125).
+#
+# Примечание: 0x5b7c78 — это writeVInt, а 0xfcfd34 — writeDataReference,
+# поэтому прежняя трактовка «int32 + string» неверна: int32-писателя здесь нет. 

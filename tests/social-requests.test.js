@@ -67,7 +67,10 @@ test('account country is confirmed only by successful matching server DataRefere
   client.regionResult = { code: 0, region: { class: 14, index: 125 } };
   await assert.rejects(() => A.execute(client, 'account-region', { region: 'US' }), /не подтвердил/);
   client.regionResult = { code: 0, region: { class: 14, index: 249 } };
-  assert.equal((await A.execute(client, 'account-region', { region: 'US' })).country, 'US');
+  const confirmed = await A.execute(client, 'account-region', { region: 'US' });
+  assert.equal(confirmed.country, 'US');
+  assert.deepEqual(confirmed.region, { class: 14, index: 249 });
+  assert.equal(confirmed.confirmed, true);
 });
 test('club stream is read from the current server session without inventing a request ACK', async () => {
   const entries = CS.decode(24311, fixture('club-stream')).entries;

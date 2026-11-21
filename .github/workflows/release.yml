@@ -70,6 +70,9 @@ jobs:
       - name: syntax and info
         run: npm run check
 
+      - name: eslint
+        run: npm run lint
+
       - name: bundle self-test
         run: node Nulls.js --self-test
 
