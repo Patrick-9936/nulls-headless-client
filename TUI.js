@@ -16,6 +16,21 @@ const clean = (v) =>
   String(v ?? '')
     .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '')
     .replace(/[\x00-\x08\x0b-\x1f\x7f]/g, '');
+// Ширина символа в терминале: CJK и эмодзи занимают две колонки.
+const charWidth = (ch) => {
+  const cp = ch.codePointAt(0);
+  if (cp === 0x200d || (cp >= 0xfe00 && cp <= 0xfe0f)) return 0;
+  return (cp >= 0x1100 && cp <= 0x115f) ||
+    (cp >= 0x2e80 && cp <= 0xa4cf) ||
+    (cp >= 0xac00 && cp <= 0xd7a3) ||
+    (cp >= 0xf900 && cp <= 0xfaff) ||
+    (cp >= 0xfe30 && cp <= 0xfe6f) ||
+    (cp >= 0xff00 && cp <= 0xff60) ||
+    (cp >= 0xffe0 && cp <= 0xffe6) ||
+    (cp >= 0x1f300 && cp <= 0x1faff)
+    ? 2
+    : 1;
+};
 const publicJSON = (v) =>
   JSON.stringify(
     v,
@@ -325,7 +340,13 @@ class App {
     this.connection = { battleTransport: 'udp', reconnect: true };
     this.previousDebugger = global.Debugger;
     const config = Store.read(path.join(root, 'config.json'), {});
-    I18N.setLanguage(I18N.detect({ config }));
+    const language = I18N.detectInfo({ config });
+    I18N.setLanguage(language.language);
+    this.languageInfo = language;
+    this.uiLanguage =
+      config.uiLanguage === undefined || I18N.isAuto(config.uiLanguage)
+        ? I18N.AUTO
+        : I18N.resolve(config.uiLanguage) || I18N.AUTO;
     this.features = Store.read(path.join(root, 'docs/features.json'), { commands: [] });
   }
   log(v) {
@@ -340,53 +361,103 @@ class App {
     const tag = c.account.lo ? require('./utils/TagCodec').logicLongToTag(c.account.hi, c.account.lo) : '';
     return clean(t('tui.context.state', { name, tag, state: c.state, count: this.sessions.size }));
   }
-  draw(title, items, index = 0) {
+  draw(title, items, index = 0, view = {}) {
+    const columns = Math.max(20, process.stdout.columns || 80);
     const height = Math.max(5, (process.stdout.rows || 24) - 10),
       start = Math.max(0, Math.min(index - Math.floor(height / 2), items.length - height));
-    process.stdout.write(
-      '\x1b[2J\x1b[H' +
-        clean(t('tui.header', { version: VERSION })) +
-        '\n' +
-        this.context() +
-        '\n\n' +
-        clean(title) +
-        '\n',
-    );
+    // Обрезаем каждую строку по ширине терминала, чтобы узкое окно не ломало кадр.
+    const fit = (value) => {
+      const text = clean(value).replace(/\r/g, ''),
+        chars = [...text],
+        total = chars.reduce((sum, ch) => sum + charWidth(ch), 0);
+      if (total <= columns) return text;
+      let used = 0,
+        out = '';
+      for (const ch of chars) {
+        const width = charWidth(ch);
+        if (used + width > columns - 1) break;
+        out += ch;
+        used += width;
+      }
+      return out + '…';
+    };
+    const lines = [
+      fit(t('tui.header', { version: VERSION })),
+      fit(this.context()),
+      '',
+      ...String(title).split('\n').map(fit),
+    ];
     items
       .slice(start, start + height)
-      .forEach((item, n) =>
-        process.stdout.write((start + n === index ? '>' : ' ') + ' ' + clean(item.label ?? item) + '\n'),
-      );
-    process.stdout.write(
-      '\n' + (items.length ? index + 1 + '/' + items.length + ' · ' : '') + clean(t('tui.hint.keys')) + '\n',
-    );
-    for (const log of this.logs) process.stdout.write(clean(log) + '\n');
+      .forEach((item, n) => lines.push(fit((start + n === index ? '>' : ' ') + ' ' + (item.label ?? item))));
+    const hint = columns < 64 ? t('tui.hint.keysNarrow') : t('tui.hint.keys');
+    lines.push('', fit((items.length ? index + 1 + '/' + items.length + ' · ' : '') + hint));
+    if (view.typed) lines.push(fit(t('tui.hint.typed', { number: view.typed })));
+    if (view.notice) lines.push(fit(view.notice));
+    if (view.help) lines.push(...t('tui.hint.help').split('\n').map(fit));
+    lines.push(...this.logs.map(fit));
+    process.stdout.write('\x1b[2J\x1b[H' + lines.join('\n') + '\n');
   }
   choose(title, items) {
     if (this.closing) return Promise.reject(new Exit());
     if (!items.length) return Promise.resolve(null);
     return new Promise((resolve, reject) => {
-      let index = 0;
+      let index = 0,
+        typed = '',
+        notice = '',
+        help = false;
       const wasRaw = !!process.stdin.isRaw,
-        render = () => this.draw(title, items, index);
-      const done = (v, e) => {
-        process.stdin.removeListener('keypress', key);
-        process.stdout.removeListener('resize', render);
-        if (process.stdin.isTTY) process.stdin.setRawMode(wasRaw);
-        this.refresh = null;
-        this.abort = null;
-        e ? reject(e) : resolve(v);
-      };
+        render = () => this.draw(title, items, index, { typed, notice, help }),
+        done = (v, e) => {
+          process.stdin.removeListener('keypress', key);
+          process.stdout.removeListener('resize', render);
+          if (process.stdin.isTTY) process.stdin.setRawMode(wasRaw);
+          this.refresh = null;
+          this.abort = null;
+          e ? reject(e) : resolve(v);
+        },
+        pick = (n) => items[n].value ?? items[n],
+        move = (n) => {
+          index = n;
+          notice = '';
+        };
       const key = (str, k = {}) => {
         if (k.ctrl && k.name === 'c') return done(null, new Exit());
-        if (k.name === 'escape' || k.name === 'q') return done(null);
-        if (k.name === 'up') index = (index + items.length - 1) % items.length;
-        else if (k.name === 'down') index = (index + 1) % items.length;
-        else if (k.name === 'pageup') index = Math.max(0, index - 10);
-        else if (k.name === 'pagedown') index = Math.min(items.length - 1, index + 10);
-        else if (k.name === 'home') index = 0;
-        else if (k.name === 'end') index = items.length - 1;
-        else if (k.name === 'return') return done(items[index].value ?? items[index]);
+        const name = k.name,
+          char = str || k.sequence || '';
+        if (char === '?') {
+          help = !help;
+          notice = '';
+          return render();
+        }
+        if (name === 'escape') {
+          if (help) {
+            help = false;
+            notice = '';
+            return render();
+          }
+          return done(null);
+        }
+        if (name === 'q') return done(null);
+        if (name === 'up' || char === 'k' || name === 'k') move((index + items.length - 1) % items.length);
+        else if (name === 'down' || char === 'j' || name === 'j') move((index + 1) % items.length);
+        else if (name === 'pageup' || (name === 'tab' && k.shift) || name === 'backtab') move(Math.max(0, index - 10));
+        else if (name === 'pagedown' || name === 'tab') move(Math.min(items.length - 1, index + 10));
+        else if (name === 'home' || char === 'g') move(0);
+        else if (name === 'end' || char === 'G') move(items.length - 1);
+        else if (name === 'backspace' || name === 'delete') typed = '';
+        else if (/^[1-9]$/.test(char) && !typed) typed = char;
+        else if (/^[0-9]$/.test(char) && typed) typed += char;
+        else if (name === 'return' || name === 'enter') {
+          if (typed) {
+            const n = Number(typed);
+            typed = '';
+            if (n >= 1 && n <= items.length) return done(pick(n - 1));
+            notice = t('tui.hint.noItem', { number: n });
+            return render();
+          }
+          return done(pick(index));
+        } else notice = '';
         render();
       };
       this.refresh = render;
@@ -565,21 +636,41 @@ class App {
     Store.write(file, { ...config, uiLanguage: code });
   }
   async language() {
+    const file = path.join(this.root, 'config.json');
+    const config = Store.read(file, {});
+    const configured =
+      config.uiLanguage === undefined || I18N.isAuto(config.uiLanguage)
+        ? I18N.AUTO
+        : I18N.resolve(config.uiLanguage) || I18N.AUTO;
     const current = I18N.getLanguage();
-    const code = await this.choose(
-      t('tui.lang.pick'),
-      I18N.SUPPORTED.map((value) => ({
+    const code = await this.choose(t('tui.lang.pick'), [
+      {
+        value: I18N.AUTO,
+        label: (configured === I18N.AUTO ? '* ' : '  ') + t('tui.lang.auto', { language: I18N.label(current) }),
+      },
+      ...I18N.SUPPORTED.map((value) => ({
         value,
-        label: (value === current ? '* ' : '  ') + I18N.label(value) + ' (' + value + ')',
+        label: (configured === value ? '* ' : '  ') + I18N.label(value) + ' (' + value + ')',
       })),
-    );
+    ]);
     if (!code) return;
-    if (code === current) {
+    if (code === I18N.AUTO) {
+      const info = I18N.detectInfo({ config: { ...config, uiLanguage: I18N.AUTO } });
+      I18N.setLanguage(info.language);
+      this.saveLanguage(I18N.AUTO);
+      this.uiLanguage = I18N.AUTO;
+      this.languageInfo = info;
+      this.log(t('tui.lang.autoSaved', { language: I18N.label(info.language) }));
+      return;
+    }
+    if (code === configured && code === current) {
       this.log(t('tui.lang.unchanged'));
       return;
     }
     I18N.setLanguage(code);
     this.saveLanguage(code);
+    this.uiLanguage = code;
+    this.languageInfo = { language: code, mode: 'fixed', source: 'config' };
     this.log(t('tui.lang.saved', { language: I18N.label(code) }));
   }
   async accounts() {
@@ -711,7 +802,7 @@ class App {
           continue;
         }
         if (selected === 'guide')
-          await this.view(t('tui.title.tui'), fs.readFileSync(path.join(this.root, 'docs/tui.md'), 'utf8'));
+          await this.view(t('tui.title.tui'), fs.readFileSync(path.join(this.root, 'docs/TUI.md'), 'utf8'));
         if (selected === 'commands')
           await this.view(t('tui.title.commands'), fs.readFileSync(path.join(this.root, 'docs/COMMANDS.md'), 'utf8'));
         if (selected === 'features') await this.view(t('tui.title.features'), this.features);

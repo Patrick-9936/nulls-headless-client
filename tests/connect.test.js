@@ -226,7 +226,8 @@ test('LoginOk modern payload exposes the bind token and persists it', () => {
   assert.equal(message.parsed, true);
   assert.equal(message.layout, 'modern-generic');
   assert.equal(message.bindToken, jwt);
-  assert.deepEqual(message.decodeErrors, []);
+  // Раскладка nulls-69 пробуется первой и на modern-пакете падает — это ожидаемо.
+  assert.ok(!message.decodeErrors.some((item) => item.layout === 'modern-generic'));
   assert.equal(message.bindClaims.game, 'laser');
   assert.equal(message.bindClaims.pid, 123);
 
@@ -256,17 +257,17 @@ test('LoginOk without a JWT leaves bindToken undefined and decode errors do not 
   plain.decode();
   assert.equal(plain.parsed, true);
   assert.equal(plain.bindToken, undefined);
-  assert.deepEqual(plain.decodeErrors, []);
+  assert.ok(!plain.decodeErrors.some((item) => item.layout === 'modern-generic'));
   assert.equal(processMessage(plain).loggedIn, 1);
 
   const broken = new LoginOkMessage();
   broken.ByteStream.set(Buffer.from([0xff]));
   broken.decode();
   assert.equal(broken.parsed, false);
-  assert.equal(broken.decodeErrors.length, 2);
+  assert.equal(broken.decodeErrors.length, 3);
   assert.deepEqual(
     broken.decodeErrors.map((item) => item.layout),
-    ['modern-generic', 'legacy'],
+    ['nulls-69', 'modern-generic', 'legacy'],
   );
   const { saved, loggedIn } = processMessage(broken);
   assert.equal(saved, 0);

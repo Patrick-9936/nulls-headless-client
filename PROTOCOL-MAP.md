@@ -22,3 +22,28 @@
 Соседние boolean занимают биты одного байта. DataReference состоит из class/index VInt; класс 0 не содержит index. LogicLong передаётся двумя Int либо двумя VInt в зависимости от конкретного сообщения: методы нельзя взаимозаменять. Пустые нативные массивы могут иметь длину -1.
 
 14354 не принимает HeroData класса 16 в первом поле; это ссылка экипировки. Непроверенные сообщения не должны выдавать фиктивное выполнение. Генератор комнат находится на сервере; клиентский код лишь кодирует уже назначенный ID.
+
+## LoginOk 20104 (снято с живого сервера, 69.252)
+
+Раскладка `nulls-69` в `Messaging/Messages/Server/LoginOkMessage.js`: плоские поля, 32-битные id, строки с 4-байтной длиной, без VInt-заголовка.
+
+```
+0    u32 accountId.hi        8    u32 homeId.hi
+4    u32 accountId.lo        12   u32 homeId.lo
+16   string passToken        36   8 байт неизвестного id (-1:-1)
+44   u32 clientMajor (69)    48   u32 contentVersion (414)
+52   u32 1                  56   string environment ("prod")
+60   u32 1, 64 u32 1, 68 u32 1
+72   string buildTag ("103121310241222")
+99   string serverTime      113  string secondaryTime
+127  u32 0                  131  i32 -1
+135  string countryCode ("RU")
+141  i32 -1, 145 u32 1, 149 i32 -1
+153  u32 patchUrlCount + patchUrl...
+233  u32 eventUrlCount + eventUrl...
+315  u32 0                  319  VInt (не расшифровано: 1365/1366)
+323  u16 0
+324  → конец: zlib-поток (78 9c) с JWT Nulls Connect
+```
+
+JWT (`{"game":"laser","bind":true,"pid":<accountId.lo>,"exp":…}`) выдаётся на каждый вход заново. Токен сохранён в `accounts/*.json` как `bindToken: {token, at}`; в лог попадает только длина и срок. Фикстуры: `tests/fixtures/login-ok-69.bin`, разбор: `tests/login-ok.test.js`, подробности: `docs/CONNECT.md`.

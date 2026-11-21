@@ -3,8 +3,16 @@ const test = require('node:test'),
   path = require('node:path');
 const { EventEmitter } = require('node:events'),
   { App, commands, groups } = require('../TUI'),
+  I18N = require('../lib/i18n'),
   Actions = require('../lib/Actions');
 const root = path.resolve(__dirname, '..');
+// Конструктор выбирает язык из config.json (uiLanguage: auto) и окружения.
+// Тесты проверяют русские подписи, поэтому фиксируем язык после создания App.
+const appWith = (deps) => {
+  const app = new App(root, deps);
+  I18N.setLanguage('ru');
+  return app;
+};
 class FakeClient extends EventEmitter {
   constructor(options) {
     super();
@@ -31,7 +39,7 @@ test('TUI covers every client action and groups use known schemas', () => {
   for (const [, ids] of groups) for (const id of ids) assert.ok(commands[id], id);
 });
 test('forms retain false and zero, omit skipped settings, and map catalogs to native references', async () => {
-  const app = new App(root);
+  const app = appWith();
   app.prompt = async () => '#2PP';
   app.choose = async () => false;
   assert.deepEqual(await app.fields('club-answer'), { tag: '#2PP', accept: false });
@@ -46,7 +54,7 @@ test('forms retain false and zero, omit skipped settings, and map catalogs to na
   assert.deepEqual(await app.fields('team-map'), { location: '15:7' });
 });
 test('connected sessions share peers, switching reuses a session, and failed login closes it', async () => {
-  const app = new App(root, { Client: FakeClient });
+  const app = appWith({ Client: FakeClient });
   await app.connectAccount('accounts/tui-test-a.json', 'One');
   const one = app.active;
   await app.connectAccount('accounts/tui-test-b.json', 'Two');
@@ -62,7 +70,7 @@ test('connected sessions share peers, switching reuses a session, and failed log
       throw Error('login refused');
     }
   }
-  const failed = new App(root, { Client: Bad });
+  const failed = appWith({ Client: Bad });
   let made;
   failed.attach = (file, c) => {
     made = c;
@@ -73,9 +81,45 @@ test('connected sessions share peers, switching reuses a session, and failed log
   assert.equal(failed.sessions.size, 0);
   assert.equal(failed.active, null);
 });
+test('TUI language menu starts with auto and keeps navigation keys localized', async () => {
+  const app = appWith();
+  let items;
+  app.choose = async (_title, list) => {
+    items = list;
+    return null;
+  };
+  await app.language();
+  assert.equal(items[0].value, 'auto');
+  assert.match(items[0].label, /Авто/);
+});
+
+test('TUI draw truncates every line on a narrow terminal', () => {
+  const app = appWith();
+  const write = process.stdout.write;
+  const descriptor = Object.getOwnPropertyDescriptor(process.stdout, 'columns');
+  let output = '';
+  try {
+    Object.defineProperty(process.stdout, 'columns', { value: 30, configurable: true });
+    process.stdout.write = (chunk) => {
+      output += String(chunk);
+      return true;
+    };
+    app.draw('о'.repeat(100), [{ label: 'п'.repeat(100) }], 0, { typed: '12', help: true });
+  } finally {
+    process.stdout.write = write;
+    if (descriptor) Object.defineProperty(process.stdout, 'columns', descriptor);
+    else delete process.stdout.columns;
+  }
+  const lines = output.replace(/^\x1b\[2J\x1b\[H/, '').split('\n');
+  assert.ok(
+    lines.every((line) => [...line].length <= 30),
+    lines.join('\n'),
+  );
+});
+
 test('TUI preserves server confirmation and blocks network actions before login', async () => {
   const requests = [],
-    app = new App(root, {
+    app = appWith({
       execute: async (c, id, args) => {
         requests.push({ c, id, args });
         return { confirmed: false, note: 'Not confirmed' };
