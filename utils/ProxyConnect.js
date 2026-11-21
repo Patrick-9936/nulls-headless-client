@@ -1,12 +1,32 @@
 const fs = require('fs');
+const { AppError, codes, isAppError } = require('../lib/Errors');
+
+// Все ошибки прокси — PROXY_FAILED (kind network, retryable true: пул может
+// переключиться на следующий прокси). Таймаут — отдельный код TIMEOUT.
+// Исходные тексты сообщений сохранены: внешние скрипты и тесты их сравнивают.
+function proxyFailure(message, details = {}) {
+  return new AppError(codes.PROXY_FAILED, message, { kind: 'network', retryable: true, details });
+}
+
+function proxyTimeout(message, details = {}) {
+  return new AppError(codes.TIMEOUT, message, { kind: 'timeout', retryable: true, details });
+}
+
+function normalizeProxyError(error, details = {}) {
+  if (isAppError(error)) return error;
+  const message = error && error.message ? error.message : String(error);
+  return new AppError(codes.PROXY_FAILED, message, { kind: 'network', retryable: true, details, cause: error });
+}
+
 function parseProxy(value) {
   let url;
   try {
     url = new URL(typeof value === 'string' ? value : value.url);
-  } catch {
-    throw new Error('Invalid proxy URL');
+  } catch (error) {
+    throw proxyFailure('Invalid proxy URL', { field: 'url', cause: error.message });
   }
-  if (!['socks5:', 'http:'].includes(url.protocol)) throw new Error('Proxy must use socks5:// or http://');
+  if (!['socks5:', 'http:'].includes(url.protocol))
+    throw proxyFailure('Proxy must use socks5:// or http://', { field: 'protocol' });
   const port = Number(url.port || (url.protocol === 'http:' ? 80 : 1080));
   const username =
     typeof value === 'object' && value.username !== undefined
@@ -16,28 +36,45 @@ function parseProxy(value) {
     typeof value === 'object' && value.password !== undefined
       ? String(value.password)
       : decodeURIComponent(url.password);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid proxy port');
+  if (!Number.isInteger(port) || port < 1 || port > 65535)
+    throw proxyFailure('Invalid proxy port', { field: 'port', port });
   return { type: url.protocol.slice(0, -1), host: url.hostname.replace(/^\[|\]$/g, ''), port, username, password };
 }
+
 function loadProxy(file) {
-  return file ? parseProxy(JSON.parse(fs.readFileSync(file, 'utf8'))) : null;
+  if (!file) return null;
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (error) {
+    throw normalizeProxyError(error, { file, operation: 'read' });
+  }
+  return parseProxy(data);
 }
+
 function loadPool(file) {
-  const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (error) {
+    throw normalizeProxyError(error, { file, operation: 'read' });
+  }
   const items = Array.isArray(data) ? data : data.proxies;
-  if (!Array.isArray(items)) throw new Error('Proxy pool must contain a proxies array');
+  if (!Array.isArray(items)) throw proxyFailure('Proxy pool must contain a proxies array', { file });
   return items.map(parseProxy);
 }
+
 async function tunnel(socket, host, port, proxy, command = 1, timeoutMs = 10000) {
-  if (command === 3 && proxy.type !== 'socks5') throw new Error('UDP requires a SOCKS5 proxy');
+  if (command === 3 && proxy.type !== 'socks5')
+    throw proxyFailure('UDP requires a SOCKS5 proxy', { command, type: proxy.type });
   let bound = null;
   let buffer = Buffer.alloc(0),
     pending = null,
     failure = null;
   function fail(error) {
-    failure = error;
+    failure = normalizeProxyError(error, { host, port });
     if (pending) {
-      pending.reject(error);
+      pending.reject(failure);
       pending = null;
     }
   }
@@ -59,15 +96,15 @@ async function tunnel(socket, host, port, proxy, command = 1, timeoutMs = 10000)
   }
   const data = (bytes) => {
     buffer = Buffer.concat([buffer, bytes]);
-    if (buffer.length > 65536) return fail(new Error('Oversized proxy response'));
+    if (buffer.length > 65536) return fail(proxyFailure('Oversized proxy response', { host, port, limit: 65536 }));
     drain();
   };
-  const closed = () => fail(new Error('Proxy closed connection'));
+  const closed = () => fail(proxyFailure('Proxy closed connection', { host, port }));
   socket.on('data', data);
   socket.on('error', fail);
   socket.on('close', closed);
   const timer = setTimeout(() => {
-    const e = new Error('Proxy connection timed out');
+    const e = proxyTimeout('Proxy connection timed out', { host, port, timeoutMs });
     fail(e);
     socket.destroy(e);
   }, timeoutMs);
@@ -82,7 +119,7 @@ async function tunnel(socket, host, port, proxy, command = 1, timeoutMs = 10000)
     await new Promise((resolve, reject) => {
       const error = (e) => {
         socket.off('connect', ready);
-        reject(e);
+        reject(normalizeProxyError(e, { host, port }));
       };
       const ready = () => {
         socket.off('error', error);
@@ -93,7 +130,7 @@ async function tunnel(socket, host, port, proxy, command = 1, timeoutMs = 10000)
       socket.connect(proxy.port, proxy.host);
     });
     if (proxy.type === 'http') {
-      if (/[\r\n\s]/.test(host)) throw new Error('Invalid target host');
+      if (/[\r\n\s]/.test(host)) throw proxyFailure('Invalid target host', { port });
       const address = (host.includes(':') ? '[' + host + ']' : host) + ':' + port;
       const auth = proxy.username
         ? 'Proxy-Authorization: Basic ' + Buffer.from(proxy.username + ':' + proxy.password).toString('base64') + '\r\n'
@@ -102,25 +139,27 @@ async function tunnel(socket, host, port, proxy, command = 1, timeoutMs = 10000)
       const header = await read((b) => {
         const n = b.indexOf('\r\n\r\n');
         if (n >= 0) return n + 4;
-        if (b.length > 16384) throw new Error('Oversized HTTP proxy header');
+        if (b.length > 16384) throw proxyFailure('Oversized HTTP proxy header', { host, port, limit: 16384 });
         return null;
       });
-      if (!/^HTTP\/1\.[01] 200(?:\s|$)/.test(header.toString('latin1'))) throw new Error('HTTP proxy CONNECT rejected');
+      if (!/^HTTP\/1\.[01] 200(?:\s|$)/.test(header.toString('latin1')))
+        throw proxyFailure('HTTP proxy CONNECT rejected', { host, port });
     } else if (proxy.type === 'socks5') {
       const method = proxy.username ? 2 : 0;
       socket.write(Buffer.from([5, 1, method]));
       const hello = await exact(2);
-      if (hello[0] !== 5 || hello[1] !== method) throw new Error('SOCKS5 authentication method rejected');
+      if (hello[0] !== 5 || hello[1] !== method)
+        throw proxyFailure('SOCKS5 authentication method rejected', { host, port, method });
       if (method === 2) {
         const u = Buffer.from(proxy.username),
           p = Buffer.from(proxy.password);
-        if (u.length > 255 || p.length > 255) throw new Error('SOCKS5 credentials too long');
+        if (u.length > 255 || p.length > 255) throw proxyFailure('SOCKS5 credentials too long', { host, port });
         socket.write(Buffer.concat([Buffer.from([1, u.length]), u, Buffer.from([p.length]), p]));
         const result = await exact(2);
-        if (result[0] !== 1 || result[1] !== 0) throw new Error('SOCKS5 authentication rejected');
+        if (result[0] !== 1 || result[1] !== 0) throw proxyFailure('SOCKS5 authentication rejected', { host, port });
       }
       const domain = Buffer.from(host);
-      if (!domain.length || domain.length > 255) throw new Error('Invalid SOCKS5 target');
+      if (!domain.length || domain.length > 255) throw proxyFailure('Invalid SOCKS5 target', { host, port });
       const targetPort = Buffer.alloc(2);
       targetPort.writeUInt16BE(port);
       socket.write(
@@ -130,7 +169,12 @@ async function tunnel(socket, host, port, proxy, command = 1, timeoutMs = 10000)
       );
       const result = await exact(4);
       if (result[0] !== 5 || result[1] !== 0 || result[2] !== 0)
-        throw new Error('SOCKS5 ' + (command === 3 ? 'UDP ASSOCIATE' : 'CONNECT') + ' rejected: ' + result[1]);
+        throw proxyFailure('SOCKS5 ' + (command === 3 ? 'UDP ASSOCIATE' : 'CONNECT') + ' rejected: ' + result[1], {
+          host,
+          port,
+          reply: result[1],
+          command,
+        });
       if (result[3] === 1) {
         const b = await exact(6);
         bound = { host: [...b.subarray(0, 4)].join('.'), port: b.readUInt16BE(4) };
@@ -144,8 +188,8 @@ async function tunnel(socket, host, port, proxy, command = 1, timeoutMs = 10000)
         const length = (await exact(1))[0],
           b = await exact(length + 2);
         bound = { host: b.subarray(0, length).toString(), port: b.readUInt16BE(length) };
-      } else throw new Error('Invalid SOCKS5 reply address');
-    } else throw new Error('Unsupported proxy type');
+      } else throw proxyFailure('Invalid SOCKS5 reply address', { host, port, addressType: result[3] });
+    } else throw proxyFailure('Unsupported proxy type', { type: proxy.type });
     socket.pause();
     socket.off('data', data);
     if (buffer.length) socket.unshift(buffer);
@@ -174,7 +218,7 @@ async function associateUdp(proxy) {
   socket.on('error', () => {});
   try {
     const relay = await tunnel(socket, '0.0.0.0', 0, proxy, 3, 3000);
-    if (!relay.port) throw new Error('SOCKS5 returned an invalid UDP relay port');
+    if (!relay.port) throw proxyFailure('SOCKS5 returned an invalid UDP relay port', { reply: relay.port });
     if (['0.0.0.0', '0:0:0:0:0:0:0:0'].includes(relay.host)) relay.host = socket.remoteAddress || proxy.host;
     socket.resume();
     return { socket, relay };

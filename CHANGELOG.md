@@ -5,6 +5,64 @@
 [Semantic Versioning](https://semver.org/lang/ru/). Незавершённые изменения
 собираются в секции `Unreleased`, при выпуске она получает номер версии и дату.
 
+## [0.3.2] — 2026-11-21
+
+### Исправлено
+- **Регион аккаунта работает**: `create-account --region KZ` применяет страну при
+  регистрации, `account-region` меняет её у существующего аккаунта. Подтверждение идёт
+  по ответу `24178` и по стране в HomeData (`lib/HomeRegion.js`), а не по
+  `LoginOk.countryCode` — там гео по IP, оно остаётся `RU`. Формат запроса не менялся:
+  `12998` — это `DataReference` класса 14, проверено дизассемблером и четырьмя живыми
+  гостями (KZ, US, KE).
+- `lib/Fleet.js`: `slot.joined` сравнивался с функцией `Protocol.target` вместо реальной
+  цели — всегда был `false` после входа в клуб.
+- `failedTotal` во флоте считал один сбой 2–3 раза; теперь единственная точка смены
+  статуса (`setStatus`) и один инкремент на инцидент.
+- `tools/watch.js`: `--bots` не работал из-за двойной нормализации; `--once` без
+  значения вешал цикл, а `--once --json` съедал флаг; `avgLoginMs: 0` считался
+  «нет данных».
+- `lib/Accounts.js`: `upsert` больше не делает полный синхронный скан аккаунтов в
+  обработчике события; отложенная запись реестра сохраняется при остановке флота.
+- `lib/Fleet.js`: `readdirSync` каталога команд без `try` и потеря результата при
+  удалённом `.runtime/commands`.
+
+### Добавлено
+- `node Program.js watch` — живой дашборд флота (`fleet-status.json`, `fleet.pid`,
+  `fleet.log`, реестр, последние результаты команд): `--once`, `--interval`,
+  `--log-lines`, `--bots first:count`, `--no-color`, `--json`. `docs/WATCH.md`.
+- Глобальные `--json` / `--quiet` / `--json=false` для любой команды; ошибки в stderr
+  JSON, коды выхода 1/2.
+- Реестр аккаунтов: `lib/Accounts.js`, `accounts/index.json` (`0600`, без токенов),
+  `tools/accounts.js` (`list`, `show`, `refresh`, `prune`, `stats`, `cleanup`),
+  `docs/ACCOUNTS.md`.
+- Метрики флота в `fleet-status.json`: `uptimeSec`, `loggedInTotal`, `failedTotal`,
+  `avgLoginMs`, `p95LoginMs`, счётчики команд, `lastCommandAt`.
+- Ротация `fleet.log` (5 МБ × 3, `--log-max-bytes`, `--log-keep`) и очистка `.runtime`
+  (results старше часа, зависшие `.processing`, `*.tmp-*` и `*.lock` старше суток).
+- Контракт ошибок: `lib/Errors.js` (`AppError`, `code`, `kind`, `retryable`, `details`,
+  `toJSON` с маскировкой секретов), внедрён в Store, Accounts, Connect, Protocol,
+  Actions, Client, Fleet, CLI, AccountLock, Platform, ProxyConnect, NullsLicense;
+  `docs/ERRORS.md`.
+- Точная раскладка хвоста `LoginOk`: `VInt tokenBlobMode` + `i32 tokenBlobLength` +
+  blob (`u32 LE tokenRawLength` + zlib-JWT). Подтверждено декодером libg и восемью
+  живыми входами; «VInt 1365/1366» был артефактом чтения со сдвигом.
+- eslint 9 в `devDependencies`, `npm run lint` = `eslint .`; сборка кладёт в бандл
+  только production-зависимости из `package-lock.json` (1250 файлов dev-дерева
+  исключено; без фильтра `Nulls.js` был бы ~12,6 МБ).
+- Тесты: `tests/account-region.test.js`, `tests/errors.test.js`,
+  `tests/errors-integration.test.js`, `tests/packaging.test.js`,
+  `tests/integration-{cli,fleet,login}.test.js`, дополнены fleet/accounts/watch/tui/i18n.
+
+### Удалено
+- `TcpSocket/Connection.js` — мёртвая обёртка без единого `require`.
+- `docs/test-results.json` — устаревший снимок 0.2.7.
+
+### Проверено
+- `npm test`, `npm run lint` (eslint 0 ошибок), `prettier --check .`,
+  `node Nulls.js --self-test`, `python3 tools/package_release.py --check`.
+- Живой сервер: регион KZ/US/KE на новых гостях, bind-token в `LoginOk`, вход с
+  привязкой Connect.
+
 ## [0.3.1] — 2026-11-21
 
 ### Добавлено

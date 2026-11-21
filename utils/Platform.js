@@ -1,5 +1,6 @@
 const fs = require('node:fs');
-const { execFileSync } = require('node:child_process');
+const childProcess = require('node:child_process');
+const { AppError, codes } = require('../lib/Errors');
 
 // Кэш результата поиска Python: повторные вызовы не запускают процессы.
 let python = undefined;
@@ -40,7 +41,7 @@ function pythonCommand() {
   const candidates = isWindows() ? ['python', 'python3'] : ['python3', 'python'];
   for (const command of candidates) {
     try {
-      const output = execFileSync(command, ['--version'], {
+      const output = childProcess.execFileSync(command, ['--version'], {
         encoding: 'utf8',
         timeout: 3000,
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -59,7 +60,7 @@ function pythonCommand() {
 function wakeLock(on) {
   if (!isAndroid()) return false;
   try {
-    execFileSync(on ? 'termux-wake-lock' : 'termux-wake-unlock', [], { timeout: 3000, stdio: 'ignore' });
+    childProcess.execFileSync(on ? 'termux-wake-lock' : 'termux-wake-unlock', [], { timeout: 3000, stdio: 'ignore' });
     return true;
   } catch {
     return false;
@@ -85,4 +86,51 @@ function fileModeSecure(file) {
   }
 }
 
-module.exports = { isAndroid, isWindows, isMac, isLinux, pythonCommand, wakeLock, supportsApkUpdate, fileModeSecure };
+// Python обязателен для обновления из APK: отдельный помощник для кода, которому
+// нужен именно запуск, а не проверка. Сообщение совпадает с прежним текстом AutoUpdate.
+function requirePython() {
+  const command = pythonCommand();
+  if (!command) {
+    throw new AppError(
+      codes.PYTHON_MISSING,
+      'нужен python3: обновление из APK требует python (python3 на Linux/macOS)',
+      {
+        details: { platform: process.platform },
+      },
+    );
+  }
+  return command;
+}
+
+// Возможности, зависящие от платформы. Неизвестная возможность считается
+// неподдерживаемой: список намеренно закрытый.
+const FEATURES = {
+  'apk-update': () => supportsApkUpdate(),
+  'wake-lock': () => isAndroid(),
+};
+
+function supports(feature) {
+  const probe = FEATURES[feature];
+  return typeof probe === 'function' ? !!probe() : false;
+}
+
+function requireFeature(feature) {
+  if (supports(feature)) return true;
+  throw new AppError(codes.PLATFORM_UNSUPPORTED, `Платформа ${process.platform} не поддерживает: ${feature}`, {
+    details: { platform: process.platform, feature },
+  });
+}
+
+module.exports = {
+  isAndroid,
+  isWindows,
+  isMac,
+  isLinux,
+  pythonCommand,
+  requirePython,
+  supports,
+  requireFeature,
+  wakeLock,
+  supportsApkUpdate,
+  fileModeSecure,
+};

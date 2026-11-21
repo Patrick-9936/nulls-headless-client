@@ -17,8 +17,7 @@ Program.js                      точка входа: CLI
               ├── Messaging/Messaging.js       кадрирование, крипто, диспетчер пакетов
               │     ├── Crypto/NullsCrypto.js  шифрование/дешифрование Native19
               │     └── Messaging/LogicLaserMessageFactory.js   id → класс сообщения
-              ├── DataStream/Queue.js          накопление входящих байтов
-              └── TcpSocket/Connection.js      альтернативная сборка поверх net.Socket
+              └── DataStream/Queue.js          накопление входящих байтов
 утils/                           крипто-хелперы, прокси, теги, лицензия, обновление
 DataStream/ByteStream.js         единственный кодек: VInt, строки, ссылки, boolean-биты
 ```
@@ -196,7 +195,38 @@ stopped → connecting → authenticating → setting-profile → online
 | `TUI.js` | интерактивное меню | не часть headless-контракта |
 | `Nulls.js` | собранный бандл | генерируется `tools/package_release.py`, руками не правится |
 
-## 9. Что читать дальше
+## 9. Сборка и проверки
+
+`tools/package_release.py` — единственный источник zip-архива и однофайлового
+`Nulls.js`; руками ни то, ни другое не правится.
+
+- **Состав.** В бандл входят исходники из `DIRECTORIES`/`FILES`, `package.json`,
+  `package-lock.json`, `config.json`, `docs/` и только production-зависимости
+  (`blakejs`, `colors`, `tweetnacl` и их транзитивное дерево). Набор production-пакетов
+  считается по `package-lock.json`: записи с `dev: true` / `devOptional` исключаются
+  вместе со всем содержимым, `node_modules/.bin`, `.package-lock.json` и npm-кэши
+  не попадают никогда. Поэтому `eslint`, `globals` и прочие devDependencies бандл
+  не раздувают.
+- **Детерминизм.** Файлы сортируются по POSIX-пути, gzip пишется с `mtime=0`,
+  отметки времени и права в zip фиксированы. Одинаковые исходники дают одинаковый
+  sha256 архива; содержимое `Nulls.js` сверяется по хешу распакованного payload,
+  потому что gzip-поток зависит от версии zlib.
+- **Режимы.** `npm run bundle` собирает zip рядом с клоном и `Nulls.js` в корень;
+  `npm run bundle:check` собирает во `$TMPDIR` и сравнивает с закоммиченным
+  `Nulls.js` (код 1 при расхождении). `node Nulls.js --self-test` проверяет
+  целостность встроенных модулей.
+- **Линтеры.** `npm run lint` — `eslint .` по плоскому конфигу
+  `eslint.config.mjs` (CommonJS, `ecmaVersion: 2023`, без плагинов, только
+  `globals`); `npm run format` / `npm run format:check` — prettier 3 с
+  `.prettierrc.json` (`printWidth 120`). `npm run check` — отдельная быстрая
+  проверка синтаксиса ключевых файлов и `node Program.js info`, она не заменяет
+  eslint.
+- **CI.** `.github/workflows/ci.yml` гоняет `npm ci --ignore-scripts`, `npm test`,
+  `npm run check`, `npm run lint` и `node Nulls.js --self-test` на Node 20/22/24,
+  отдельная задача `bundle` проверяет `bundle:check` и воспроизводимость zip.
+  `release.yml` повторяет проверки, собирает артефакты и публикует GitHub Release.
+
+## 10. Что читать дальше
 
 - `docs/COMMANDS.md` — список команд и параметров.
 - `docs/SCRIPTS.md` — контракт для внешних скриптов.

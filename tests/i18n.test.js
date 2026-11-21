@@ -231,15 +231,15 @@ test('CLI: lang tr сохраняет выбор и подтверждает н�
   }
 });
 
-test('CLI: неизвестный язык даёт код 1 и понятное сообщение', () => {
+test('CLI: неизвестный язык даёт код 2 (ошибка аргумента) и понятное сообщение', () => {
   const dir = fixture();
   try {
     const result = run(dir, ['lang', 'xx']);
-    assert.equal(result.status, 1);
+    assert.equal(result.status, 2);
     assert.match(result.stderr, /не поддерживается/);
     assert.match(result.stderr, /ru, en, tr, zh/);
     const flag = run(dir, ['help', '--lang', 'xx']);
-    assert.equal(flag.status, 1);
+    assert.equal(flag.status, 2);
     assert.match(flag.stderr, /не поддерживается/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });

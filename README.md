@@ -61,8 +61,8 @@ node TUI.js
 
 ```sh
 pkg install nodejs unzip
-unzip /sdcard/Download/nulls-headless-client-0.3.1.zip -d "$HOME"
-cd ~/nulls-headless-client-0.3.1
+unzip /sdcard/Download/nulls-headless-client-0.3.2.zip -d "$HOME"
+cd ~/nulls-headless-client-0.3.2
 node Program.js create-account --account accounts/bot-1.json --name 'МойБот' --once
 node Program.js login --account accounts/bot-1.json
 ```
@@ -111,9 +111,30 @@ node tools/fleet.js stop
 `clubError`, уже вошедший бот остаётся онлайн. Есть `retry`, `pause`, `resume`.
 
 Фоновый процесс пишет `fleet.log` и `fleet-status.json`, переподключается после разрыва и
-просит termux wake-lock. Android всё равно может прибить Termux — для постоянной работы
-нужен сервер, а не телефон. Наличие процесса не значит, что все боты вошли: смотрите
-`states` и `bots`. `--timeout` — миллисекунды.
+просит termux wake-lock (на Windows/Linux/macOS — no-op). Android всё равно может прибить
+Termux — для постоянной работы нужен сервер, а не телефон. Наличие процесса не значит, что
+все боты вошли: смотрите `states` и `bots`. `--timeout` — миллисекунды.
+
+### Наблюдение и реестр
+
+```sh
+node Program.js watch                    # живой дашборд: статусы, метрики, хвост fleet.log
+node Program.js watch --once --json      # один кадр в JSON
+node tools/accounts.js list              # реестр accounts/index.json: теги, имена, клубы
+node tools/accounts.js stats
+node tools/accounts.js prune --dry-run   # что можно удалить, ничего не удаляя
+```
+
+`watch` читает `fleet-status.json`, `fleet.pid`, `fleet.log`, `accounts/index.json` и
+`.runtime/results`; флаги `--interval`, `--log-lines`, `--bots 1:13`, `--no-color`:
+[`docs/WATCH.md`](docs/WATCH.md). Реестр и `prune` (файлы с токенами не удаляются никогда):
+[`docs/ACCOUNTS.md`](docs/ACCOUNTS.md).
+
+`fleet-status.json` содержит `metrics`: uptime, входы, провалы, `avgLoginMs`, `p95LoginMs`,
+счётчики команд. Статус пишется не чаще 2 раз в секунду (коалесирование событий);
+`--status-interval 0` возвращает запись на каждое изменение. `fleet.log` ротируется
+(5 МБ × 3 архива, `--log-max-bytes`, `--log-keep`), `.runtime` чистится от старых
+результатов и зависших команд. Подробности — [`docs/FLEET.md`](docs/FLEET.md).
 
 ## Лобби и бой
 
@@ -275,6 +296,9 @@ npm run bundle:check  # пересобрать в $TMPDIR и сверить с �
 | [`docs/RELEASING.md`](docs/RELEASING.md) | выпуск версии |
 | [`docs/CODESPACES.md`](docs/CODESPACES.md) | ограниченный интеграционный тест |
 | [`docs/FLEET.md`](docs/FLEET.md) | флот: статус, команды, лимиты |
+| [`docs/WATCH.md`](docs/WATCH.md) | дашборд `watch`, `--json` / `--quiet` |
+| [`docs/ACCOUNTS.md`](docs/ACCOUNTS.md) | реестр аккаунтов, `prune`, токены |
+| [`docs/ERRORS.md`](docs/ERRORS.md) | коды ошибок для скриптов |
 | [`docs/PLATFORMS.md`](docs/PLATFORMS.md) | Windows, Linux, macOS, Android |
 
 ## Ограничения

@@ -16,7 +16,11 @@ const path = require('node:path');
 const { parse } = require('../lib/Args');
 const Connect = require('../lib/Connect');
 
-const print = (value) => console.log(JSON.stringify(value, null, 2));
+const ROOT = path.resolve(__dirname, '..');
+// --json: одна строка {"ok":true,"result":…}, как в остальном CLI.
+let jsonMode = false;
+const print = (value) =>
+  console.log(jsonMode ? JSON.stringify({ ok: true, result: value }) : JSON.stringify(value, null, 2));
 const SECRET_KEYS = /^(token|access_token|refresh_token|bearer|bind_token|bindToken|password|pin)$/i;
 
 class UsageError extends Error {}
@@ -35,6 +39,8 @@ function help() {
       '  links    [--token <bearer>] [--game laser]',
       '  token    --player-id <id> [--token <bearer>] [--show-token]',
       '  status   (локальное состояние, без сети)',
+      '',
+      'Глобально: --json (одна строка {"ok":true,"result":…}), --quiet.',
       '  logout   (удалить .runtime/connect.json)',
       '',
       'Токен хранится в .runtime/connect.json с правами 0600 и в выводе не печатается.',
@@ -73,7 +79,9 @@ function required(options, key, message) {
 }
 
 function bindTokenFromAccount(file) {
-  const resolved = path.resolve(process.cwd(), file);
+  // Как в lib/CLI.js: путь ищется от корня клиента, затем от текущего каталога.
+  const candidates = path.isAbsolute(file) ? [file] : [path.resolve(ROOT, file), path.resolve(process.cwd(), file)];
+  const resolved = candidates.find((item) => fs.existsSync(item)) || candidates[0];
   let account;
   try {
     account = JSON.parse(fs.readFileSync(resolved, 'utf8'));
@@ -94,7 +102,7 @@ async function main() {
     help();
     return;
   }
-  // --show-token is a bare switch; lib/Args would otherwise expect a value.
+  // --show-token is a bare switch; --json/--quiet уже boolean в lib/Args.
   const argv = raw.map((item) => (item === '--show-token' ? '--show-token=1' : item));
   let options, positional;
   try {
@@ -102,6 +110,7 @@ async function main() {
   } catch (error) {
     throw new UsageError(error.message);
   }
+  jsonMode = options.json === true;
   const command = positional[0] || 'status';
   const showToken = ['1', 'true', 'yes'].includes(String(options.showToken || '').toLowerCase());
 

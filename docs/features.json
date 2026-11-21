@@ -1,5 +1,5 @@
 {
-  "version": "0.3.1",
+  "version": "0.3.2",
   "date": "2026-11-21",
   "notes": "See VERIFICATION.md for conditions and server refusals. Loading does not implement gameplay.",
   "commands": [
@@ -337,7 +337,7 @@
     "club-request": "Pending stage; text verified with club owner in same fleet",
     "team-request": "Outgoing request/cancellation verified by owner in same fleet; otherwise unconfirmed",
     "team-invite": "Friends and clubmate routes tested; same-fleet recipient delivery awaited",
-    "account-region": "24178 success code and matching region DataReference; Home persistence not decoded",
+    "account-region": "24178 code 0 + matching 14:N; Home country verified after reconnect (LoginOk.countryCode is IP-based)",
     "team-event": "Current server event IDs required; no complete Home event catalogue",
     "team-bot": "Friendly lobby only",
     "team-status": "Numeric member status in 24124; labels not inferred",

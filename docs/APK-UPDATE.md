@@ -116,10 +116,13 @@ config.loginClientSeed = (config.apkSize ^ 4330295) | 0;
      ID, сверить карту в `PROTOCOL-MAP.md` и `docs/protocol-evidence.json`.
 
 5. Пересобрать бандл, потому что `Nulls.js` хранит копию исходников и
-   `config.json`:
+   `config.json`. В архив и бандл попадают только production-зависимости
+   (`blakejs`, `colors`, `tweetnacl`); devDependencies (`eslint`, `globals`, `prettier`) в
+   релиз не идут, ставить их для сборки не нужно:
 
    ```sh
    npm run bundle
+   npm run bundle:check
    ```
 
 6. Проверить:
@@ -127,13 +130,14 @@ config.loginClientSeed = (config.apkSize ^ 4330295) | 0;
    ```sh
    node Program.js info
    node Program.js features
+   npm run lint
    node Nulls.js --self-test
    node Program.js login --account accounts/bot-1.json
    ```
 
    `info` показывает версию, хост, `appBinaryVersion` и версию контента;
-   `features` — что реально проверено; `--self-test` — целостность бандла;
-   `login` — живой вход.
+   `features` — что реально проверено; `lint` — eslint без ошибок;
+   `--self-test` — целостность бандла; `login` — живой вход.
 
 ## 5. Типовые ошибки
 

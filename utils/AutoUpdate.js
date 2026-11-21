@@ -5,6 +5,7 @@ const { execFileSync } = require('child_process');
 const Inspector = require('./LibgInspector');
 const Transport = require('./UpdateTransport');
 const Platform = require('./Platform');
+const { AppError, codes } = require('../lib/Errors');
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const digest = (b) => crypto.createHash('sha256').update(b).digest('hex');
 const fields = [
@@ -24,9 +25,16 @@ const fields = [
 ];
 function fingerprintInto(config, fp) {
   if (!fp || !/^\d+\.\d+\.\d+$/.test(String(fp.version)) || !/^([a-f\d]{40})$/i.test(String(fp.sha)))
-    throw new Error('Invalid server fingerprint; config preserved');
+    throw new AppError(codes.STATE_ERROR, 'Invalid server fingerprint; config preserved', {
+      kind: 'server',
+      details: { field: 'fingerprint', reason: 'format' },
+    });
   const v = fp.version.split('.').map(Number);
-  if (v.some((x) => !Number.isSafeInteger(x) || x > 0x7fffffff)) throw new Error('Invalid content version');
+  if (v.some((x) => !Number.isSafeInteger(x) || x > 0x7fffffff))
+    throw new AppError(codes.STATE_ERROR, 'Invalid content version', {
+      kind: 'server',
+      details: { field: 'version', reason: 'range' },
+    });
   Object.assign(config, { major: v[0], minor: v[1], build: v[2], fingerprintHash: fp.sha });
   return config;
 }
@@ -34,7 +42,9 @@ function candidateFromAPK(current, meta, lib) {
   const c = clone(current),
     v = meta.appVersion.split('.').map(Number);
   if (v.length !== 2 || v.some((x) => !Number.isInteger(x) || x < 0 || x > 0x7fffffff))
-    throw new Error('Invalid APK version');
+    throw new AppError(codes.INVALID_ARGUMENT, 'Invalid APK version', {
+      details: { field: 'appVersion', value: meta.appVersion ?? null },
+    });
   if (
     v[0] < (current.clientMajor ?? current.major) ||
     (v[0] === (current.clientMajor ?? current.major) && v[1] < (current.clientBuild ?? current.build))
@@ -67,7 +77,9 @@ function atomicWrite(file, bytes) {
 function commit(root, before, candidate) {
   const file = path.join(root, 'config.json');
   if (fs.readFileSync(file, 'utf8') !== before)
-    throw new Error('config.json changed during verification; update cancelled');
+    throw new AppError(codes.STATE_ERROR, 'config.json changed during verification; update cancelled', {
+      details: { file: 'config.json', reason: 'changed-during-verification' },
+    });
   const backup = path.join(
     root,
     '.updates',
@@ -87,10 +99,16 @@ function lock(root) {
   } catch (e) {
     if (e.code !== 'EEXIST') throw e;
     const pid = Number(fs.readFileSync(p, 'utf8'));
-    if (!Number.isInteger(pid) || pid < 1) throw new Error('Invalid updater lock; inspect .updates/update.lock');
+    if (!Number.isInteger(pid) || pid < 1)
+      throw new AppError(codes.STATE_ERROR, 'Invalid updater lock; inspect .updates/update.lock', {
+        details: { file: path.relative(root, p) },
+      });
     try {
       process.kill(pid, 0);
-      throw new Error('Another updater is running');
+      throw new AppError(codes.STATE_ERROR, 'Another updater is running', {
+        retryable: true,
+        details: { file: path.relative(root, p), pid },
+      });
     } catch (err) {
       if (err.code !== 'ESRCH') throw err;
     }
@@ -117,12 +135,15 @@ function readAPK(root, current, opts, stage) {
       .map((x) => x.slice(8));
     base = apks.find((p) => path.basename(p) === 'base.apk');
     libs = apks.find((p) => path.basename(p) === 'split_config.arm64_v8a.apk') || base;
-    if (!base) throw new Error('Install/update ' + pkg + ' or supply --apk FILE');
+    if (!base)
+      throw new AppError(codes.PLATFORM_UNSUPPORTED, 'Install/update ' + pkg + ' or supply --apk FILE', {
+        details: { package: pkg, platform: process.platform },
+      });
   }
   base = path.resolve(base);
   libs = libs ? path.resolve(libs) : base;
-  const python = Platform.pythonCommand();
-  if (!python) throw new Error('нужен python3: обновление из APK требует python (python3 на Linux/macOS)');
+  // PYTHON_MISSING: текст сообщения совпадает с прежним throw.
+  const python = Platform.requirePython();
   const meta = JSON.parse(
     execFileSync(python, ['-P', path.join(root, 'tools/extract_update_apk.py'), base, libs, stage, pkg], {
       encoding: 'utf8',
@@ -161,14 +182,19 @@ async function runUpdate(root, opts = {}, deps = {}) {
               .filter((x) => x.endsWith('.json'))
               .sort()
           : [];
-      if (!names.length) throw new Error('No update backup available');
+      if (!names.length)
+        throw new AppError(codes.STATE_ERROR, 'No update backup available', {
+          details: { dir: path.join('.updates', 'backups') },
+        });
       const restored = JSON.parse(fs.readFileSync(path.join(dir, names.at(-1)), 'utf8'));
       prepared(root, clone(restored));
       const backup = commit(root, before, restored);
       return { status: 'rolled-back', backup };
     }
     if (!['native19', 'nulls-native19'].includes(current.cryptoMode))
-      throw new Error('Updater supports the verified Native19 clients only');
+      throw new AppError(codes.INVALID_CONFIG, 'Updater supports the verified Native19 clients only', {
+        details: { field: 'cryptoMode', cryptoMode: current.cryptoMode ?? null },
+      });
     fs.mkdirSync(stage, { recursive: true });
     const apk = (deps.readAPK || readAPK)(root, current, opts, stage);
     const candidate = apk ? apk.config : clone(current);
@@ -182,8 +208,10 @@ async function runUpdate(root, opts = {}, deps = {}) {
     const response = await network.fingerprint(prepared(root, clone(candidate)));
     if (response.status === 7) fingerprintInto(candidate, response.fingerprint);
     else if (response.status !== null)
-      throw new Error(
+      throw new AppError(
+        codes.STATE_ERROR,
         `Server rejected update probe (code ${response.status}); newer installed APK or protocol analysis may be needed`,
+        { kind: 'server', details: { serverCode: response.status, endpoint: 'fingerprint' } },
       );
     const changes = fields
       .filter((k) => JSON.stringify(current[k]) !== JSON.stringify(candidate[k]))
@@ -198,7 +226,10 @@ async function runUpdate(root, opts = {}, deps = {}) {
     }
     const verification = await network.verify(prepared(root, clone(candidate)), account, root, { helloOnly: !full });
     if (full && !(verification.loginOk && verification.homeData))
-      throw new Error('Login/HomeData not confirmed; config preserved');
+      throw new AppError(codes.STATE_ERROR, 'Login/HomeData not confirmed; config preserved', {
+        kind: 'server',
+        details: { endpoint: 'verify' },
+      });
     const report = {
       status: changes.length ? (opts.check ? 'update-available' : 'updated') : 'up-to-date',
       appVersion: candidate.appBinaryVersion,
@@ -238,13 +269,21 @@ function parseArgs(args) {
       '--interval': 'interval',
       '--libg': 'libg',
     }[a];
-    if (!key || !args[i + 1] || args[i + 1].startsWith('--')) throw new Error('Unknown/missing updater option ' + a);
+    if (!key || !args[i + 1] || args[i + 1].startsWith('--'))
+      throw new AppError(codes.INVALID_ARGUMENT, 'Unknown/missing updater option ' + a, {
+        details: { option: a },
+      });
     o[key] = args[++i];
   }
-  if (o.rollback && (o.check || o.watch)) throw new Error('--rollback cannot be combined with --check/--watch');
+  if (o.rollback && (o.check || o.watch))
+    throw new AppError(codes.INVALID_ARGUMENT, '--rollback cannot be combined with --check/--watch', {
+      details: { arguments: ['rollback', 'check', 'watch'] },
+    });
   o.interval = Number(o.interval || 1800);
   if (!Number.isInteger(o.interval) || o.interval < 60 || o.interval > 86400)
-    throw new Error('--interval must be 60–86400 seconds');
+    throw new AppError(codes.INVALID_ARGUMENT, '--interval must be 60–86400 seconds', {
+      details: { argument: 'interval', value: o.interval ?? null },
+    });
   return o;
 }
 async function main(root, args = process.argv.slice(2)) {

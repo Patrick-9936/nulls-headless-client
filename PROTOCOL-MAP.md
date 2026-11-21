@@ -30,20 +30,26 @@
 ```
 0    u32 accountId.hi        8    u32 homeId.hi
 4    u32 accountId.lo        12   u32 homeId.lo
-16   string passToken        36   8 байт неизвестного id (-1:-1)
-44   u32 clientMajor (69)    48   u32 contentVersion (414)
-52   u32 1                  56   string environment ("prod")
-60   u32 1, 64 u32 1, 68 u32 1
-72   string buildTag ("103121310241222")
-99   string serverTime      113  string secondaryTime
-127  u32 0                  131  i32 -1
-135  string countryCode ("RU")
-141  i32 -1, 145 u32 1, 149 i32 -1
-153  u32 patchUrlCount + patchUrl...
-233  u32 eventUrlCount + eventUrl...
-315  u32 0                  319  VInt (не расшифровано: 1365/1366)
-323  u16 0
-324  → конец: zlib-поток (78 9c) с JWT Nulls Connect
+16   string passToken        40   2 × optional string (обе -1, отсутствуют)
+48   u32 clientMajor (69)    52   u32 contentVersion (414)
+56   u32 1                  60   string environment ("prod")
+68   u32 1, 72 u32 1, 76 u32 1
+80   string buildTag ("103121310241222")
+107  string serverTime      121  string secondaryTime
+135  u32 0                  139  i32 -1
+143  string countryCode ("RU")
+149  i32 -1, 153 u32 1, 157 i32 -1
+161  u32 patchUrlCount + patchUrl...
+241  u32 eventUrlCount + eventUrl...
+323  VInt tokenBlobMode (0)
+324  i32  tokenBlobLength (4 + длина zlib-потока)
+328  blob[tokenBlobLength]: u32 LE tokenRawLength, затем zlib-поток (78 9c) с JWT
 ```
+
+Смещения в таблице для примера с 2 URL; они сдвигаются вместе с длиной passToken и строк.
+Хвост — одна «сжатая строка»: `VInt mode`, `int32 BE длина blob`, blob = `u32 LE длина
+распакованного` + zlib-поток. Значение `1365/1366`, которое раньше читалось как VInt, —
+артефакт смещения на байт: `readUInt32(0)` вместо `readVInt` склеивал 0x97/0x94 со старшим
+байтом длины blob. Доказательство: декодер LoginOk в libg.so — см. `docs/CONNECT.md`.
 
 JWT (`{"game":"laser","bind":true,"pid":<accountId.lo>,"exp":…}`) выдаётся на каждый вход заново. Токен сохранён в `accounts/*.json` как `bindToken: {token, at}`; в лог попадает только длина и срок. Фикстуры: `tests/fixtures/login-ok-69.bin`, разбор: `tests/login-ok.test.js`, подробности: `docs/CONNECT.md`.
