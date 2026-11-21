@@ -3,7 +3,7 @@ const BASE = BigInt(PLAYER_CHARS.length);
 
 function normalizeTag(tag) {
   if (tag === undefined || tag === null) throw new Error('Player tag is empty');
-  const clean = String(tag).trim().toUpperCase().replace(/^#/, '').replace(/O/g,'0');
+  const clean = String(tag).trim().toUpperCase().replace(/^#/, '').replace(/O/g, '0');
   if (!clean) throw new Error('Player tag is empty');
   return clean;
 }

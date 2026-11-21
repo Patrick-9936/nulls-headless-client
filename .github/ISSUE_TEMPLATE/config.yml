@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Обновление под новый APK
+    url: https://github.com/Patrick-9936/nulls-headless-client/blob/main/docs/APK-UPDATE.md
+    about: Порядок обновления config.json, блока лицензии и проверки входа
+  - name: Выпуск версии
+    url: https://github.com/Patrick-9936/nulls-headless-client/blob/main/docs/RELEASING.md
+    about: Как собрать бандл, поставить тег и что делает release.yml

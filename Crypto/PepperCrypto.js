@@ -23,7 +23,11 @@ module.exports = class PepperCrypto {
     if (type === 10100) return Buffer.from(payload);
     if (type === 10101) {
       if (!this.session_key) throw new Error('No session key yet');
-      const body = Buffer.concat([Buffer.from(this.session_key), Buffer.from(this.client_nonce.bytes()), Buffer.from(payload)]);
+      const body = Buffer.concat([
+        Buffer.from(this.session_key),
+        Buffer.from(this.client_nonce.bytes()),
+        Buffer.from(payload),
+      ]);
       const boxed = nacl.box.after(new Uint8Array(body), this.nonce.bytes(), this.key);
       return Buffer.concat([Buffer.from(this.client_public_key), Buffer.from(boxed)]);
     }
@@ -39,7 +43,10 @@ module.exports = class PepperCrypto {
     }
     if (type === 20104 || type === 20103) {
       if (!this.session_key) return Buffer.from(payload);
-      const nonce = new Nonce({ nonce: this.client_nonce.bytes(), Keys: [this.client_public_key, this.server_public_key] });
+      const nonce = new Nonce({
+        nonce: this.client_nonce.bytes(),
+        Keys: [this.client_public_key, this.server_public_key],
+      });
       const opened = nacl.box.open.after(payload, nonce.bytes(), this.key);
       if (!opened) return null;
       this.server_nonce = new Nonce({ nonce: opened.slice(0, 24) });

@@ -15,6 +15,8 @@
   "appStore": 2,
   "promonPadSize": 0,
   "preferredLanguage": "en",
+  "locale": "ru-RU",
+  "uiLanguage": "ru",
   "storefrontCountryCode": "",
   "storefrontId": "",
   "postLoginDelayMs": 1200,
@@ -27,15 +29,9 @@
     "serverHello": 20100,
     "loginFailed": 20103,
     "loginOk": 20104,
-    "loginOkCandidates": [
-      20104,
-      25220
-    ],
+    "loginOkCandidates": [20104, 25220],
     "ownHomeData": 24101,
-    "ownHomeCandidates": [
-      24101,
-      24180
-    ],
+    "ownHomeCandidates": [24101, 24180],
     "friendList": 20105,
     "friendListUpdate": 20106,
     "addFriendFailed": 20112,

@@ -1,23 +1,46 @@
+# Аккаунты и токены — в репозиторий не попадают
 accounts/
 account.json
-*.lock
-*.log
-*.pid
+
+# Рантайм-состояние клиента
 .runtime/
 .verification/
 .updates/
+.sdk-runtime/
+.nulls-single-*/
 PacketsDumps/
+*.lock
+*.log
+*.pid
+*.raw
+
+# Статусы и локальные конфиги инструментов
 fleet-status.json
+proxy-watch-status.json
 working-proxies.*
 proxy.json
 native-relocations.json
 native-vtables.json
 
-proxy-watch-status.json
-node_modules/
-.nulls-single-*/
-.sdk-runtime/
-__pycache__/
-*.pyc
+# Сборка релиза: zip лежит рядом с репозиторием, dist — staging для workflow
+dist/
+release-notes.md
+nulls-headless-client-*.zip*
+Nulls.js.sha256
 *.zip
 *.sha256
+*.tmp-*
+*.update-*
+
+# Зависимости и мусор окружения
+node_modules/
+__pycache__/
+*.pyc
+coverage/
+.DS_Store
+.idea/
+.vscode/
+.eslintcache
+npm-debug.log*
+
+# Nulls.js и client-license.bin закоммичены намеренно — не игнорировать.

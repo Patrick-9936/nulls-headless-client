@@ -1,0 +1,29 @@
+# Сборка и зависимости
+node_modules/
+Nulls.js
+tools/single-file.template
+package-lock.json
+
+# Документация и данные (правится руками, не prettier)
+docs/**
+data/**
+*.md
+CHANGELOG*.md
+
+# Состояние и учётные записи (никогда не форматировать)
+.runtime/**
+accounts/**
+fleet-status.json
+working-proxies.*
+proxy-watch-status.json
+*.lock
+*.log
+*.pid
+
+# Дампы и артефакты
+PacketsDumps/
+.verification/
+.updates/
+.updates-*/
+.nulls-single-*/
+.sdk-runtime/

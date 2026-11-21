@@ -69,3 +69,14 @@ node tools/fleet.js command --bot 1 --action team-bot --slot 1 --disabled=false
 ## Пока экспериментально
 
 `club-invite`, `team-advertise`, `practice`, `player-status`, старый `team-answer` требуют `--experimental`. Первые четыре проверены отправкой, но нужного серверного результата не получено. `player-status` проверяет присутствие через онлайн-друга того же fleet; это отдельная команда от работающей `team-status`. Реклама команды и тренировочный бой не объявлены работающими. Для старого `team-answer` используйте проверенные `accept-invite`/`decline-invite`.
+
+## Nulls Connect
+
+Привязка игровых аккаунтов к e-mail через Nulls Connect вынесена в отдельный CLI. Полный цикл, хранение токена и типовые ошибки — `docs/CONNECT.md`.
+
+```sh
+node tools/connect.js pin --email user@example.com
+node tools/connect.js confirm --email user@example.com --pin 1234
+node tools/connect.js bind --account accounts/bot-1.json
+node tools/connect.js links
+```

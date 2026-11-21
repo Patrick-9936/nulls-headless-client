@@ -1,0 +1,65 @@
+name: Баг
+description: Что-то не работает — вход, обновление, сборка, бандл
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо за отчёт. Не вставляйте токены аккаунтов, `account.json`,
+        `client-license.bin` и дампы пакетов — этого достаточно, чтобы потерять аккаунт.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: Что произошло
+      description: Команда, ожидаемое и фактическое поведение.
+      placeholder: |
+        node Program.js login --account accounts/bot-1.json
+        Ожидал OwnHomeData, получил LoginFailed error=8
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги воспроизведения
+      placeholder: |
+        1. npm ci --ignore-scripts
+        2. node Program.js info
+        3. ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Версия клиента
+      description: Вывод `node Program.js info` (поле version) или номер из package.json.
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: Окружение
+      description: Termux/Android, Linux, Windows, версия Node, версия APK Nulls.
+      placeholder: Termux, Node 24.4.1, APK 69.252
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи
+      description: Вывод команды без токенов и путей к аккаунтам.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Проверки
+      options:
+        - label: Прогнал `npm test` и `node Nulls.js --self-test`
+        - label: В логах нет токенов, паролей и содержимого `account.json`
+          required: true
+        - label: Это не вопрос по установке APK (для этого есть docs/APK-UPDATE.md)
