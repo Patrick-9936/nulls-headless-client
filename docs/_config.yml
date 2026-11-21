@@ -6,3 +6,5 @@ github:
   repository_url: https://github.com/Patrick-9936/nulls-headless-client
   zip_url: https://github.com/Patrick-9936/nulls-headless-client/archive/refs/heads/main.zip
   tar_url: https://github.com/Patrick-9936/nulls-headless-client/archive/refs/heads/main.tar.gz
+plugins:
+  - jekyll-sitemap
