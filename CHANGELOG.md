@@ -5,6 +5,47 @@
 [Semantic Versioning](https://semver.org/lang/ru/). Незавершённые изменения
 собираются в секции `Unreleased`, при выпуске она получает номер версии и дату.
 
+## [0.3.1] — 2026-11-21
+
+### Добавлено
+- Авто-выбор языка интерфейса: `uiLanguage: "auto"` в `config.json`, определение по
+  `NULLS_LANG` / `LC_ALL` / `LC_MESSAGES` / `LANG`, затем по системной локали Node
+  (`Intl`), потом `ru`. `node Program.js lang` показывает язык, режим и источник,
+  `node Program.js lang auto` возвращает авто-режим, `lang <код>` фиксирует язык;
+  в `info` добавлены `languageMode` и `languageSource`.
+- TUI: управление в vim-стиле (`j`/`k`, `g`/`G`), `tab`/`shift+tab` по 10 пунктов,
+  набор номера пункта цифрами с подтверждением по `enter`, `backspace` для сброса,
+  справка по `?`, обрезка строк по ширине терминала с учётом CJK.
+- Точная раскладка `LoginOk` 69.252 (`nulls-69`): плоские 32-битные id и строки,
+  bind-token Nulls Connect лежит в zlib-потоке в конце пакета. Снято с живого
+  сервера, закреплено обезличенными фикстурами `tests/fixtures/login-ok-69*.bin` и
+  `tests/login-ok.test.js`; таблица смещений — в `docs/CONNECT.md` и `PROTOCOL-MAP.md`.
+- `utils/Platform.js`: `isAndroid/isWindows/isMac/isLinux`, `pythonCommand`,
+  `wakeLock`, `supportsApkUpdate`, `fileModeSecure`; `docs/PLATFORMS.md` — что работает
+  на Windows, Linux, macOS и Android.
+- `docs/FLEET.md` — контракт `fleet-status.json`, команды, лимиты и состояния.
+
+### Изменено
+- `lib/Fleet.js` оптимизирован: статус пишется не чаще 2 раз в секунду с heartbeat
+  раз в 30 с и пропуском неизменившегося содержимого (было — запись на каждое
+  изменение состояния каждого бота); очередь запуска на курсорах вместо двух полных
+  поисков; `command --all` выполняет действия параллельно (`commandConcurrency`, по
+  умолчанию 8) с сохранением порядка результатов; команды захватываются через
+  `rename` в `.processing`, зависшие файлы чистятся через 10 минут; `stop()` делает
+  финальный flush.
+- `tools/fleet.js`: wake-lock только на Android через `Platform`, права на PID-файл
+  через `fileModeSecure`, понятное сообщение при чужом процессе.
+- `utils/AutoUpdate.js`: Python ищется как `python3` или `python`, APK-путь под
+  платформенным гейтом, `path.sep` вместо `/`, обработка `SIGBREAK` на Windows.
+- `tests/connect.test.js` учитывает третий фолбэк раскладки (`nulls-69`).
+
+### Проверено
+- `npm test`: 132/132, `node tools/i18n-check.js`: 248 ключей, `node Nulls.js --self-test`.
+- Два живых `LoginOk` 69.252: раскладка разбирается полностью, bind-token находится,
+  `pid` в claims совпадает с `accountId.lo`; живой вход сохраняет `bindToken` в аккаунт.
+- 100 изменений состояния флота → 2 записи статуса за 2 с; `command --all` по 20 ботам
+  за 169 мс вместо ~1000 мс.
+
 ## [0.3.0] — 2026-11-21
 
 ### Добавлено

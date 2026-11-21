@@ -16,7 +16,7 @@
   "promonPadSize": 0,
   "preferredLanguage": "en",
   "locale": "ru-RU",
-  "uiLanguage": "ru",
+  "uiLanguage": "auto",
   "storefrontCountryCode": "",
   "storefrontId": "",
   "postLoginDelayMs": 1200,

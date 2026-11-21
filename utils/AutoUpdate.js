@@ -4,6 +4,7 @@ const fs = require('fs'),
 const { execFileSync } = require('child_process');
 const Inspector = require('./LibgInspector');
 const Transport = require('./UpdateTransport');
+const Platform = require('./Platform');
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const digest = (b) => crypto.createHash('sha256').update(b).digest('hex');
 const fields = [
@@ -108,7 +109,7 @@ function readAPK(root, current, opts, stage) {
   let base = opts.apk,
     libs = opts.splitAPK;
   if (!base) {
-    if (!fs.existsSync('/system/bin/pm')) return null;
+    if (!Platform.supportsApkUpdate()) return null;
     const apks = execFileSync('/system/bin/pm', ['path', pkg], { encoding: 'utf8', timeout: 10000 })
       .trim()
       .split(/\r?\n/)
@@ -120,8 +121,10 @@ function readAPK(root, current, opts, stage) {
   }
   base = path.resolve(base);
   libs = libs ? path.resolve(libs) : base;
+  const python = Platform.pythonCommand();
+  if (!python) throw new Error('нужен python3: обновление из APK требует python (python3 на Linux/macOS)');
   const meta = JSON.parse(
-    execFileSync('python', ['-P', path.join(root, 'tools/extract_update_apk.py'), base, libs, stage, pkg], {
+    execFileSync(python, ['-P', path.join(root, 'tools/extract_update_apk.py'), base, libs, stage, pkg], {
       encoding: 'utf8',
       timeout: 60000,
       maxBuffer: 4 * 1024 * 1024,
@@ -211,7 +214,7 @@ async function runUpdate(root, opts = {}, deps = {}) {
     if (changes.length && !opts.check) {
       candidate.lastAutomaticUpdate = { at: new Date().toISOString(), verification };
       report.backup = commit(root, before, candidate);
-      preserveStage = String(candidate.clientLicensePath || '').startsWith(path.relative(root, stage) + '/');
+      preserveStage = String(candidate.clientLicensePath || '').startsWith(path.relative(root, stage) + path.sep);
     }
     return report;
   } finally {
@@ -265,6 +268,8 @@ async function main(root, args = process.argv.slice(2)) {
     };
     process.once('SIGINT', halt);
     process.once('SIGTERM', halt);
+    // Windows: Ctrl+Break приходит как SIGBREAK.
+    if (Platform.isWindows()) process.once('SIGBREAK', halt);
     try {
       while (!stop) {
         try {
@@ -284,6 +289,7 @@ async function main(root, args = process.argv.slice(2)) {
     } finally {
       process.off('SIGINT', halt);
       process.off('SIGTERM', halt);
+      if (Platform.isWindows()) process.off('SIGBREAK', halt);
     }
   } catch (e) {
     console.error('Update failed: ' + e.message + '; current config retained');

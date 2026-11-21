@@ -2,9 +2,10 @@
 const fs = require('node:fs'),
   path = require('node:path'),
   crypto = require('node:crypto');
-const { spawn, execFileSync } = require('node:child_process');
+const { spawn } = require('node:child_process');
 const { parse } = require('../lib/Args');
 const Store = require('../lib/Store');
+const Platform = require('../utils/Platform');
 const ROOT = path.resolve(__dirname, '..'),
   PID = path.join(ROOT, 'fleet.pid');
 function ownedPID() {
@@ -18,7 +19,9 @@ function ownedPID() {
     )
       return null;
     return pid;
-  } catch {
+  } catch (error) {
+    if (error.code === 'EPERM')
+      console.error(`fleet.pid указывает на процесс ${pid}, принадлежащий другому пользователю; уберите файл вручную`);
     return null;
   }
 }
@@ -79,18 +82,12 @@ async function main() {
   const Fleet = require('../lib/Fleet');
   const fleet = new Fleet(ROOT, options);
   fs.writeFileSync(PID, String(process.pid), { mode: 0o600 });
-  let wakeLock = false;
-  try {
-    execFileSync('termux-wake-lock', [], { timeout: 3000, stdio: 'ignore' });
-    wakeLock = true;
-  } catch {}
+  Platform.fileModeSecure(PID);
+  const wakeLock = Platform.wakeLock(true);
   const stop = () => {
     fleet.stop();
     if (fs.existsSync(PID) && Number(fs.readFileSync(PID, 'utf8')) === process.pid) fs.unlinkSync(PID);
-    if (wakeLock)
-      try {
-        execFileSync('termux-wake-unlock', [], { timeout: 3000, stdio: 'ignore' });
-      } catch {}
+    if (wakeLock) Platform.wakeLock(false);
   };
   process.once('SIGINT', stop);
   process.once('SIGTERM', stop);

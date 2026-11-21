@@ -74,6 +74,83 @@ test('приоритет языка: аргумент -> config.uiLanguage -> en
   assert.equal(i18n.fromEnv({}), null);
 });
 
+test('auto: env -> системная локаль -> ru, явный код важнее auto', () => {
+  assert.equal(i18n.resolveMode('auto'), 'auto');
+  assert.equal(i18n.resolveMode('AUTO'), 'auto');
+  assert.equal(i18n.resolveMode('tr-TR'), 'tr');
+  assert.equal(i18n.resolveMode('xx'), null);
+  assert.deepEqual(i18n.detectInfo({ config: { uiLanguage: 'auto' }, env: { LANG: 'tr_TR.UTF-8' } }), {
+    language: 'tr',
+    mode: 'auto',
+    source: 'env',
+  });
+  assert.deepEqual(i18n.detectInfo({ config: { uiLanguage: 'auto' }, env: {}, systemLocale: 'zh-CN' }), {
+    language: 'zh',
+    mode: 'auto',
+    source: 'system',
+  });
+  assert.deepEqual(i18n.detectInfo({ config: { uiLanguage: 'auto' }, env: {}, systemLocale: 'xx-YY' }), {
+    language: 'ru',
+    mode: 'auto',
+    source: 'default',
+  });
+  // LANG=C — локаль задана, но языка в ней нет: запасной ru.
+  assert.equal(i18n.detectInfo({ config: { uiLanguage: 'auto' }, env: { LANG: 'C' } }).language, 'ru');
+  // Отсутствие uiLanguage в конфиге тоже означает auto.
+  assert.deepEqual(i18n.detectInfo({ config: {}, env: { LANG: 'tr_TR.UTF-8' } }), {
+    language: 'tr',
+    mode: 'auto',
+    source: 'env',
+  });
+  assert.deepEqual(i18n.detectInfo({ lang: 'en', config: { uiLanguage: 'auto' }, env: { LANG: 'tr_TR.UTF-8' } }), {
+    language: 'en',
+    mode: 'fixed',
+    source: 'lang',
+  });
+  assert.deepEqual(i18n.detectInfo({ config: { uiLanguage: 'en' }, env: { LANG: 'tr_TR.UTF-8' } }), {
+    language: 'en',
+    mode: 'fixed',
+    source: 'config',
+  });
+  const system = i18n.systemLocale();
+  assert.ok(system === null || typeof system === 'string');
+});
+
+test('CLI: auto берёт язык из env, --lang важнее auto, lang auto сохраняет режим', () => {
+  const auto = fixture({ uiLanguage: 'auto' });
+  try {
+    const byEnv = JSON.parse(run(auto, ['lang'], { LANG: 'tr_TR.UTF-8' }).stdout);
+    assert.equal(byEnv.language, 'tr');
+    assert.equal(byEnv.mode, 'auto');
+    assert.equal(byEnv.source, 'env');
+    assert.equal(byEnv.configured, 'auto');
+
+    const emptyEnv = run(auto, ['lang'], { NULLS_LANG: '', LC_ALL: '', LC_MESSAGES: '', LANG: '' });
+    assert.equal(emptyEnv.status, 0, emptyEnv.stderr);
+    const bySystem = JSON.parse(emptyEnv.stdout);
+    assert.ok(['ru', 'en', 'tr', 'zh'].includes(bySystem.language));
+    assert.equal(bySystem.mode, 'auto');
+    assert.ok(['system', 'default'].includes(bySystem.source), bySystem.source);
+
+    const byFlag = JSON.parse(run(auto, ['lang', '--lang', 'en'], { LANG: 'tr_TR.UTF-8' }).stdout);
+    assert.equal(byFlag.language, 'en');
+    assert.equal(byFlag.mode, 'fixed');
+    assert.equal(byFlag.source, 'lang');
+  } finally {
+    fs.rmSync(auto, { recursive: true, force: true });
+  }
+  const fixed = fixture({ uiLanguage: 'ru' });
+  try {
+    const enabled = JSON.parse(run(fixed, ['lang', 'auto']).stdout);
+    assert.equal(enabled.saved, true);
+    assert.equal(enabled.mode, 'auto');
+    assert.equal(enabled.language, 'ru');
+    assert.equal(JSON.parse(fs.readFileSync(path.join(fixed, 'config.json'), 'utf8')).uiLanguage, 'auto');
+  } finally {
+    fs.rmSync(fixed, { recursive: true, force: true });
+  }
+});
+
 function fixture(config = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nulls-i18n-'));
   fs.copyFileSync(path.join(root, 'Program.js'), path.join(dir, 'Program.js'));

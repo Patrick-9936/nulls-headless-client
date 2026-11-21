@@ -11,6 +11,9 @@
 
 Проект неофициальный и не связан с Supercell или Nulls. Подробности — [`LICENSE`](LICENSE).
 
+Нужен только Node.js 20+: клиент запускается на **Windows, Linux, macOS и Android (Termux)**.
+Что где работает и какие есть ограничения — [`docs/PLATFORMS.md`](docs/PLATFORMS.md).
+
 ## Что умеет
 
 | Область | Возможности |
@@ -58,8 +61,8 @@ node TUI.js
 
 ```sh
 pkg install nodejs unzip
-unzip /sdcard/Download/nulls-headless-client-0.3.0.zip -d "$HOME"
-cd ~/nulls-headless-client-0.3.0
+unzip /sdcard/Download/nulls-headless-client-0.3.1.zip -d "$HOME"
+cd ~/nulls-headless-client-0.3.1
 node Program.js create-account --account accounts/bot-1.json --name 'МойБот' --once
 node Program.js login --account accounts/bot-1.json
 ```
@@ -78,13 +81,16 @@ node Program.js login --account accounts/bot-1.json
 ## Язык интерфейса
 
 ```sh
-node Program.js lang           # текущий язык и список поддерживаемых
-node Program.js lang tr        # переключить и сохранить в config.json
+node Program.js lang           # текущий язык, режим и источник
+node Program.js lang tr        # зафиксировать язык в config.json
+node Program.js lang auto      # вернуть авто-выбор по системе
 node Program.js help --lang en # разовый запуск на другом языке
 ```
 
-Поддерживаются `ru`, `en`, `tr`, `zh`. Язык берётся из `--lang`, затем из `config.json`
-(`uiLanguage`), затем из окружения (`NULLS_LANG`, `LANG`), иначе `ru`.
+Поддерживаются `ru`, `en`, `tr`, `zh`. По умолчанию включён авто-режим
+(`uiLanguage: "auto"`): язык берётся из `NULLS_LANG` / `LC_ALL` / `LC_MESSAGES` / `LANG`,
+затем из системной локали Node (`Intl`), иначе `ru`. Явный `--lang` важнее конфига,
+конкретный код в `uiLanguage` важнее окружения.
 
 Переключение языка интерфейса **не** меняет раскладку логина: `locale` уходит только в
 legacy-логин, а `preferredLanguage` / `storefront*` — только в modern, и включать modern
@@ -268,6 +274,8 @@ npm run bundle:check  # пересобрать в $TMPDIR и сверить с �
 | [`docs/APK-UPDATE.md`](docs/APK-UPDATE.md) | обновление под новый APK |
 | [`docs/RELEASING.md`](docs/RELEASING.md) | выпуск версии |
 | [`docs/CODESPACES.md`](docs/CODESPACES.md) | ограниченный интеграционный тест |
+| [`docs/FLEET.md`](docs/FLEET.md) | флот: статус, команды, лимиты |
+| [`docs/PLATFORMS.md`](docs/PLATFORMS.md) | Windows, Linux, macOS, Android |
 
 ## Ограничения
 

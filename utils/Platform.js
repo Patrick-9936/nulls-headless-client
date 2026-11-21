@@ -1,0 +1,88 @@
+const fs = require('node:fs');
+const { execFileSync } = require('node:child_process');
+
+// Кэш результата поиска Python: повторные вызовы не запускают процессы.
+let python = undefined;
+
+function isAndroid() {
+  if (process.platform === 'android') return true;
+  if (String(process.env.PREFIX || '').includes('com.termux')) return true;
+  try {
+    return fs.existsSync('/system/bin/pm');
+  } catch {
+    return false;
+  }
+}
+
+function isWindows() {
+  return process.platform === 'win32';
+}
+
+function isMac() {
+  return process.platform === 'darwin';
+}
+
+function isLinux() {
+  return process.platform === 'linux' || process.platform === 'android';
+}
+
+function hasPM() {
+  try {
+    return fs.existsSync('/system/bin/pm');
+  } catch {
+    return false;
+  }
+}
+
+// Возвращает имя команды Python, которая действительно отвечает на --version, или null.
+function pythonCommand() {
+  if (python !== undefined) return python;
+  const candidates = isWindows() ? ['python', 'python3'] : ['python3', 'python'];
+  for (const command of candidates) {
+    try {
+      const output = execFileSync(command, ['--version'], {
+        encoding: 'utf8',
+        timeout: 3000,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      if (/Python\s+\d+\.\d+/.test(output)) {
+        python = command;
+        return python;
+      }
+    } catch {}
+  }
+  python = null;
+  return python;
+}
+
+// Android: termux-wake-lock/-unlock. Остальные платформы: no-op без запуска процессов.
+function wakeLock(on) {
+  if (!isAndroid()) return false;
+  try {
+    execFileSync(on ? 'termux-wake-lock' : 'termux-wake-unlock', [], { timeout: 3000, stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Обновление из установленного APK возможно только на Android с /system/bin/pm,
+// либо когда APK передан явно (--apk/--split-apk) — тогда pm не нужен.
+function supportsApkUpdate(options = {}) {
+  const value = options || {};
+  if (typeof value === 'string' ? value : value.apk || value.splitAPK) return true;
+  return isAndroid() && hasPM();
+}
+
+// POSIX: chmod 0600. Windows: no-op, без исключения.
+function fileModeSecure(file) {
+  if (isWindows()) return false;
+  try {
+    fs.chmodSync(file, 0o600);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+module.exports = { isAndroid, isWindows, isMac, isLinux, pythonCommand, wakeLock, supportsApkUpdate, fileModeSecure };
