@@ -39,12 +39,14 @@ Nulls Connect — внешняя идентификация Nulls: пользо�
    node tools/connect.js links
    ```
 
-6. Отвязка. Симметрична `bind`: сначала `GET /games/unbind?bind_token=...&game=laser` с bearer, при `404`/`405` — один JSON-POST fallback. Endpoint **не подтверждён на живом upstream**: если после обоих методов сервер отвечает `404`/`405`/`501`, CLI завершается ошибкой `CONNECT_UNSUPPORTED` с текстом «сервер не поддерживает отвязку» и ничего не выдумывает про успех.
+6. Отвязка. Сначала `GET /games/unbind?bind_token=...&game=laser` с bearer, затем ровно один JSON-POST fallback на `404`/`405` (чтобы поддержать сборки, принимающие только POST). Если после обоих методов путь отвечает как незарегистрированный — `CONNECT_UNSUPPORTED`. Если маршрут существует, но связи нет — `CONNECT_NOT_LINKED`. **Проверено на живом upstream 2026-11-21: маршрут `/games/unbind` не зарегистрирован** — см. раздел «Отвязка: фактические ответы».
 
    ```sh
    node tools/connect.js unbind --account accounts/bot-1.json
    node tools/connect.js unbind --bind-token <jwt> --token <bearer>
    ```
+
+   Предупреждение: локальный аккаунт при `CONNECT_UNSUPPORTED`/`CONNECT_NOT_LINKED` не меняется, `bindToken` остаётся на месте.
 
 7. Игровой токен конкретного игрока. По умолчанию печатаются только префикс и длина; полный токен — только с `--show-token`:
 
@@ -52,6 +54,62 @@ Nulls Connect — внешняя идентификация Nulls: пользо�
    node tools/connect.js token --player-id 123456
    node tools/connect.js token --player-id 123456 --show-token
    ```
+
+### Отвязка: фактические ответы (2026-11-21)
+
+Запросы к `https://connect.nulls.gg/api` без bearer и с заведомо неверным bearer, по одному,
+timeout 10 с, пауза между запросами ≥1 с; всего 13 запросов. Секретов и чужих данных в пробах
+не было: `bind_token` — литерал `invalid.jwt.token`, bearer — литерал `invalid`.
+
+| Метод | Путь | Authorization | Статус | Тело (фрагмент) |
+| --- | --- | --- | ---: | --- |
+| GET | `/games/definitely-not-a-route` | — | 404 | `{"detail":"Not Found"}` |
+| GET | `/games/unbind?game=laser` | — | 404 | `{"detail":"Not Found"}` |
+| GET | `/games/unbind?game=laser&bind_token=invalid.jwt.token` | — | 404 | `{"detail":"Not Found"}` |
+| GET | `/games/unbind?game=laser` | `Bearer invalid` | 404 | `{"detail":"Not Found"}` |
+| POST | `/games/unbind?game=laser` | — | 404 | `{"detail":"Not Found"}` |
+| DELETE | `/games/unbind?game=laser` | — | 404 | `{"detail":"Not Found"}` |
+| OPTIONS | `/games/unbind` | — | 404 | `{"detail":"Not Found"}` |
+| GET | `/games/unbind/` | — | 404 | `{"detail":"Not Found"}` |
+| GET | `/games/unlink?game=laser` | — | 404 | `{"detail":"Not Found"}` |
+| GET | `/games/bind?game=laser` | — | 403 | `{"detail":"Not authenticated"}` |
+| GET | `/games/bind?game=laser` | `Bearer invalid` | 403 | `{"detail":"Invalid authentication credentials"}` |
+| GET | `/games/links?game=laser` | — | 403 | `{"detail":"Not authenticated"}` |
+| GET | `/games/token?game=laser&player_id=1` | — | 403 | `{"detail":"Not authenticated"}` |
+
+`content-type` во всех ответах — `application/json`.
+
+Выводы, подтверждённые этими ответами:
+
+- Для `/games/unbind` upstream отвечает так же, как для заведомо несуществующего пути: `404`
+  с типовым телом роутера FastAPI, на всех проверенных методах, и без bearer, и с ним. Это
+  означает, что маршрут **не зарегистрирован**; 403 «нет аутентификации» не появляется, то есть
+  запрос не доходит до обработчика.
+- Существующие маршруты ведут себя иначе: `/games/bind`, `/games/links`, `/games/token` без
+  bearer отдают `403 {"detail":"Not authenticated"}`, с неверным bearer — `403` с другим
+  текстом. Значит, проверка маршрута по наличию 403/401 работает.
+- `405` в этом наборе не встретился ни разу. Если он появится на GET, это будет доказательством,
+  что путь существует (Method Not Allowed выдаётся только для зарегистрированного пути) — тогда
+  клиент делает один POST и уже по его ответу решает между `CONNECT_NOT_LINKED` и
+  `CONNECT_UNSUPPORTED`.
+- `501` не встретился; трактуется как «не реализовано» без POST-повтора.
+
+Правило различения в `lib/Connect.js`:
+
+- `404` + тело `{"detail":"Not Found"}` (или пустое/не-JSON тело) → похоже на отсутствующий
+  маршрут; отправляется один POST, и если он отвечает так же — `CONNECT_UNSUPPORTED` с
+  `details: {getStatus: 404, postStatus: 404}`.
+- `404` с другим телом, либо `400`, в тексте которого есть «not linked»/«no link»/«связь не
+  найдена» → `CONNECT_NOT_LINKED` сразу (маршрут есть, связи нет), `status` и `data` сохраняются.
+- `401`/`403` → обычная ошибка `http`: маршрут есть, но bearer не принят; это не «нет связи».
+- `405` на GET → один POST; его `404` с типовым телом или `405`/`501` → `CONNECT_UNSUPPORTED`,
+  его `404` с другим телом или `400` про link → `CONNECT_NOT_LINKED`.
+
+Что осталось неподтверждённым: существует ли отвязка под другим путём или другим методом
+(например, `DELETE` на `/games/bind` или отдельный `/games/links/{id}`) — это не проверялось,
+чтобы не гадать по спискам и не нагружать upstream. Также не подтверждено, каким именно телом
+существующий (если появится) маршрут сообщает «связи нет»: распознавание `CONNECT_NOT_LINKED`
+построено на общих формулировках и на том, что тело отличается от типового `Not Found`.
 
 Служебные команды:
 
@@ -105,7 +163,7 @@ node Program.js login --account accounts/bot-1.json --connect-bind --connect-tok
 
 ## Таймауты и повторы
 
-Каждый запрос ограничен `AbortSignal.timeout` — 15 секунд по умолчанию, переопределяется опцией `timeout` на уровне библиотеки. Один повтор на 250 мс допускается только для идемпотентных GET (`links`, `gameToken`, `profile`) и только при сетевой ошибке. Таймаут, HTTP-ошибка и ошибка JSON не повторяются. `requestPin` и `confirmPin` не повторяются: первая отправляет письмо, вторая меняет состояние логина. У `bind` есть один документированный fallback: если GET отвечает 404/405, тот же вызов уходит JSON-телом через POST. `unbind` устроен так же (fallback тоже на 404/405), но его endpoint на живом upstream не подтверждён: если и POST отвергнут с 404/405/501 (или GET сразу вернул 501), клиент бросает `CONNECT_UNSUPPORTED`.
+Каждый запрос ограничен `AbortSignal.timeout` — 15 секунд по умолчанию, переопределяется опцией `timeout` на уровне библиотеки. Один повтор на 250 мс допускается только для идемпотентных GET (`links`, `gameToken`, `profile`) и только при сетевой ошибке. Таймаут, HTTP-ошибка и ошибка JSON не повторяются. `requestPin` и `confirmPin` не повторяются: первая отправляет письмо, вторая меняет состояние логина. У `bind` есть один документированный fallback: если GET отвечает 404/405, тот же вызов уходит JSON-телом через POST. У `unbind` fallback тоже на 404/405, но ответы различаются по смыслу: `404` с типовым телом роутера после обоих методов даёт `CONNECT_UNSUPPORTED`, `404` с собственным сообщением сервера и `400` про отсутствие связи — `CONNECT_NOT_LINKED`.
 
 ## Типовые ошибки
 
@@ -117,7 +175,8 @@ node Program.js login --account accounts/bot-1.json --connect-bind --connect-tok
 | `timeout` | Upstream не ответил за отведённое время. |
 | `network` | DNS, TLS, обрыв соединения, недоступный upstream. |
 | `json` | Сервер объявил JSON в `content-type`, но тело не разобралось. |
-| `CONNECT_UNSUPPORTED` | Отвязка: `/games/unbind` не принял ни GET, ни POST (404/405/501). Значит, сервер не поддерживает отвязку — локально ничего не меняется. |
+| `CONNECT_UNSUPPORTED` | Отвязка: маршрут `/games/unbind` отсутствует на upstream — `404` с типовым `{"detail":"Not Found"}` (или `405`/`501` после fallback). Локально ничего не меняется. |
+| `CONNECT_NOT_LINKED` | Отвязка: маршрут существует, но связи с игровым аккаунтом нет (`404` с другим телом или `400` про link). Локально ничего не меняется. |
 
 CLI печатает ошибку в stderr и выходит с кодом `1`; ошибки аргументов — код `2`; успех — `0`.
 
@@ -198,6 +257,7 @@ blob[tokenBlobLength]:
 ## Что подтверждено, а что эвристика
 
 - HTTP-контракт Connect (`/auth/login.v2`, `/games/bind`, `/games/links`, `/games/token`, `/games/bind` через POST-fallback) взят из открытого PR #4 и комментариев в нём.
-- `/games/unbind` **не подтверждён на живом upstream**: путь и форма запроса выбраны симметрично `bind` (GET с `bind_token`/`game`, POST-JSON на 404/405), но в PR его не было. Поэтому «сервер не поддерживает отвязку» — ожидаемый, а не исключительный исход; проверять на живом сервере.
+- `/games/unbind` **проверен на живом upstream 2026-11-21 и отсутствует**: `404 {"detail":"Not Found"}` на GET, POST, DELETE и OPTIONS, без bearer и с неверным bearer — ровно как у заведомо несуществующего пути. Рабочие маршруты на тот же запрос без bearer отвечают `403 {"detail":"Not authenticated"}`. Подробная таблица — в разделе «Отвязка: фактические ответы».
+- Существование отвязки под другим путём или методом не проверялось; текущий клиент его не использует.
 - Извлечение bind-token из `LoginOk` **подтверждено на живом сервере**: восемь пакетов 69.252, новые гости, все содержат сжатый JWT. Фикстуры в `tests/fixtures/login-ok-69*.bin` обезличены (структура и длины настоящие, токен синтетический), разбор закреплён `tests/login-ok.test.js`. Хвост расшифрован по декодеру `LoginOk` в libg.so (`0xf2cd80`, см. раздел о хвосте): `VInt mode`, `int32` BE длина blob, внутри `u32 LE` длина распакованного JWT и zlib-поток. Поля `+0x150/+0x151` и optional-строки после blob в живых пакетах не встречаются.
 - `profile()` и `updateProfile()` в библиотеке повторяют вызовы profiles-прокси из PR, но в CLI не выведены и на живом сервере здесь не проверялись.

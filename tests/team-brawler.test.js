@@ -5,6 +5,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const Protocol = require('../lib/Protocol');
 const Actions = require('../lib/Actions');
+const brawlers = require('../data/brawlers.json');
 const { AppError } = require('../lib/Errors');
 
 test('team-brawler: эталонные байты slot=0, brawler=16000000', () => {
@@ -20,6 +21,37 @@ test('team-brawler: ссылка 16:N переводится в числовой
   assert.equal(Protocol.brawlerNumber('16:0'), 16000000);
   assert.equal(Protocol.brawlerIndex('16:5'), 5);
   assert.equal(Protocol.brawlerIndex(16000007), 7);
+});
+
+test('team-brawler: имя бойца из data/brawlers.json', () => {
+  assert.deepEqual(
+    brawlers.slice(0, 3).map((b) => b.name),
+    ['ShotgunGirl', 'Gunslinger', 'BullDude'],
+  );
+  assert.equal(Protocol.brawlerNumber('ShotgunGirl'), 16000000);
+  assert.equal(Protocol.brawlerNumber('Gunslinger'), 16000001);
+  assert.equal(Protocol.brawlerNumber('gUnSlInGeR'), 16000001);
+  assert.equal(Protocol.brawlerIndex('BullDude'), 2);
+  assert.equal(
+    Protocol.encode('team-brawler', { brawler: 'Gunslinger', slot: 1 }).payload.toString('hex'),
+    '0000000100f42401',
+  );
+  // Каждое имя каталога даёт ровно 16000000 + index.
+  for (const brawler of brawlers)
+    assert.equal(Protocol.brawlerNumber(brawler.name), 16000000 + brawler.index, brawler.name);
+});
+
+test('team-brawler: неизвестное имя отклоняется с подсказкой', () => {
+  assert.throws(
+    () => Protocol.brawlerNumber('Colt'),
+    (error) => error instanceof AppError && /Неизвестный боец "Colt"/.test(error.message),
+  );
+  // Неполное имя попадает в подсказку «похожие».
+  assert.throws(
+    () => Protocol.brawlerNumber('gun'),
+    (error) => error instanceof AppError && /Неизвестный боец/.test(error.message) && /Gunslinger/.test(error.message),
+  );
+  assert.throws(() => Protocol.brawlerIndex(''), /brawler/);
 });
 
 test('team-brawler: проверка аргументов', () => {
@@ -57,9 +89,28 @@ test('team-brawler: подтверждение по TeamData и отказ се�
   assert.equal(sent[0].command, 'team-brawler');
   assert.deepEqual(sent[0].options.types, [24124]);
 
+  // Имя бойца даёт тот же индекс, что и ссылка 16:N.
+  client.team = { members: [{ ...own, brawler: { class: 16, index: 1 } }] };
+  const byName = await Actions.execute(client, 'team-brawler', {
+    brawler: 'Gunslinger',
+    experimental: true,
+  });
+  assert.deepEqual(byName.brawler, { class: 16, index: 1 });
+  assert.equal(sent[1].args.brawler, 'Gunslinger');
+
   client.team = { members: [{ ...own, brawler: { class: 16, index: 0 } }] };
   await assert.rejects(
     () => Actions.execute(client, 'team-brawler', { brawler: '16:5', experimental: true }),
-    (error) => error instanceof AppError && /не подтвердил выбор бойца/.test(error.message),
+    (error) =>
+      error instanceof AppError &&
+      /не подтвердил выбор бойца/.test(error.message) &&
+      /16:0/.test(error.message) &&
+      /16:5/.test(error.message),
+  );
+
+  client.team = { members: [] };
+  await assert.rejects(
+    () => Actions.execute(client, 'team-brawler', { brawler: '16:5', experimental: true }),
+    (error) => error instanceof AppError && /внутри лобби/.test(error.message),
   );
 });

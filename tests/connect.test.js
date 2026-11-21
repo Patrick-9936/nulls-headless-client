@@ -217,21 +217,79 @@ test('unbind falls back to a JSON POST on 405', async () => {
   assert.deepEqual(JSON.parse(made[1].options.body), { bind_token: jwt, game: 'laser' });
 });
 
-test('unbind reports CONNECT_UNSUPPORTED when both methods are rejected', async () => {
+test('unbind reports CONNECT_UNSUPPORTED when the route itself is missing', async () => {
   const jwt = buildJwt();
   const before = calls.length;
-  installFetch((url, options) => (options.method === 'POST' ? response(405) : response(404)));
+  // FastAPI router 404: exactly what connect.nulls.gg returns for /games/unbind.
+  installFetch(() => response(404, { detail: 'Not Found' }));
   await assert.rejects(Connect.unbind(jwt, { token: 'bearer-x' }), (error) => {
     assert.equal(error.name, 'ConnectError');
     assert.equal(error.code, 'CONNECT_UNSUPPORTED');
     assert.equal(error.kind, 'server');
     assert.equal(error.retryable, false);
-    assert.equal(error.status, 405);
+    assert.equal(error.status, 404);
     assert.match(error.message, /не поддерживает отвязку/);
-    assert.deepEqual(error.details, { endpoint: '/games/unbind', getStatus: 404, postStatus: 405 });
+    assert.deepEqual(error.details, { endpoint: '/games/unbind', getStatus: 404, postStatus: 404 });
+    return true;
+  });
+  // One POST fallback is still attempted for builds that expose only POST.
+  assert.equal(calls.length - before, 2);
+});
+
+test('unbind reports CONNECT_NOT_LINKED when the route exists but the link does not', async () => {
+  const jwt = buildJwt();
+  const before = calls.length;
+  installFetch(() => response(404, { detail: 'bind token is not linked to any account' }));
+  await assert.rejects(Connect.unbind(jwt, { token: 'bearer-x' }), (error) => {
+    assert.equal(error.code, 'CONNECT_NOT_LINKED');
+    assert.equal(error.kind, 'server');
+    assert.equal(error.retryable, false);
+    assert.equal(error.status, 404);
+    assert.match(error.message, /Связь с игровым аккаунтом не найдена/);
+    assert.deepEqual(error.details, { endpoint: '/games/unbind', status: 404 });
+    return true;
+  });
+  assert.equal(calls.length - before, 1);
+});
+
+test('unbind treats a 405 as a live route and reports missing after the POST fallback', async () => {
+  const jwt = buildJwt();
+  const before = calls.length;
+  installFetch((url, options) =>
+    options.method === 'POST'
+      ? response(404, { detail: 'Not Found' })
+      : response(405, { detail: 'Method Not Allowed' }),
+  );
+  await assert.rejects(Connect.unbind(jwt, { token: 'bearer-x' }), (error) => {
+    assert.equal(error.code, 'CONNECT_UNSUPPORTED');
+    assert.equal(error.status, 404);
+    assert.deepEqual(error.details, { endpoint: '/games/unbind', getStatus: 405, postStatus: 404 });
     return true;
   });
   assert.equal(calls.length - before, 2);
+});
+
+test('unbind reports CONNECT_NOT_LINKED for a POST 400 that says the account is not linked', async () => {
+  const jwt = buildJwt();
+  installFetch((url, options) =>
+    options.method === 'POST' ? response(400, { detail: 'account not linked' }) : response(405, {}),
+  );
+  await assert.rejects(Connect.unbind(jwt, { token: 'bearer-x' }), (error) => {
+    assert.equal(error.code, 'CONNECT_NOT_LINKED');
+    assert.equal(error.status, 400);
+    return true;
+  });
+});
+
+test('unbind keeps a rejected bearer as a plain HTTP error, not as unsupported', async () => {
+  const jwt = buildJwt();
+  installFetch(() => response(403, { detail: 'Invalid authentication credentials' }));
+  await assert.rejects(Connect.unbind(jwt, { token: 'bearer-x' }), (error) => {
+    assert.equal(error.code, 'http');
+    assert.equal(error.status, 403);
+    assert.doesNotMatch(error.message, /не поддерживает отвязку/);
+    return true;
+  });
 });
 
 test('unbind treats a GET 501 as unsupported without a POST attempt', async () => {

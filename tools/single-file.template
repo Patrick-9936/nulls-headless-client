@@ -71,7 +71,10 @@ async function main(argv=process.argv.slice(2)){
  if(argv[0]==='--extract'){if(!argv[1])throw Error('--extract требует путь');console.log(extract(argv[1]));return;}
  const root=extract(directory);
  if(argv[0]==='--test'){
-  const tests=fs.readdirSync(path.join(root,'tests')).filter(n=>n.endsWith('.test.js')).map(n=>path.join(root,'tests',n));
+  // В однофайловой сборке тестов нет: они в репозитории (npm test). Даём понятный ответ.
+  const dir=path.join(root,'tests');
+  if(!fs.existsSync(dir)){console.log('Тестов в этой сборке нет. Целостность: node Nulls.js --self-test; полный набор: npm test в репозитории.');return;}
+  const tests=fs.readdirSync(dir).filter(n=>n.endsWith('.test.js')).map(n=>path.join(dir,n));
   const c=spawn(process.execPath,['--test',...tests],{cwd:root,stdio:'inherit'});
   const code=await new Promise((resolve,reject)=>{c.once('error',reject);c.once('exit',resolve);});process.exitCode=code??1;return;
  }

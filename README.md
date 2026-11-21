@@ -62,7 +62,7 @@ node TUI.js
 ```sh
 pkg install nodejs unzip
 unzip /sdcard/Download/nulls-headless-client-0.3.2.zip -d "$HOME"
-cd ~/nulls-headless-client-0.3.3
+cd ~/nulls-headless-client-0.3.4
 node Program.js create-account --account accounts/bot-1.json --name 'МойБот' --once
 node Program.js login --account accounts/bot-1.json
 ```

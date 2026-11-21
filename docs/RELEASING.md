@@ -50,6 +50,50 @@ npm run bundle:check  # python3 tools/package_release.py --check
 sha256 с `Nulls.js` в корне и печатает JSON с полями `check`, `expected_sha256`,
 `committed_sha256`, `changed`. Код возврата 0 — всё совпало, 1 — есть различия.
 
+### Состав бандла
+
+Релиз — это рабочий клиент, а не копия репозитория. В zip и в `Nulls.js` входят:
+
+- корневые `Program.js`, `TUI.js`, `package.json`, `package-lock.json`,
+  `config.json`, `client-license.bin`, `.gitignore`;
+- деревья `Crypto/`, `DataStream/`, `Messaging/`, `utils/`, `lib/` (включая
+  `lib/locales/*.json`), `data/` (`brawlers`, `regions`, `maps`,
+  `club-badges`, `team-errors`), `tools/`;
+- production-пакеты `node_modules` (см. выше);
+- ровно четыре файла из `docs/` — те, что код читает в рантайме:
+  - `docs/features.json` — `lib/CLI.js` (команда `features`) и `TUI.js`;
+  - `docs/protocol-evidence.json` — `lib/Protocol.js` (`encode`, версии пакетов);
+  - `docs/TUI.md`, `docs/COMMANDS.md` — `TUI.js`, пункты меню «руководство» и
+    «команды».
+
+Allowlist задан в `tools/package_release.py` константой `DOC_FILES`; `verify_zip()`
+требует, чтобы набор `docs/` в архиве совпадал с ней, а `tests/` и
+`docs/native/` отсутствовали. Те же проверки делает `tests/packaging.test.js`.
+`tests/` наоборот обязан присутствовать: `node Nulls.js --test` запускает
+встроенный набор из однофайлового клиента.
+
+Не входят в релиз (и не должны попадать обратно):
+
+- `docs/native/` — 160 файлов выдержек дампов для разработки;
+- `docs/native/` — 160 файлов выдержек дампов для разработки;
+- остальные `docs/*.md`, `docs/VERIFICATION.md`, `docs/RELEASING.md` —
+  документация для людей (код их не читает);
+- `README.md`, `PROTOCOL-MAP.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`
+  остаются в репозитории, но не пакуются.
+
+Размеры до/после перехода на allowlist (версия 0.3.3, Termux/ARM; замер сразу
+после смены набора файлов, без учёта последующих правок в `lib/`):
+
+| Артефакт | Было | Стало | Экономия |
+| --- | --- | --- | --- |
+| `Nulls.js`, байт | 1 127 018 | 652 470 | −474 548 (42 %) |
+| zip, байт | 729 953 | 391 913 | −338 040 (46 %) |
+| файлов в бандле | 379 | 136 | −243 |
+| из них `tests/` | 60 | 0 | −60 |
+| из них `docs/native/` | 160 | 0 | −160 |
+| из них прочие `docs/*.md` | 23 | 0 | −23 |
+| из них `docs/` всего | 185 (666 417 Б) | 4 (39 730 Б) | −181 |
+
 ## 3. Проверки перед коммитом
 
 ```sh
