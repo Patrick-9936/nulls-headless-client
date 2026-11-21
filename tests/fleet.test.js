@@ -457,6 +457,35 @@ test('cleanup удаляет старый результат и не трога�
     clean(root);
   }
 });
+test('metrics.avgRttMs собирается из онлайн-слотов с измеренным RTT', async () => {
+  const root = tempRoot();
+  writeAccount(root, 1);
+  writeAccount(root, 2);
+  class RttClient extends FakeClient {
+    async connect() {
+      this.rttMs = 42;
+      this.rttSamples = 3;
+      const result = await super.connect();
+      this.emit('packet', { type: 9999, payload: Buffer.alloc(0), at: new Date().toISOString() });
+      return result;
+    }
+  }
+  const fleet = new Fleet(root, { count: 2, concurrency: 2 }, RttClient);
+  try {
+    fleet.start();
+    for (let i = 0; i < 20; i++) await flush();
+    const metrics = fleet.metricsData();
+    assert.equal(metrics.avgRttMs, 42);
+    assert.equal(metrics.rttSamples, 6, 'сумма замеров двух онлайн-ботов');
+    for (const slot of fleet.slots) slot.status = 'failed';
+    const empty = fleet.metricsData();
+    assert.equal(empty.avgRttMs, null);
+    assert.equal(empty.rttSamples, null);
+  } finally {
+    fleet.stop();
+    clean(root);
+  }
+});
 test('вход в клуб отмечает slot.joined по реальной цели, а не по функции', async () => {
   const root = tempRoot();
   writeAccount(root, 1);

@@ -39,7 +39,14 @@ Nulls Connect — внешняя идентификация Nulls: пользо�
    node tools/connect.js links
    ```
 
-6. Игровой токен конкретного игрока. По умолчанию печатаются только префикс и длина; полный токен — только с `--show-token`:
+6. Отвязка. Симметрична `bind`: сначала `GET /games/unbind?bind_token=...&game=laser` с bearer, при `404`/`405` — один JSON-POST fallback. Endpoint **не подтверждён на живом upstream**: если после обоих методов сервер отвечает `404`/`405`/`501`, CLI завершается ошибкой `CONNECT_UNSUPPORTED` с текстом «сервер не поддерживает отвязку» и ничего не выдумывает про успех.
+
+   ```sh
+   node tools/connect.js unbind --account accounts/bot-1.json
+   node tools/connect.js unbind --bind-token <jwt> --token <bearer>
+   ```
+
+7. Игровой токен конкретного игрока. По умолчанию печатаются только префикс и длина; полный токен — только с `--show-token`:
 
    ```sh
    node tools/connect.js token --player-id 123456
@@ -55,6 +62,32 @@ node tools/connect.js --help
 ```
 
 `logout` удаляет только локальный файл. Серверный токен при этом не отзывается: если он скомпрометирован, отзывайте его на стороне Connect.
+
+## Привязка сразу после входа: `--connect-bind`
+
+Необязательный шаг для `node Program.js login` и `node Program.js create-account`:
+
+```sh
+node Program.js login --account accounts/bot-1.json --connect-bind
+node Program.js login --account accounts/bot-1.json --connect-bind --connect-token <bearer>
+```
+
+После успешного входа, если у аккаунта уже есть `bindToken.token` из `LoginOk`, клиент вызывает `Connect.bind(...)` с bearer из `--connect-token` или из `.runtime/connect.json`. Результат добавляется в JSON-ответ полем `connectBind`:
+
+- `{"ok": true, "status": 200, "data": {...}}` — привязка прошла; токены в `data` замаскированы;
+- `{"skipped": true, "reason": "..."}` — привязка не выполнена. `reason`: `no-bind-token` (LoginOk не дал JWT), `no-bearer` (нет `--connect-token` и локального токена), `http`/`network`/`timeout`/`validation` (код ошибки Connect, плюс `status`/`message` для диагностики).
+
+`skipped` **не делает вход неуспешным**: `confirmed` и `account` остаются такими, какими их вернул `login`, предупреждение уходит в `Debugger.warn` (stderr). Без флага шаг не выполняется вовсе и сеть для него не нужна; с флагом при отсутствии bearer или bind-token сеть тоже не трогается. Ни bearer, ни bind-token не логируются — только их наличие/длина.
+
+## Формы `--json` в `tools/connect.js`
+
+`tools/connect.js` понимает три формы вывода для всех команд (`pin`, `confirm`, `bind`, `unbind`, `links`, `token`, `status`, `logout`):
+
+- `--json` — одна строка `{"ok":true,"result":{...}}`;
+- `--json=false` (или `=0`/`=no`) — обычный pretty-JSON в несколько строк;
+- без флага — тот же pretty-JSON.
+
+Секретные поля (`token`, `bind_token`, `pin`, …) в выводе маскируются как `[скрыто, N символов]`; для `token` есть отдельный `--show-token`.
 
 ## Где лежит токен
 
@@ -72,7 +105,7 @@ node tools/connect.js --help
 
 ## Таймауты и повторы
 
-Каждый запрос ограничен `AbortSignal.timeout` — 15 секунд по умолчанию, переопределяется опцией `timeout` на уровне библиотеки. Один повтор на 250 мс допускается только для идемпотентных GET (`links`, `gameToken`, `profile`) и только при сетевой ошибке. Таймаут, HTTP-ошибка и ошибка JSON не повторяются. `requestPin` и `confirmPin` не повторяются: первая отправляет письмо, вторая меняет состояние логина. У `bind` есть один документированный fallback: если GET отвечает 404/405, тот же вызов уходит JSON-телом через POST.
+Каждый запрос ограничен `AbortSignal.timeout` — 15 секунд по умолчанию, переопределяется опцией `timeout` на уровне библиотеки. Один повтор на 250 мс допускается только для идемпотентных GET (`links`, `gameToken`, `profile`) и только при сетевой ошибке. Таймаут, HTTP-ошибка и ошибка JSON не повторяются. `requestPin` и `confirmPin` не повторяются: первая отправляет письмо, вторая меняет состояние логина. У `bind` есть один документированный fallback: если GET отвечает 404/405, тот же вызов уходит JSON-телом через POST. `unbind` устроен так же (fallback тоже на 404/405), но его endpoint на живом upstream не подтверждён: если и POST отвергнут с 404/405/501 (или GET сразу вернул 501), клиент бросает `CONNECT_UNSUPPORTED`.
 
 ## Типовые ошибки
 
@@ -84,6 +117,7 @@ node tools/connect.js --help
 | `timeout` | Upstream не ответил за отведённое время. |
 | `network` | DNS, TLS, обрыв соединения, недоступный upstream. |
 | `json` | Сервер объявил JSON в `content-type`, но тело не разобралось. |
+| `CONNECT_UNSUPPORTED` | Отвязка: `/games/unbind` не принял ни GET, ни POST (404/405/501). Значит, сервер не поддерживает отвязку — локально ничего не меняется. |
 
 CLI печатает ошибку в stderr и выходит с кодом `1`; ошибки аргументов — код `2`; успех — `0`.
 
@@ -164,6 +198,6 @@ blob[tokenBlobLength]:
 ## Что подтверждено, а что эвристика
 
 - HTTP-контракт Connect (`/auth/login.v2`, `/games/bind`, `/games/links`, `/games/token`, `/games/bind` через POST-fallback) взят из открытого PR #4 и комментариев в нём.
+- `/games/unbind` **не подтверждён на живом upstream**: путь и форма запроса выбраны симметрично `bind` (GET с `bind_token`/`game`, POST-JSON на 404/405), но в PR его не было. Поэтому «сервер не поддерживает отвязку» — ожидаемый, а не исключительный исход; проверять на живом сервере.
 - Извлечение bind-token из `LoginOk` **подтверждено на живом сервере**: восемь пакетов 69.252, новые гости, все содержат сжатый JWT. Фикстуры в `tests/fixtures/login-ok-69*.bin` обезличены (структура и длины настоящие, токен синтетический), разбор закреплён `tests/login-ok.test.js`. Хвост расшифрован по декодеру `LoginOk` в libg.so (`0xf2cd80`, см. раздел о хвосте): `VInt mode`, `int32` BE длина blob, внутри `u32 LE` длина распакованного JWT и zlib-поток. Поля `+0x150/+0x151` и optional-строки после blob в живых пакетах не встречаются.
-- `profile()` и `updateProfile()` в библиотеке повторяют вызовы profiles-прокси из PR, но в CLI не выведены и на живом сервере здесь не проверялись.
 - `profile()` и `updateProfile()` в библиотеке повторяют вызовы profiles-прокси из PR, но в CLI не выведены и на живом сервере здесь не проверялись.

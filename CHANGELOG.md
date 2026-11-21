@@ -5,6 +5,35 @@
 [Semantic Versioning](https://semver.org/lang/ru/). Незавершённые изменения
 собираются в секции `Unreleased`, при выпуске она получает номер версии и дату.
 
+## [0.3.3] — 2026-11-21
+
+### Добавлено
+- **`team-brawler`**: выбор бойца в лобби — пакет **14375** (`int32 slot` + `int32` числовой id
+  бойца), восстановлен по libg (`encode 0xf35ba8`, отправка из колбэка выбора `0x9c3864`).
+  Команда помечена экспериментальной: раскладка подтверждена бинарём, но живой сервер на
+  пробу не ответил — подробности и все попытки в `docs/REQUESTS.md` и
+  `docs/native/team-brawler-native.txt`.
+- **Nulls Connect**: `unbind` (`GET /games/unbind`, POST-fallback, `CONNECT_UNSUPPORTED` если
+  upstream не поддерживает), `--connect-bind` для `login`/`create-account` (необязательный
+  шаг: без bind-токена или bearer пропускается, вход не ломается), `links --json` и
+  единая проверка всех `--json`-форм.
+- **RTT**: `client.rttMs` / `rttSamples` из пары «запрос → совпавший ответ» (окно 50),
+  `slot.rttMs`, `metrics.avgRttMs` и `metrics.rttSamples` в статусе флота.
+- `docs/native/team-brawler-factory.md`, `docs/native/team-brawler-callsites.md` — разбор
+  фабрики сообщений и call-site'ов из libg.
+
+### Изменено
+- `tools/fleet.js`/`watch`: `avgRttMs` рисуется, `0 мс` — валидный замер.
+- `docs/COMMANDS.md`: разделы про `--connect-bind`, `unbind`, `watch`, `--json`/`--quiet`.
+- `tests/session-fleet.test.js`: проверка `team-brawler` переведена с исключения на
+  эталонные байты 14375.
+
+### Проверено
+- `npm test` — 261+ тест, `npm run lint` (eslint 0 ошибок), `prettier --check`,
+  `node Nulls.js --self-test`, `bundle:check`.
+- Живой сервер: 14375 принят молча (ни ошибки, ни обновления TeamData), 14354/14357/14364/14369
+  рвут соединение; регион и Connect-bind проверены ранее.
+
 ## [0.3.2] — 2026-11-21
 
 ### Исправлено

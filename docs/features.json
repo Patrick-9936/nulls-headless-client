@@ -1,5 +1,5 @@
 {
-  "version": "0.3.2",
+  "version": "0.3.3",
   "date": "2026-11-21",
   "notes": "See VERIFICATION.md for conditions and server refusals. Loading does not implement gameplay.",
   "commands": [
@@ -199,11 +199,6 @@
       "experimental": false
     },
     {
-      "command": "team-brawler",
-      "status": "unavailable",
-      "experimental": false
-    },
-    {
       "command": "team-mode",
       "status": "live-verified",
       "experimental": false
@@ -282,6 +277,11 @@
       "command": "team-status",
       "status": "live-verified",
       "experimental": false
+    },
+    {
+      "command": "team-brawler",
+      "status": "experimental",
+      "experimental": true
     },
     {
       "command": "invitations",

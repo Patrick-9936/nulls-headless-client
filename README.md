@@ -62,7 +62,7 @@ node TUI.js
 ```sh
 pkg install nodejs unzip
 unzip /sdcard/Download/nulls-headless-client-0.3.2.zip -d "$HOME"
-cd ~/nulls-headless-client-0.3.2
+cd ~/nulls-headless-client-0.3.3
 node Program.js create-account --account accounts/bot-1.json --name 'МойБот' --once
 node Program.js login --account accounts/bot-1.json
 ```
@@ -131,7 +131,7 @@ node tools/accounts.js prune --dry-run   # что можно удалить, н�
 [`docs/ACCOUNTS.md`](docs/ACCOUNTS.md).
 
 `fleet-status.json` содержит `metrics`: uptime, входы, провалы, `avgLoginMs`, `p95LoginMs`,
-счётчики команд. Статус пишется не чаще 2 раз в секунду (коалесирование событий);
+`avgRttMs` (время «запрос→ответ», окно 50), счётчики команд. Статус пишется не чаще 2 раз в секунду (коалесирование событий);
 `--status-interval 0` возвращает запись на каждое изменение. `fleet.log` ротируется
 (5 МБ × 3 архива, `--log-max-bytes`, `--log-keep`), `.runtime` чистится от старых
 результатов и зависших команд. Подробности — [`docs/FLEET.md`](docs/FLEET.md).
@@ -150,7 +150,9 @@ node tools/fleet.js command --bot 1 --action leave-room
 ```
 
 `--type 0` — обычная команда, `--type 1` — дружеский бой. В обычной команде сервер
-запрещает одинаковых бойцов; смена бойца пока не реализована. `--battle-transport udp`
+запрещает одинаковых бойцов. Выбор бойца в лобби — `team-brawler --brawler <id> [--slot 0]`
+(пакет 14375, экспериментальная: раскладка восстановлена из libg, живьём сервер её пока
+не подтвердил — см. [`docs/REQUESTS.md`](docs/REQUESTS.md)). `--battle-transport udp`
 включает получение кадров боя и нейтральные пакеты, движение и атаки не реализованы:
 [`docs/BATTLE_UDP.md`](docs/BATTLE_UDP.md).
 
@@ -174,12 +176,16 @@ bind по JWT из `LoginOk`.
 ```sh
 node tools/connect.js pin --email you@example.com
 node tools/connect.js confirm --email you@example.com --pin 1234
-node tools/connect.js bind --account accounts/bot-1.json
+node tools/connect.js bind --account accounts/bot-1.json     # привязать
 node tools/connect.js links
+node tools/connect.js unbind --account accounts/bot-1.json   # отвязать
+node Program.js login --account accounts/bot-1.json --connect-bind  # привязать сразу при входе
 ```
 
-Токен хранится в `.runtime/connect.json` с правами `0600` и не попадает в git. Полный
-цикл, переменные окружения и таблица ошибок: [`docs/CONNECT.md`](docs/CONNECT.md).
+Токен хранится в `.runtime/connect.json` с правами `0600` и не попадает в git.
+`--connect-bind` необязателен: без bind-токена или bearer шаг пропускается, вход остаётся
+успешным. Полный цикл, переменные окружения и таблица ошибок:
+[`docs/CONNECT.md`](docs/CONNECT.md).
 
 ## Свои скрипты
 

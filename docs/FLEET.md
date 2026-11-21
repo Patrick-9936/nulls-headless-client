@@ -88,7 +88,9 @@ node tools/fleet.js run --count 3          # на переднем плане
       "tag": "#ABC123",
       "onlineSince": "2026-11-21T11:59:00.000Z",
       "lastServerAt": "2026-11-21T12:00:00.000Z",
-      "matchmaking": null
+      "matchmaking": null,
+      "rttMs": 42,
+      "rttSamples": 17
     }
   ]
 }
@@ -141,7 +143,8 @@ console.log({ alive, online, states: status.states });
   "failedTotal": 1,
   "avgLoginMs": 1840,
   "p95LoginMs": 2600,
-  "avgRttMs": null,
+  "avgRttMs": 42,
+  "rttSamples": 34,
   "commands": { "ok": 7, "error": 1, "pending": 0 },
   "lastCommandAt": "2026-11-21T12:01:40.000Z"
 }
@@ -158,7 +161,8 @@ console.log({ alive, online, states: status.states });
 | `failedTotal` | число | переходов в `failed`/`blocked` — один раз на инцидент (первый вход по таймауту 90 с считается один раз, последующие события того же сбоя не добавляют) |
 | `avgLoginMs` | число/null | среднее время от `launch()` до `online`, последние 200 замеров |
 | `p95LoginMs` | число/null | 95-й перцентиль тех же замеров |
-| `avgRttMs` | число/null | среднее `client.rttMs`, если клиент его сообщает; иначе `null` |
+| `avgRttMs` | число/null | среднее `slot.rttMs` по слотам в статусе `online`; `null`, если ни один онлайн-бот ещё не измерил RTT |
+| `rttSamples` | число/null | сумма `slot.rttSamples` тех же слотов — сколько замеров стоит за `avgRttMs`; `null` без данных |
 | `commands.ok` | число | успешно обработанных файлов команд |
 | `commands.error` | число | команд, завершившихся ошибкой (не ошибок отдельных ботов) |
 | `commands.pending` | число | файлов в `.runtime/commands` на момент записи статуса |
@@ -166,8 +170,18 @@ console.log({ alive, online, states: status.states });
 
 `avgLoginMs`/`p95LoginMs` равны `null`, пока не было ни одного успешного входа. Замер идёт от
 вызова `launch()` (включая ожидание в очереди на `concurrency`), а не от открытия сокета.
-`avgRttMs` не выдумывается: текущий `lib/Client.js` не хранит RTT запрос→ответ, поэтому поле `null`,
-пока клиент не начнёт выставлять `rttMs`.
+`avgRttMs` — это измеренный RTT «запрос → ответ», а не время keep-alive или серверных push-пакетов.
+`Client.request()` ставит метку `process.hrtime.bigint()` непосредственно перед `Messaging.send`;
+вторая метка снимается при приходе пакета в `Client._packet` (до декодирования payload), а засчитывается
+она только если `_packet` сопоставил пакет с ожиданием по `types`/`check`. Замер не
+добавляет полей в пакеты и не меняет таймауты. Таймауты, отмена (`wait().cancel`) и серверный отказ
+(пакет из `errors`) RTT не считают — они отклоняют ожидание, не доводя его до `resolve`.
+
+Клиент хранит скользящее окно последних **50** успешных замеров: `client.rttMs` — округлённое
+среднее по окну (`null`, пока замеров нет), `client.rttSamples` — размер окна (0…50). Флот копирует
+эти значения в слот при каждом `packet` (`slot.rttMs`, `slot.rttSamples`); `metrics` пересчитываются
+только при записи статуса. Замеры, созданные напрямую через `client.wait()` без `Client.request()`
+(например, ожидание стрима клуба), в окно не попадают: у них нет надёжной точки отправки.
 
 ## Реестр аккаунтов
 

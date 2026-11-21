@@ -192,7 +192,10 @@ test('invite response uses the lobby ID, decision 1/2, and a separate spectator 
     '0200000000001491e001',
   );
   assert.throws(() => P.encode('invite-answer', { tag: { hi: 0, lo: 100 } }), /ID команды/);
-  assert.throws(() => P.encode('team-brawler', { brawler: '16:1' }), /экипировку/);
+  // 14375: int32 slot + int32 числовой id бойца (см. docs/native/team-brawler-native.txt).
+  assert.equal(P.encode('team-brawler', { brawler: '16:1' }).id, 14375);
+  assert.equal(P.encode('team-brawler', { brawler: '16:1' }).payload.toString('hex'), '0000000000f42401');
+  assert.equal(P.encode('team-brawler', { brawler: 16000000, slot: 2 }).payload.toString('hex'), '0000000200f42400');
 });
 test('ordinary matchmaking refuses duplicate fighters before sending ready', async () => {
   let sent = false;

@@ -36,12 +36,13 @@ function help() {
       '  pin      --email a@b.c [--locale ru] [--game laser]',
       '  confirm  --email a@b.c --pin 1234 [--locale ru] [--game laser]',
       '  bind     --bind-token <jwt> [--token <bearer>] | --account accounts/bot-1.json',
+      '  unbind   --bind-token <jwt> [--token <bearer>] | --account accounts/bot-1.json',
       '  links    [--token <bearer>] [--game laser]',
       '  token    --player-id <id> [--token <bearer>] [--show-token]',
       '  status   (локальное состояние, без сети)',
-      '',
-      'Глобально: --json (одна строка {"ok":true,"result":…}), --quiet.',
       '  logout   (удалить .runtime/connect.json)',
+      '',
+      'Глобально: --json (одна строка {"ok":true,"result":…}), --json=false (pretty-JSON), --quiet.',
       '',
       'Токен хранится в .runtime/connect.json с правами 0600 и в выводе не печатается.',
       'Переменные окружения: NC_API_UPSTREAM, NC_PROFILES_UPSTREAM, NC_STATE_FILE.',
@@ -50,6 +51,7 @@ function help() {
       '  node tools/connect.js pin --email user@example.com',
       '  node tools/connect.js confirm --email user@example.com --pin 1234',
       '  node tools/connect.js bind --account accounts/bot-1.json',
+      '  node tools/connect.js unbind --account accounts/bot-1.json',
       '  node tools/connect.js links',
       '  node tools/connect.js token --player-id 123456',
     ].join('\n'),
@@ -141,6 +143,14 @@ async function main() {
     if (!bindToken) throw new UsageError('Нужен --bind-token <jwt> или --account с сохранённым bindToken');
     const result = await Connect.bind(bindToken, { token: options.token, game: options.game });
     print({ status: result.status, data: redact(result.data) });
+    return;
+  }
+
+  if (command === 'unbind') {
+    const bindToken = options.bindToken || (options.account ? bindTokenFromAccount(options.account) : null);
+    if (!bindToken) throw new UsageError('Нужен --bind-token <jwt> или --account с сохранённым bindToken');
+    const result = await Connect.unbind(bindToken, { token: options.token, game: options.game });
+    print({ status: result.status, unbound: true, data: redact(result.data) });
     return;
   }
 
