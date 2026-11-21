@@ -9,7 +9,8 @@
 наблюдение за боями и несколько онлайн-сессий одновременно. Без игры, без root, без
 правки APK — только сеть и протокол.
 
-Проект неофициальный и не связан с Supercell или Nulls. Подробности — [`LICENSE`](LICENSE).
+Проект неофициальный и не связан с Supercell или Nulls. Код — MIT ([`LICENSE`](LICENSE)),
+оговорки про игру, ассеты и дампы — [`NOTICE.md`](NOTICE.md).
 
 Нужен только Node.js 20+: клиент запускается на **Windows, Linux, macOS и Android (Termux)**.
 Что где работает и какие есть ограничения — [`docs/PLATFORMS.md`](docs/PLATFORMS.md).
