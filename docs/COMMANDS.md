@@ -81,10 +81,10 @@ node Program.js create-account --account accounts/new.json --name 'Бот' --reg
 | modes | `--mode BrawlBall`; каталог 468 карт из APK, доступность зависит от сервера |
 | ready / unready | состояние готовности своего участника |
 | matchmake | обычный подбор: `stage: queued` после 20405, `loading` после пакетов загрузки |
+| team-brawler | `--experimental --brawler 16000005` (или `16:5`) `[--slot 0]`; 14375, подтверждение по TeamData |
 | cancel-matchmake | отменить активный подбор; подтверждение 20406 |
-| team-brawler | пока недоступна; неверный пакет выбора отключал соединение, отправка заблокирована |
 
-В обычной команде одинаковые бойцы запрещены. Карты каталога могут отсутствовать в текущей ротации. Дружеский старт проверен двумя ботами, обычная очередь и отмена одним. Бот не управляет персонажем в самом матче.
+Выбор бойца в лобби — `team-brawler --experimental --brawler <id>`: пакет 14375 (int32 слот + int32 числовой id бойца), подтверждение берётся из 24124 TeamData. Живьём выбор в лобби пока не подтверждён — подробности в [REQUESTS.md](REQUESTS.md#выбор-бойца-в-лобби). В обычной команде одинаковые бойцы запрещены. Карты каталога могут отсутствовать в текущей ротации. Дружеский старт проверен двумя ботами, обычная очередь и отмена одним. Бот не управляет персонажем в самом матче.
 
 ## Приглашения в лобби
 
@@ -141,3 +141,26 @@ node Program.js club-recommendations --account accounts/bot-1.json --once
 `.runtime/results`; отсутствие файлов и «флот не запущен» показываются явно. Подробности:
 [WATCH.md](WATCH.md). Реестр аккаунтов и `prune`: [ACCOUNTS.md](ACCOUNTS.md). Коды ошибок
 для скриптов: [ERRORS.md](ERRORS.md).
+
+## Nulls Connect: привязка после входа
+
+`--connect-bind` — необязательный флаг для `login` и `create-account`. После успешного входа клиент берёт bind-token из `LoginOk` (`bindToken.token` в файле аккаунта) и bearer из `--connect-token` или `.runtime/connect.json`, затем вызывает `Connect.bind`. В JSON-ответе появляется поле `connectBind`:
+
+- `{"ok": true, "status": 200, "data": {...}}` — привязка выполнена;
+- `{"skipped": true, "reason": "no-bind-token" | "no-bearer" | "http" | "network" | "timeout" | "validation"}` — шаг пропущен; вход остаётся успешным (`confirmed` не меняется), предупреждение идёт в stderr.
+
+```sh
+node Program.js login --account accounts/bot-1.json --connect-bind
+node Program.js login --account accounts/bot-1.json --connect-bind --connect-token <bearer>
+```
+
+Без флага поведение прежнее и сеть для Connect не нужна; при отсутствии bearer или bind-token сеть тоже не трогается. Ни bearer, ни bind-token не печатаются — только статус/причина (в `--dry-run`: `[скрыто, N символов]`).
+
+### Отвязка аккаунта
+
+```sh
+node tools/connect.js unbind --account accounts/bot-1.json
+node tools/connect.js unbind --bind-token <jwt> --token <bearer>
+```
+
+`GET /games/unbind?bind_token=…&game=laser` с Bearer; при 404/405 — один POST-fallback. Если отвергнуты оба (404/405/501), команда завершается ошибкой `CONNECT_UNSUPPORTED` («сервер не поддерживает отвязку»), код выхода 1. Endpoint на живом upstream не подтверждён.

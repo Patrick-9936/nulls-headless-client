@@ -1,0 +1,18 @@
+14375 = 0x3827, version 23 — выбор бойца в лобби (libg 69.252, ARM64)
+
+0xf35ba8  encode: ldr w1,[x19,#0x90]; writeInt32 (0x5b7334)
+                 ldr w1,[x19,#0x94]; writeInt32 (0x5b7334)
+0xf35bdc  decode: readInt32 -> +0x90; readInt32 -> +0x94
+0xf35c14  type getter: mov w0, #0x3827
+0xf35c1c  version getter: mov w0, #0x17 (23)
+0xf35ba8  layout: int32 slot, int32 numeric brawler id (не DataReference)
+0x5b7334  writeInt32: 4 байта big-endian
+0x5b76ec  readInt32
+0x9c3864  единственная точка отправки; вызов из колбэка выбора 0x9c98... (0x9cce98)
+          после отправки: team[+0x2f0][slot] = hero
+0xe037a0  числовой id данных бойца из LogicData
+
+Связанные классы в том же диапазоне: 14352 0xf37a1c (kick), 14353 0xf37ac0 (leave),
+14354 0xf35edc (лоадаут, 8 полей), 14355 0xf39640 (ready), 14357 0xf39d80
+(массив long + VInt), 14358 0xf397b0 (join), 14364 0xf38c4c (два long),
+14369 0xf38b30 (ref + опциональный long + 3 VInt).

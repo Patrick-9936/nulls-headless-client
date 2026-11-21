@@ -186,6 +186,66 @@ test('bind sends the bearer header and the bind_token query', async () => {
   assert.equal(call.options.headers.authorization, 'Bearer bearer-x');
 });
 
+test('unbind sends the bearer header and the bind_token query', async () => {
+  const jwt = buildJwt();
+  installFetch(() => response(200, { unbound: true }));
+  const result = await Connect.unbind(jwt, { token: 'bearer-x' });
+  const call = lastCall();
+  assert.equal(result.status, 200);
+  assert.equal(call.url.pathname, '/api/games/unbind');
+  assert.equal(call.url.searchParams.get('bind_token'), jwt);
+  assert.equal(call.url.searchParams.get('game'), 'laser');
+  assert.equal(call.options.method, 'GET');
+  assert.equal(call.options.headers.authorization, 'Bearer bearer-x');
+});
+
+test('unbind falls back to a JSON POST on 405', async () => {
+  const jwt = buildJwt();
+  const before = calls.length;
+  installFetch((url, options) =>
+    options.method === 'POST' ? response(200, { unbound: true }) : response(405, { error: 'method not allowed' }),
+  );
+  const result = await Connect.unbind(jwt, { token: 'bearer-x' });
+  assert.equal(result.status, 200);
+  const made = calls.slice(before);
+  assert.equal(made.length, 2);
+  assert.equal(made[0].options.method, 'GET');
+  assert.equal(made[1].url.pathname, '/api/games/unbind');
+  assert.equal(made[1].options.method, 'POST');
+  assert.equal(made[1].options.headers.authorization, 'Bearer bearer-x');
+  assert.equal(made[1].url.searchParams.get('bind_token'), null);
+  assert.deepEqual(JSON.parse(made[1].options.body), { bind_token: jwt, game: 'laser' });
+});
+
+test('unbind reports CONNECT_UNSUPPORTED when both methods are rejected', async () => {
+  const jwt = buildJwt();
+  const before = calls.length;
+  installFetch((url, options) => (options.method === 'POST' ? response(405) : response(404)));
+  await assert.rejects(Connect.unbind(jwt, { token: 'bearer-x' }), (error) => {
+    assert.equal(error.name, 'ConnectError');
+    assert.equal(error.code, 'CONNECT_UNSUPPORTED');
+    assert.equal(error.kind, 'server');
+    assert.equal(error.retryable, false);
+    assert.equal(error.status, 405);
+    assert.match(error.message, /не поддерживает отвязку/);
+    assert.deepEqual(error.details, { endpoint: '/games/unbind', getStatus: 404, postStatus: 405 });
+    return true;
+  });
+  assert.equal(calls.length - before, 2);
+});
+
+test('unbind treats a GET 501 as unsupported without a POST attempt', async () => {
+  const jwt = buildJwt();
+  const before = calls.length;
+  installFetch(() => response(501));
+  await assert.rejects(Connect.unbind(jwt, { token: 'bearer-x' }), (error) => {
+    assert.equal(error.code, 'CONNECT_UNSUPPORTED');
+    assert.match(error.message, /не поддерживает отвязку/);
+    return true;
+  });
+  assert.equal(calls.length - before, 1);
+});
+
 test('links and gameToken return structures and never print anything', async () => {
   const printed = [];
   const originalLog = console.log;
@@ -216,6 +276,9 @@ test('validation rejects empty e-mail, malformed PIN and empty bind token', asyn
   await assert.rejects(Connect.confirmPin('a@b.c', '12a'), /PIN/);
   await assert.rejects(Connect.confirmPin('a@b.c', '123'), /PIN/);
   await assert.rejects(Connect.bind(''), /bind-token/);
+  await assert.rejects(Connect.unbind(''), /bind-token/);
+  await assert.rejects(Connect.bind(buildJwt(), { stateFile: path.join(tmpRoot, 'empty.json') }), /bearer/);
+  await assert.rejects(Connect.unbind(buildJwt(), { stateFile: path.join(tmpRoot, 'empty.json') }), /bearer/);
 });
 
 test('LoginOk modern payload exposes the bind token and persists it', () => {

@@ -414,5 +414,13 @@
     "decoder": "0xf446d4",
     "typeGetter": "0xf4476c",
     "version": 33
+  },
+  "14375": {
+    "encoder": "0xf35ba8",
+    "decoder": "0xf35bdc",
+    "typeGetter": "0xf35c14",
+    "version": 23,
+    "layout": "int32 slot + int32 numeric brawler id (writer 0x5b7334)",
+    "callsite": "0x9c3864 (brawler pick callback 0x9cce98)"
   }
 }
