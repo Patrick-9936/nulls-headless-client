@@ -25,8 +25,14 @@ from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 
 ROOT = Path(__file__).resolve().parents[1]
 
-DIRECTORIES = {'Crypto', 'DataStream', 'Messaging', 'utils', 'lib', 'data', 'docs', 'tools', 'tests', 'node_modules', '.devcontainer'}
-FILES = {'Program.js', 'TUI.js', 'package.json', 'package-lock.json', 'config.json', 'client-license.bin', 'README.md', 'PROTOCOL-MAP.md', '.gitignore'}
+DIRECTORIES = {'Crypto', 'DataStream', 'Messaging', 'utils', 'lib', 'data', 'tools', 'tests', 'node_modules', '.devcontainer'}
+FILES = {'Program.js', 'TUI.js', 'package.json', 'package-lock.json', 'config.json', 'client-license.bin', '.gitignore'}
+# Из docs/ в релиз идёт только то, что клиент читает в рантайме:
+#   features.json         — lib/CLI.js (команда features), TUI.js
+#   protocol-evidence.json— lib/Protocol.js (версии пакетов при encode)
+#   TUI.md, COMMANDS.md   — TUI.js, пункты меню «руководство» и «команды»
+# docs/native/ — выдержки для разработки, docs/*.md — документация; рантайм их не читает.
+DOC_FILES = {'docs/features.json', 'docs/protocol-evidence.json', 'docs/TUI.md', 'docs/COMMANDS.md'}
 EXCLUDED_DIRS = {'.git', '__pycache__', 'PacketsDumps', '.verification', '.runtime', '.updates'}
 EXCLUDED_SUFFIXES = {'.zip', '.pyc', '.log', '.pid', '.lock', '.raw'}
 ZIP_DATE = (1980, 1, 1, 0, 0, 0)  # fixed timestamp keeps repeated zips byte-identical
@@ -117,7 +123,14 @@ def verify_zip(archive: Path, prefix: str, config: dict, license_path: Path, pro
         assert f'{prefix}/account.json' not in names
         assert len(z.read(f'{prefix}/{license_path.as_posix()}')) >= 58
         assert json.loads(z.read(f'{prefix}/config.json'))['host'] == 'brawl.server.dnull.xyz'
-        assert f'{prefix}/lib/Client.js' in names and f'{prefix}/docs/VERIFICATION.md' in names
+        assert f'{prefix}/lib/Client.js' in names
+        # Из docs/ в бандле только рантайм-файлы: allowlist, без выдержек native.
+        assert any(name.startswith(f'{prefix}/tests/') for name in names), 'tests/ должны входить: node Nulls.js --test'
+        for doc in sorted(DOC_FILES):
+            assert f'{prefix}/{doc}' in names, f'missing runtime doc {doc}'
+        shipped_docs = {name[len(prefix) + 1:] for name in names if name.startswith(f'{prefix}/docs/')}
+        assert shipped_docs == DOC_FILES, f'unexpected docs entries: {sorted(shipped_docs - DOC_FILES)}'
+        assert not any('/docs/native/' in name for name in names), 'docs/native/ must not ship'
         assert f'{prefix}/node_modules/.package-lock.json' not in names
         assert not any('/node_modules/.bin/' in name for name in names)
         # Inside node_modules only production packages may appear; dev trees stay out.
@@ -235,7 +248,7 @@ def main(argv) -> int:
     license_path = Path(config['clientLicensePath'])
     assert not license_path.is_absolute() and '..' not in license_path.parts
 
-    entries = collect(ROOT, set(FILES) | {license_path.as_posix()}, DIRECTORIES, production_packages(ROOT))
+    entries = collect(ROOT, set(FILES) | DOC_FILES | {license_path.as_posix()}, DIRECTORIES, production_packages(ROOT))
     single_bytes = build_bundle(version, entries)
 
     if '--check' in argv:

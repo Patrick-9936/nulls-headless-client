@@ -1,6 +1,6 @@
 {
   "name": "nulls-headless-client",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": true,
   "description": "Headless Node.js client for the Nulls Brawl protocol: accounts, clubs, lobby and bot fleets.",
   "license": "MIT",

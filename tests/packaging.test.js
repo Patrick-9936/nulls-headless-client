@@ -76,6 +76,41 @@ function isDependencyPath(entry, name) {
   );
 }
 
+test('payload: рантайм-docs по allowlist, тесты внутри, native-выдержки нет', (t) => {
+  if (!fs.existsSync(path.join(ROOT, 'Nulls.js'))) return t.skip('Nulls.js ещё не собран');
+  const paths = bundlePaths();
+
+  // tests/ остаются в бандле: node Nulls.js --test должен работать из одного файла.
+  assert.ok(
+    paths.some((entry) => entry.startsWith('tests/') && entry.endsWith('.test.js')),
+    'tests/*.test.js входят в бандл',
+  );
+  assert.deepEqual(
+    paths.filter((entry) => entry.startsWith('docs/native/')),
+    [],
+    'docs/native/ не входит в бандл',
+  );
+  assert.deepEqual(
+    paths.filter((entry) => entry.startsWith('docs/')).sort(),
+    ['docs/COMMANDS.md', 'docs/TUI.md', 'docs/features.json', 'docs/protocol-evidence.json'],
+    'из docs/ в бандле только файлы, читаемые в рантайме',
+  );
+
+  // Рантайм читает их напрямую: CLI/TUI — features.json, Protocol — protocol-evidence.json.
+  for (const entry of [
+    'docs/features.json',
+    'docs/protocol-evidence.json',
+    'docs/TUI.md',
+    'docs/COMMANDS.md',
+    'data/brawlers.json',
+    'data/regions.json',
+    'data/maps.json',
+    'config.json',
+  ]) {
+    assert.ok(paths.includes(entry), `${entry} на месте`);
+  }
+});
+
 test('devDependencies не попадают в собранный бандл', (t) => {
   if (!fs.existsSync(path.join(ROOT, 'Nulls.js'))) return t.skip('Nulls.js ещё не собран');
   const paths = bundlePaths();
