@@ -1,0 +1,28 @@
+name: Предложение
+description: Новая команда, улучшение протокола или инфраструктуры
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Что предлагается
+      description: Опишите команду или изменение и зачем оно нужно.
+    validations:
+      required: true
+
+  - type: textarea
+    id: protocol
+    attributes:
+      label: Данные протокола
+      description: |
+        Если предложение касается сервера — приложите ID пакетов, структуру
+        сообщения или ссылку на `docs/protocol-evidence.json`. Без подтверждения
+        статус в `docs/features.json` останется экспериментальным.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Проверки
+      options:
+        - label: Я проверил, что такой команды нет в `node Program.js help`
+        - label: Я понимаю, что непроверенные функции помечаются как experimental

@@ -1,6 +1,6 @@
 {
-  "version": "0.2.7",
-  "date": "2026-10-09",
+  "version": "0.3.0",
+  "date": "2026-11-21",
   "notes": "See VERIFICATION.md for conditions and server refusals. Loading does not implement gameplay.",
   "commands": [
     {

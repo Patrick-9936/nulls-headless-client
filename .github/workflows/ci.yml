@@ -1,19 +1,63 @@
 name: ci
+
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
+    name: test (node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - name: install
+        run: npm ci --ignore-scripts
+      - name: unit tests
+        run: npm test
+      - name: syntax and info
+        run: npm run check
+      - name: lint (syntax only)
+        run: npm run lint
+      - name: bundle self-test
+        run: node Nulls.js --self-test
+
+  bundle:
+    name: bundle matches sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm ci --ignore-scripts
-      - run: npm test
-      - run: npm run check
-      - run: node Nulls.js --self-test
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: install
+        run: npm ci --ignore-scripts
+      - name: committed Nulls.js is up to date
+        run: python3 tools/package_release.py --check
+      - name: rebuild and verify no tracked file changed
+        run: |
+          python3 tools/package_release.py
+          git status --porcelain
+          git diff --exit-code -- Nulls.js

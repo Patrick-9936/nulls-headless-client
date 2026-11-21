@@ -1,18 +1,45 @@
 {
   "name": "nulls-headless-client",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "private": true,
-  "description": "Nulls headless client with account sessions, club and team commands, fleet control and explicit server confirmation.",
+  "description": "Headless Node.js client for the Nulls Brawl protocol: accounts, clubs, lobby and bot fleets.",
+  "license": "MIT",
+  "author": "Patrick-9936",
+  "homepage": "https://github.com/Patrick-9936/nulls-headless-client#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Patrick-9936/nulls-headless-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Patrick-9936/nulls-headless-client/issues"
+  },
+  "keywords": [
+    "nulls",
+    "brawl-stars",
+    "headless-client",
+    "game-protocol",
+    "bot-fleet",
+    "nodejs"
+  ],
   "main": "Program.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node Program.js help",
-    "check": "node --check Program.js && node --check lib/Client.js && node --check lib/Fleet.js && node --check tools/fleet.js && node Program.js info && node --check tools/candidates.js && node --check tools/proxy-watch.js && node --check tools/test-session.js",
+    "check": "node --check Program.js && node --check TUI.js && node --check lib/Client.js && node --check lib/CLI.js && node --check lib/i18n.js && node --check lib/Connect.js && node --check lib/Fleet.js && node --check tools/fleet.js && node --check tools/connect.js && node --check tools/i18n-check.js && node Program.js info && node tools/i18n-check.js && node --check tools/candidates.js && node --check tools/proxy-watch.js && node --check tools/test-session.js",
+    "lint": "npm run check",
+    "lint:eslint": "npx --yes eslint@9 .",
+    "format": "npx --yes prettier@3 --write .",
+    "format:check": "npx --yes prettier@3 --check .",
     "test": "node --test tests/*.test.js",
     "update": "node tools/update.js",
     "update:check": "node tools/update.js --check",
     "update:watch": "node tools/update.js --watch",
     "fleet": "node tools/fleet.js",
-    "features": "node Program.js features"
+    "features": "node Program.js features",
+    "bundle": "python3 tools/package_release.py",
+    "bundle:check": "python3 tools/package_release.py --check"
   },
   "dependencies": {
     "blakejs": "^1.2.1",

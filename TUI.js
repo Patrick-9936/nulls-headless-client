@@ -1,275 +1,845 @@
 #!/usr/bin/env node
 'use strict';
-const fs=require('node:fs'),path=require('node:path'),readline=require('node:readline');
-const {createInterface}=require('node:readline/promises'),{spawn}=require('node:child_process');
-const Client=require('./lib/Client'),Actions=require('./lib/Actions'),Store=require('./lib/Store');
-const ROOT=__dirname,VERSION=require('./package.json').version;
-const clean=v=>String(v??'').replace(/\x1b\[[0-?]*[ -/]*[@-~]/g,'').replace(/[\x00-\x08\x0b-\x1f\x7f]/g,'');
-const publicJSON=v=>JSON.stringify(v,(k,x)=>/passToken|password|secret|deviceId|androidId|idForVendor|openDeviceId|license|loginClientSeed/i.test(k)?'[скрыто]':x,2);
-class Exit extends Error{} class Cancel extends Error{}
-const tag=['tag','тег игрока (#...)','text',undefined,true],clubTag=['clubTag','тег клуба (#...)','text',undefined,true];
-const text=['text','текст','text',undefined,true],code=['code','код лобби','text',undefined,true];
-const decision=['accept','решение','choice',[{label:'принять / одобрить',value:true},{label:'отклонить',value:false}],true];
-const commands={
- 'account-region':['регион аккаунта',[['region','регион','regions',undefined,true]]],
- 'friend':['отправить заявку в друзья',[tag]],'accept-friend':['принять заявку в друзья',[tag]],
- 'decline-friend':['отклонить заявку в друзья',[tag]],'remove-friend':['удалить друга',[tag]],
- 'friends':['все друзья',[]],'friends-online':['друзья в сети',[]],
- 'spectate':['наблюдать за игроком',[tag]],'stop-spectate':['выйти из наблюдения',[]],
- 'brawl-tv':['открыть brawl tv',[]],'brawl-tv-channels':['каналы brawl tv',[]],
- 'brawl-tv-next':['следующая трансляция',[['channel','номер канала','tv-channel',undefined,true]]],
- 'create-club':['создать клуб',[['clubName','название клуба','text',undefined,true]]],
- 'join-club':['вступить в клуб',[clubTag]],'leave-club':['выйти из клуба',[]],
- 'club-info':['информация о клубе',[['clubTag','тег клуба (пусто — свой)','text']]],
- 'club-recommendations':['рекомендованные сервером клубы',[]],
- 'club-members':['участники клуба',[]],'club-online':['участники клуба в сети',[]],
- 'club-chat':['сообщение в чат клуба',[text]],'club-stream':['лента клуба',[]],'club-requests':['заявки в клуб',[]],
- 'club-request':['отправить заявку в клуб',[clubTag,text]],'club-answer':['ответить на заявку в клуб',[tag,decision]],
- 'club-description':['описание клуба',[['description','описание (можно пустое)','empty','',true]]],
- 'club-trophies':['трофеи для входа',[['requiredTrophies','порог трофеев','number',0,true]]],
- 'club-settings':['настройки клуба',[
- ['description','новое описание (пусто — оставить)','text'],
- ['type','тип клуба','choice',[{label:'открытый',value:1},{label:'по заявкам',value:2},{label:'закрытый',value:3}]],
- ['requiredTrophies','новый порог трофеев','number'],['badge','эмблема','badges'],['region','регион','regions'],
- ['familyFriendly','семейный клуб','choice',[{label:'да',value:true},{label:'нет',value:false}]]]],
- 'club-role':['назначить роль участнику',[tag,['role','роль','choice',[
- {label:'участник',value:'member'},{label:'старейшина',value:'senior'},{label:'вице-президент',value:'vice'},{label:'президент',value:'president'}],true]]],
- 'club-promote':['повысить участника',[tag]],'club-demote':['понизить участника',[tag]],
- 'club-kick':['исключить участника',[tag,['text','причина (необязательно)','text']]],'club-invite':['пригласить в клуб',[tag]],
- 'create-room':['создать лобби',[['type','тип лобби','choice',[{label:'обычная команда',value:0},{label:'дружеский бой',value:1}],true]]],
- 'join-room':['войти в лобби',[code]],'leave-room':['выйти из лобби',[]],'team-info':['состояние лобби',[]],
- 'chat':['сообщение в чат лобби',[text]],'team-invite':['пригласить друга / соклубника',[tag]],
- 'team-cancel-invite':['отменить приглашение',[tag]],'invitations':['входящие приглашения',[]],
- 'accept-invite':['принять приглашение',[['code','код (пусто — входящее)','text']]],
- 'decline-invite':['отклонить приглашение',[['code','код (пусто — входящее)','text']]],
- 'invite-answer':['ответить на приглашение',[['code','код (пусто — входящее)','text'],decision]],
- 'team-answer':['старый ответ на приглашение',[['response','код ответа','number',0,true],['extra','дополнительное поле','number',0,true]]],
- 'team-request':['запросить вход в лобби',[tag,code]],'team-cancel-request':['отменить запрос входа',[]],
- 'team-request-answer':['ответить на запрос входа',[tag,decision]],'team-kick':['исключить из лобби',[tag]],
- 'team-map':['выбрать карту',[['location','карта','maps',undefined,true]]],
- 'team-mode':['выбрать режим',[['mode','режим','modes',undefined,true]]],
- 'team-location':['карта и модификаторы',[['location','карта','maps',undefined,true],['modifiers','модификаторы через запятую (необязательно)','numbers']]],
- 'team-event':['выбрать событие',[['event','ID события','number',undefined,true],['slot','слот','number',0,true],['modifier','модификатор','number',0,true]]],
- 'team-status':['статус в лобби',[['status','числовой статус','number',0,true]]],
- 'team-bot':['встроенный бот дружеского боя',[['slot','слот 0–9','number',0,true],['disabled','состояние','choice',[{label:'отключить',value:true},{label:'включить',value:false}],true]]],
- 'team-advertise':['реклама команды',[['type','тип','number',0,true]]],
- 'ready':['нажать «готово»',[]],'unready':['снять готовность',[]],'matchmake':['начать подбор',[]],
- 'cancel-matchmake':['выйти из подбора',[]],'practice':['тренировка',[]],
- 'player-status':['статус игрока',[['status','статус','number',0,true],['extra','дополнительное поле','number',0,true]]],
- 'team-brawler':['выбор бойца (недоступен)',[]],
- 'top':['рейтинг игроков',[['type','тип рейтинга','number',0,true],['local','рейтинг','choice',[{label:'общий',value:false},{label:'местный',value:true}],true],['brawler','ссылка бойца','text','16:0',true],['extra','дополнительное поле','number',0,true]]]
+const fs = require('node:fs'),
+  path = require('node:path'),
+  readline = require('node:readline');
+const { createInterface } = require('node:readline/promises'),
+  { spawn } = require('node:child_process');
+const Client = require('./lib/Client'),
+  Actions = require('./lib/Actions'),
+  Store = require('./lib/Store'),
+  I18N = require('./lib/i18n');
+const ROOT = __dirname,
+  VERSION = require('./package.json').version,
+  t = I18N.t;
+const clean = (v) =>
+  String(v ?? '')
+    .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '')
+    .replace(/[\x00-\x08\x0b-\x1f\x7f]/g, '');
+const publicJSON = (v) =>
+  JSON.stringify(
+    v,
+    (k, x) =>
+      /passToken|password|secret|deviceId|androidId|idForVendor|openDeviceId|license|loginClientSeed/i.test(k)
+        ? t('tui.json.hidden')
+        : x,
+    2,
+  );
+class Exit extends Error {}
+class Cancel extends Error {}
+const tag = ['tag', 'tui.field.tag', 'text', undefined, true],
+  clubTag = ['clubTag', 'tui.field.clubTag', 'text', undefined, true];
+const text = ['text', 'tui.field.text', 'text', undefined, true],
+  code = ['code', 'tui.field.code', 'text', undefined, true];
+const decision = [
+  'accept',
+  'tui.field.decision',
+  'choice',
+  [
+    { label: 'tui.decision.accept', value: true },
+    { label: 'tui.decision.decline', value: false },
+  ],
+  true,
+];
+const commands = {
+  'account-region': ['tui.action.account-region', [['region', 'tui.field.region', 'regions', undefined, true]]],
+  friend: ['tui.action.friend', [tag]],
+  'accept-friend': ['tui.action.accept-friend', [tag]],
+  'decline-friend': ['tui.action.decline-friend', [tag]],
+  'remove-friend': ['tui.action.remove-friend', [tag]],
+  friends: ['tui.action.friends', []],
+  'friends-online': ['tui.action.friends-online', []],
+  spectate: ['tui.action.spectate', [tag]],
+  'stop-spectate': ['tui.action.stop-spectate', []],
+  'brawl-tv': ['tui.action.brawl-tv', []],
+  'brawl-tv-channels': ['tui.action.brawl-tv-channels', []],
+  'brawl-tv-next': ['tui.action.brawl-tv-next', [['channel', 'tui.field.channel', 'tv-channel', undefined, true]]],
+  'create-club': ['tui.action.create-club', [['clubName', 'tui.field.clubName', 'text', undefined, true]]],
+  'join-club': ['tui.action.join-club', [clubTag]],
+  'leave-club': ['tui.action.leave-club', []],
+  'club-info': ['tui.action.club-info', [['clubTag', 'tui.field.clubTagSelf', 'text']]],
+  'club-recommendations': ['tui.action.club-recommendations', []],
+  'club-members': ['tui.action.club-members', []],
+  'club-online': ['tui.action.club-online', []],
+  'club-chat': ['tui.action.club-chat', [text]],
+  'club-stream': ['tui.action.club-stream', []],
+  'club-requests': ['tui.action.club-requests', []],
+  'club-request': ['tui.action.club-request', [clubTag, text]],
+  'club-answer': ['tui.action.club-answer', [tag, decision]],
+  'club-description': [
+    'tui.action.club-description',
+    [['description', 'tui.field.descriptionOptional', 'empty', '', true]],
+  ],
+  'club-trophies': [
+    'tui.action.club-trophies',
+    [['requiredTrophies', 'tui.field.requiredTrophies', 'number', 0, true]],
+  ],
+  'club-settings': [
+    'tui.action.club-settings',
+    [
+      ['description', 'tui.field.newDescription', 'text'],
+      [
+        'type',
+        'tui.field.clubType',
+        'choice',
+        [
+          { label: 'tui.clubType.open', value: 1 },
+          { label: 'tui.clubType.apply', value: 2 },
+          { label: 'tui.clubType.closed', value: 3 },
+        ],
+      ],
+      ['requiredTrophies', 'tui.field.requiredTrophies', 'number'],
+      ['badge', 'tui.field.badge', 'badges'],
+      ['region', 'tui.field.region', 'regions'],
+      [
+        'familyFriendly',
+        'tui.field.familyFriendly',
+        'choice',
+        [
+          { label: 'tui.yes', value: true },
+          { label: 'tui.no', value: false },
+        ],
+      ],
+    ],
+  ],
+  'club-role': [
+    'tui.action.club-role',
+    [
+      tag,
+      [
+        'role',
+        'tui.field.role',
+        'choice',
+        [
+          { label: 'tui.role.member', value: 'member' },
+          { label: 'tui.role.senior', value: 'senior' },
+          { label: 'tui.role.vice', value: 'vice' },
+          { label: 'tui.role.president', value: 'president' },
+        ],
+        true,
+      ],
+    ],
+  ],
+  'club-promote': ['tui.action.club-promote', [tag]],
+  'club-demote': ['tui.action.club-demote', [tag]],
+  'club-kick': ['tui.action.club-kick', [tag, ['text', 'tui.field.kickReason', 'text']]],
+  'club-invite': ['tui.action.club-invite', [tag]],
+  'create-room': [
+    'tui.action.create-room',
+    [
+      [
+        'type',
+        'tui.field.roomType',
+        'choice',
+        [
+          { label: 'tui.roomType.team', value: 0 },
+          { label: 'tui.roomType.friendly', value: 1 },
+        ],
+        true,
+      ],
+    ],
+  ],
+  'join-room': ['tui.action.join-room', [code]],
+  'leave-room': ['tui.action.leave-room', []],
+  'team-info': ['tui.action.team-info', []],
+  chat: ['tui.action.chat', [text]],
+  'team-invite': ['tui.action.team-invite', [tag]],
+  'team-cancel-invite': ['tui.action.team-cancel-invite', [tag]],
+  invitations: ['tui.action.invitations', []],
+  'accept-invite': ['tui.action.accept-invite', [['code', 'tui.field.codeOptional', 'text']]],
+  'decline-invite': ['tui.action.decline-invite', [['code', 'tui.field.codeOptional', 'text']]],
+  'invite-answer': ['tui.action.invite-answer', [['code', 'tui.field.codeOptional', 'text'], decision]],
+  'team-answer': [
+    'tui.action.team-answer',
+    [
+      ['response', 'tui.field.response', 'number', 0, true],
+      ['extra', 'tui.field.extra', 'number', 0, true],
+    ],
+  ],
+  'team-request': ['tui.action.team-request', [tag, code]],
+  'team-cancel-request': ['tui.action.team-cancel-request', []],
+  'team-request-answer': ['tui.action.team-request-answer', [tag, decision]],
+  'team-kick': ['tui.action.team-kick', [tag]],
+  'team-map': ['tui.action.team-map', [['location', 'tui.field.location', 'maps', undefined, true]]],
+  'team-mode': ['tui.action.team-mode', [['mode', 'tui.field.mode', 'modes', undefined, true]]],
+  'team-location': [
+    'tui.action.team-location',
+    [
+      ['location', 'tui.field.location', 'maps', undefined, true],
+      ['modifiers', 'tui.field.modifiers', 'numbers'],
+    ],
+  ],
+  'team-event': [
+    'tui.action.team-event',
+    [
+      ['event', 'tui.field.event', 'number', undefined, true],
+      ['slot', 'tui.field.slot', 'number', 0, true],
+      ['modifier', 'tui.field.extra', 'number', 0, true],
+    ],
+  ],
+  'team-status': ['tui.action.team-status', [['status', 'tui.field.numericStatus', 'number', 0, true]]],
+  'team-bot': [
+    'tui.action.team-bot',
+    [
+      ['slot', 'tui.field.slot09', 'number', 0, true],
+      [
+        'disabled',
+        'tui.field.state',
+        'choice',
+        [
+          { label: 'tui.bot.disable', value: true },
+          { label: 'tui.bot.enable', value: false },
+        ],
+        true,
+      ],
+    ],
+  ],
+  'team-advertise': ['tui.action.team-advertise', [['type', 'tui.field.type', 'number', 0, true]]],
+  ready: ['tui.action.ready', []],
+  unready: ['tui.action.unready', []],
+  matchmake: ['tui.action.matchmake', []],
+  'cancel-matchmake': ['tui.action.cancel-matchmake', []],
+  practice: ['tui.action.practice', []],
+  'player-status': [
+    'tui.action.player-status',
+    [
+      ['status', 'tui.field.status', 'number', 0, true],
+      ['extra', 'tui.field.extra', 'number', 0, true],
+    ],
+  ],
+  'team-brawler': ['tui.action.team-brawler', []],
+  top: [
+    'tui.action.top',
+    [
+      ['type', 'tui.field.ratingType', 'number', 0, true],
+      [
+        'local',
+        'tui.field.rating',
+        'choice',
+        [
+          { label: 'tui.rating.global', value: false },
+          { label: 'tui.rating.local', value: true },
+        ],
+        true,
+      ],
+      ['brawler', 'tui.field.brawler', 'text', '16:0', true],
+      ['extra', 'tui.field.extra', 'number', 0, true],
+    ],
+  ],
 };
-const groups=[
- ['аккаунт и соединение',[]],
- ['друзья',['friends','friends-online','friend','accept-friend','decline-friend','remove-friend','account-region','player-status']],
- ['клуб',['club-recommendations','club-info','club-members','club-online','club-stream','club-requests','create-club','join-club','leave-club','club-chat','club-request','club-answer','club-description','club-trophies','club-settings','club-role','club-promote','club-demote','club-kick','club-invite']],
- ['лобби и приглашения',['create-room','join-room','leave-room','team-info','chat','team-invite','invitations','accept-invite','decline-invite','invite-answer','team-request','team-cancel-request','team-request-answer','team-cancel-invite','team-kick','team-status','team-advertise','team-answer']],
- ['карты и подбор',['team-mode','team-map','team-location','team-event','team-bot','team-brawler','ready','unready','matchmake','cancel-matchmake','practice']],
- ['наблюдение и brawl tv',['spectate','stop-spectate','brawl-tv','brawl-tv-channels','brawl-tv-next']],
- ['рейтинг',['top']],['инструкция и утилиты',[]]
+const groups = [
+  ['tui.group.account', []],
+  [
+    'tui.group.friends',
+    [
+      'friends',
+      'friends-online',
+      'friend',
+      'accept-friend',
+      'decline-friend',
+      'remove-friend',
+      'account-region',
+      'player-status',
+    ],
+  ],
+  [
+    'tui.group.club',
+    [
+      'club-recommendations',
+      'club-info',
+      'club-members',
+      'club-online',
+      'club-stream',
+      'club-requests',
+      'create-club',
+      'join-club',
+      'leave-club',
+      'club-chat',
+      'club-request',
+      'club-answer',
+      'club-description',
+      'club-trophies',
+      'club-settings',
+      'club-role',
+      'club-promote',
+      'club-demote',
+      'club-kick',
+      'club-invite',
+    ],
+  ],
+  [
+    'tui.group.team',
+    [
+      'create-room',
+      'join-room',
+      'leave-room',
+      'team-info',
+      'chat',
+      'team-invite',
+      'invitations',
+      'accept-invite',
+      'decline-invite',
+      'invite-answer',
+      'team-request',
+      'team-cancel-request',
+      'team-request-answer',
+      'team-cancel-invite',
+      'team-kick',
+      'team-status',
+      'team-advertise',
+      'team-answer',
+    ],
+  ],
+  [
+    'tui.group.maps',
+    [
+      'team-mode',
+      'team-map',
+      'team-location',
+      'team-event',
+      'team-bot',
+      'team-brawler',
+      'ready',
+      'unready',
+      'matchmake',
+      'cancel-matchmake',
+      'practice',
+    ],
+  ],
+  ['tui.group.tv', ['spectate', 'stop-spectate', 'brawl-tv', 'brawl-tv-channels', 'brawl-tv-next']],
+  ['tui.group.top', ['top']],
+  ['tui.group.utilities', []],
 ];
 class App {
- constructor(root=ROOT,deps={}) {
-  this.root=root;this.Client=deps.Client||Client;this.execute=deps.execute||Actions.execute;
-  this.sessions=new Map();this.active=null;this.logs=[];this.closing=false;this.refresh=null;this.abort=null;this.child=null;
-  this.connection={battleTransport:'udp',reconnect:true};this.previousDebugger=global.Debugger;
-  this.features=Store.read(path.join(root,'docs/features.json'),{commands:[]});
- }
- log(v){this.logs.push(clean(v).replace(/\n/g,' ').slice(0,180));if(this.logs.length>3)this.logs.shift();this.refresh?.();}
- context(){const c=this.active;return c?clean((c.account.name||'без имени')+' '+(c.account.lo?require('./utils/TagCodec').logicLongToTag(c.account.hi,c.account.lo):'')+' · '+c.state+' · сессий '+this.sessions.size):'не подключён · сессий '+this.sessions.size;}
- draw(title,items,index=0){
-  const height=Math.max(5,(process.stdout.rows||24)-10),start=Math.max(0,Math.min(index-Math.floor(height/2),items.length-height));
-  process.stdout.write('\x1b[2J\x1b[HNulls '+VERSION+' · tui\n'+this.context()+'\n\n'+clean(title)+'\n');
-  items.slice(start,start+height).forEach((item,n)=>process.stdout.write((start+n===index?'>':' ')+' '+clean(item.label??item)+'\n'));
-  process.stdout.write('\n'+(items.length?(index+1)+'/'+items.length+' · ':'')+'↑↓ Enter · Esc/Q назад · Ctrl+C выход\n');
-  for(const log of this.logs)process.stdout.write(clean(log)+'\n');
- }
- choose(title,items){
-  if(this.closing)return Promise.reject(new Exit());if(!items.length)return Promise.resolve(null);
-  return new Promise((resolve,reject)=>{
-   let index=0;const wasRaw=!!process.stdin.isRaw,render=()=>this.draw(title,items,index);
-   const done=(v,e)=>{process.stdin.removeListener('keypress',key);process.stdout.removeListener('resize',render);if(process.stdin.isTTY)process.stdin.setRawMode(wasRaw);this.refresh=null;this.abort=null;e?reject(e):resolve(v);};
-   const key=(str,k={})=>{
-    if(k.ctrl&&k.name==='c')return done(null,new Exit());
-    if(k.name==='escape'||k.name==='q')return done(null);
-    if(k.name==='up')index=(index+items.length-1)%items.length;
-    else if(k.name==='down')index=(index+1)%items.length;
-    else if(k.name==='pageup')index=Math.max(0,index-10);
-    else if(k.name==='pagedown')index=Math.min(items.length-1,index+10);
-    else if(k.name==='home')index=0;else if(k.name==='end')index=items.length-1;
-    else if(k.name==='return')return done(items[index].value??items[index]);
-    render();
-   };
-   this.refresh=render;this.abort=()=>done(null,new Exit());
-   readline.emitKeypressEvents(process.stdin);process.stdin.setRawMode(true);process.stdin.resume();
-   process.stdin.on('keypress',key);process.stdout.on('resize',render);render();
-  });
- }
- async prompt(label,fallback,required=false,kind='text'){
-  for(;;){
-   if(this.closing)throw new Exit();
-   process.stdout.write('\x1b[2J\x1b[H'+clean(label)+(fallback!==undefined?' ['+clean(fallback)+']':'')+'\nпусто — значение по умолчанию; /cancel — назад\n');
-   const rl=createInterface({input:process.stdin,output:process.stdout}),controller=new AbortController();this.abort=()=>{controller.abort();rl.close();};rl.once('SIGINT',()=>{this.closing=true;this.abort?.();});let answer;
-   try{answer=await rl.question('› ',{signal:controller.signal});}catch{throw new Exit();}finally{rl.close();this.abort=null;}
-   if(answer==='/cancel')throw new Cancel();
-   const value=answer!==''?answer:fallback;
-   if(value===undefined&&!required)return undefined;
-   if((value===undefined||(kind!=='empty'&&!String(value).trim()))&&required){this.log('нужно заполнить поле');continue;}
-   if(value===undefined)return undefined;
-   if(kind==='number'){if(!/^-?\d+$/.test(String(value))||!Number.isSafeInteger(Number(value))){this.log('нужно целое число');continue;}return Number(value);}
-   if(kind==='numbers'){if(!String(value).trim())return [];const parts=String(value).split(',').map(x=>x.trim());if(parts.some(x=>!/^[-]?\d+$/.test(x))){this.log('введите целые числа через запятую');continue;}return parts.map(Number);}
-   return String(value);
+  constructor(root = ROOT, deps = {}) {
+    this.root = root;
+    this.Client = deps.Client || Client;
+    this.execute = deps.execute || Actions.execute;
+    this.sessions = new Map();
+    this.active = null;
+    this.logs = [];
+    this.closing = false;
+    this.refresh = null;
+    this.abort = null;
+    this.child = null;
+    this.connection = { battleTransport: 'udp', reconnect: true };
+    this.previousDebugger = global.Debugger;
+    const config = Store.read(path.join(root, 'config.json'), {});
+    I18N.setLanguage(I18N.detect({ config }));
+    this.features = Store.read(path.join(root, 'docs/features.json'), { commands: [] });
   }
- }
- async view(title,value){
-  const lines=(typeof value==='string'?clean(value):publicJSON(value)).split('\n'),pages=[],size=Math.max(3,(process.stdout.rows||24)-18);
-  for(let n=0;n<lines.length;n+=size)pages.push(lines.slice(n,n+size).join('\n'));
-  let page=0;
-  for(;;){
-   const action=await this.choose(title+'\n\n'+pages[page]+'\n\nстраница '+(page+1)+'/'+pages.length,[
-    {label:'назад',value:'back'},...(page>0?[{label:'предыдущая страница',value:'prev'}]:[]),
-    ...(page+1<pages.length?[{label:'следующая страница',value:'next'}]:[])]);
-   if(!action||action==='back')return;page+=action==='next'?1:-1;
+  log(v) {
+    this.logs.push(clean(v).replace(/\n/g, ' ').slice(0, 180));
+    if (this.logs.length > 3) this.logs.shift();
+    this.refresh?.();
   }
- }
- async fields(id){
-  const args={};
-  for(const [key,label,kind,defaultValue,required] of commands[id][1]){
-   let values;
-   if(kind==='choice')values=defaultValue;
-   if(kind==='regions')values=Store.read(path.join(this.root,'data/regions.json'),[]).map(r=>({label:r.Name+' · '+(r.DisplayName||''),value:r.reference}));
-   if(kind==='badges')values=Store.read(path.join(this.root,'data/club-badges.json'),[]).map(r=>({label:r.Name,value:r.reference}));
-   if(kind==='maps')values=Store.read(path.join(this.root,'data/maps.json'),[]).map(r=>({label:r.mode+' · '+r.name,value:r.reference}));
-   if(kind==='modes')values=[...new Set(Store.read(path.join(this.root,'data/maps.json'),[]).map(r=>r.mode))].map(value=>({label:value,value}));
-   if(kind==='tv-channel'){
-    const r=await this.execute(this.active,'brawl-tv-channels',{experimental:true,timeout:15000});
-    values=r.channels.map(c=>({label:c.id+' · '+(c.title||'канал'),value:c.id}));
-    if(!values.length)throw Error('сервер не сообщил каналов');
-   }
-   if(values){
-    const selected=await this.choose(label,required?values:[{label:'оставить без изменения',value:'__skip__'},...values]);
-    if(selected===null)throw new Cancel();if(selected!=='__skip__')args[key]=selected;
-   }else{const value=await this.prompt(label,defaultValue,required,kind);if(value!==undefined)args[key]=value;}
+  context() {
+    const c = this.active;
+    if (!c) return clean(t('tui.context.disconnected', { count: this.sessions.size }));
+    const name = c.account.name || t('tui.context.unnamed');
+    const tag = c.account.lo ? require('./utils/TagCodec').logicLongToTag(c.account.hi, c.account.lo) : '';
+    return clean(t('tui.context.state', { name, tag, state: c.state, count: this.sessions.size }));
   }
-  return args;
- }
- attach(file,client){
-  this.sessions.set(file,client);this.active=client;for(const c of this.sessions.values())c.peers=this.sessions;
-  client.on('state',s=>this.log((client.account.name||path.basename(file))+': '+s.state+(s.error?' · '+s.error:'')));
-  client.on('warning',e=>this.log(e.message));client.on('battle-vision',()=>{client.tuiFrames=(client.tuiFrames||0)+1;});
- }
- async connectAccount(file,name){
-  file=path.resolve(this.root,file);const saved=Store.read(file,{});
-  if(saved.passToken&&!saved.hi&&!saved.lo)throw Error('файл аккаунта не содержит ID');
-  if(!saved.passToken&&!name)throw Error('у нового аккаунта нужно задать ник');
-  if(this.sessions.has(file)){this.active=this.sessions.get(file);if(this.active.state!=='online')await this.active.connect();return;}
-  const client=new this.Client({root:this.root,account:file,...this.connection,...(name?{name}:{})});
-  this.attach(file,client);this.log('подключение…');
-  try{await client.connect();this.log('вход подтверждён сервером');}
-  catch(e){client.close();this.sessions.delete(file);this.active=[...this.sessions.values()].at(-1)||null;throw e;}
- }
- async accounts(){
-  for(;;){
-   const choice=await this.choose('аккаунт и соединение',[
-    {label:'подключить сохранённый аккаунт',value:'load'},{label:'создать один новый аккаунт',value:'new'},
-    {label:'переключить активную сессию',value:'switch'},{label:'состояние активного аккаунта',value:'info'},
-    {label:'переподключить активный аккаунт',value:'reconnect'},{label:'отключить активный аккаунт',value:'close'},
-    {label:'параметры новых подключений',value:'settings'},{label:'назад',value:'back'}]);
-   if(!choice||choice==='back')return;
-   try{
-    if(choice==='load'){
-     const files=[];if(fs.existsSync(path.join(this.root,'account.json')))files.push('account.json');
-     const dir=path.join(this.root,'accounts');if(fs.existsSync(dir))for(const n of fs.readdirSync(dir).filter(n=>n.endsWith('.json')))files.push('accounts/'+n);
-     const picked=await this.choose('выберите аккаунт',[...files.map(value=>({label:value,value})),{label:'указать другой путь',value:'__path__'}]);
-     if(!picked)continue;const file=picked==='__path__'?await this.prompt('путь к JSON аккаунта',undefined,true):picked;
-     if(!fs.existsSync(path.resolve(this.root,file)))throw Error('файл не найден; для регистрации выберите «создать»');
-     await this.connectAccount(file);
-    }else if(choice==='new'){
-     const file=await this.prompt('файл нового аккаунта','accounts/tui-'+Date.now()+'.json',true);
-     if(fs.existsSync(path.resolve(this.root,file)))throw Error('файл уже существует; выберите другое имя');
-     await this.connectAccount(file,await this.prompt('ник нового аккаунта',undefined,true));
-    }else if(choice==='switch'){
-     const file=await this.choose('открытые сессии',[...this.sessions].map(([value,c])=>({label:(c.account.name||path.basename(value))+' · '+c.state,value})));
-     if(file)this.active=this.sessions.get(file);
-    }else if(choice==='settings'){
-     const transport=await this.choose('получение udp кадров',[{label:'udp',value:'udp'},{label:'только TCP',value:'none'}]);if(!transport)continue;
-     const proxyPoolFile=await this.prompt('файл пула прокси (пусто — напрямую)','');
-     this.connection={reconnect:true,battleTransport:transport,...(proxyPoolFile?{proxyPoolFile:path.resolve(this.root,proxyPoolFile)}:{})};
-     await this.view('настройки новых сессий',this.connection);
-    }else{
-     if(!this.active)throw Error('сначала выберите аккаунт');
-     if(choice==='info')await this.view('аккаунт',{file:this.active.file,account:this.active.account,state:this.active.state,team:this.active.team,club:this.active.club,matchmaking:this.active.matchmaking,udpFrames:this.active.tuiFrames||0});
-     if(choice==='reconnect')await this.active.reconnect();
-     if(choice==='close'){this.active.close();this.sessions.delete(this.active.file);this.active=[...this.sessions.values()].at(-1)||null;}
+  draw(title, items, index = 0) {
+    const height = Math.max(5, (process.stdout.rows || 24) - 10),
+      start = Math.max(0, Math.min(index - Math.floor(height / 2), items.length - height));
+    process.stdout.write(
+      '\x1b[2J\x1b[H' +
+        clean(t('tui.header', { version: VERSION })) +
+        '\n' +
+        this.context() +
+        '\n\n' +
+        clean(title) +
+        '\n',
+    );
+    items
+      .slice(start, start + height)
+      .forEach((item, n) =>
+        process.stdout.write((start + n === index ? '>' : ' ') + ' ' + clean(item.label ?? item) + '\n'),
+      );
+    process.stdout.write(
+      '\n' + (items.length ? index + 1 + '/' + items.length + ' · ' : '') + clean(t('tui.hint.keys')) + '\n',
+    );
+    for (const log of this.logs) process.stdout.write(clean(log) + '\n');
+  }
+  choose(title, items) {
+    if (this.closing) return Promise.reject(new Exit());
+    if (!items.length) return Promise.resolve(null);
+    return new Promise((resolve, reject) => {
+      let index = 0;
+      const wasRaw = !!process.stdin.isRaw,
+        render = () => this.draw(title, items, index);
+      const done = (v, e) => {
+        process.stdin.removeListener('keypress', key);
+        process.stdout.removeListener('resize', render);
+        if (process.stdin.isTTY) process.stdin.setRawMode(wasRaw);
+        this.refresh = null;
+        this.abort = null;
+        e ? reject(e) : resolve(v);
+      };
+      const key = (str, k = {}) => {
+        if (k.ctrl && k.name === 'c') return done(null, new Exit());
+        if (k.name === 'escape' || k.name === 'q') return done(null);
+        if (k.name === 'up') index = (index + items.length - 1) % items.length;
+        else if (k.name === 'down') index = (index + 1) % items.length;
+        else if (k.name === 'pageup') index = Math.max(0, index - 10);
+        else if (k.name === 'pagedown') index = Math.min(items.length - 1, index + 10);
+        else if (k.name === 'home') index = 0;
+        else if (k.name === 'end') index = items.length - 1;
+        else if (k.name === 'return') return done(items[index].value ?? items[index]);
+        render();
+      };
+      this.refresh = render;
+      this.abort = () => done(null, new Exit());
+      readline.emitKeypressEvents(process.stdin);
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.on('keypress', key);
+      process.stdout.on('resize', render);
+      render();
+    });
+  }
+  async prompt(label, fallback, required = false, kind = 'text') {
+    for (;;) {
+      if (this.closing) throw new Exit();
+      process.stdout.write(
+        '\x1b[2J\x1b[H' +
+          clean(label) +
+          (fallback !== undefined ? ' [' + clean(fallback) + ']' : '') +
+          '\n' +
+          clean(t('tui.prompt.hint')) +
+          '\n',
+      );
+      const rl = createInterface({ input: process.stdin, output: process.stdout }),
+        controller = new AbortController();
+      this.abort = () => {
+        controller.abort();
+        rl.close();
+      };
+      rl.once('SIGINT', () => {
+        this.closing = true;
+        this.abort?.();
+      });
+      let answer;
+      try {
+        answer = await rl.question('› ', { signal: controller.signal });
+      } catch {
+        throw new Exit();
+      } finally {
+        rl.close();
+        this.abort = null;
+      }
+      if (answer === '/cancel') throw new Cancel();
+      const value = answer !== '' ? answer : fallback;
+      if (value === undefined && !required) return undefined;
+      if ((value === undefined || (kind !== 'empty' && !String(value).trim())) && required) {
+        this.log(t('tui.prompt.required'));
+        continue;
+      }
+      if (value === undefined) return undefined;
+      if (kind === 'number') {
+        if (!/^-?\d+$/.test(String(value)) || !Number.isSafeInteger(Number(value))) {
+          this.log(t('tui.prompt.number'));
+          continue;
+        }
+        return Number(value);
+      }
+      if (kind === 'numbers') {
+        if (!String(value).trim()) return [];
+        const parts = String(value)
+          .split(',')
+          .map((x) => x.trim());
+        if (parts.some((x) => !/^[-]?\d+$/.test(x))) {
+          this.log(t('tui.prompt.numbers'));
+          continue;
+        }
+        return parts.map(Number);
+      }
+      return String(value);
     }
-   }catch(e){if(e instanceof Exit)throw e;if(!(e instanceof Cancel))await this.view('ошибка',e.message);}
   }
- }
- async action(id){
-  if(!this.active||this.active.state!=='online')throw Error('сначала подключите аккаунт в разделе «аккаунт и соединение»');
-  const feature=this.features.commands.find(f=>f.command===id);
-  if(feature?.status==='unavailable')return this.view('недоступно','функция не подтверждена и заблокирована в клиенте.');
-  if(feature?.experimental){const yes=await this.choose('функция экспериментальная. результат может быть не подтверждён.',[{label:'назад',value:'back'},{label:'выполнить',value:'yes'}]);if(yes!=='yes')return;}
-  const args=await this.fields(id);
-  if(id==='brawl-tv'){
-   const pick=await this.choose('brawl tv',[{label:'первый доступный канал',value:'auto'},{label:'выбрать канал',value:'channel'},{label:'по тегу игрока',value:'tag'}]);
-   if(!pick)throw new Cancel();if(pick==='channel')args.channel=(await this.fields('brawl-tv-next')).channel;
-   if(pick==='tag')args.tag=await this.prompt('тег игрока (#...)',undefined,true);
-  }
-  args.experimental=!!feature?.experimental;this.log('ожидание ответа сервера…');
-  const result=await this.execute(this.active,id,args);
-  await this.view(result.confirmed===false?'результат не подтверждён':'ответ сервера',result);
- }
- async utilities(){
-  for(;;){
-   const selected=await this.choose('инструкция и утилиты',[
-    {label:'инструкция по tui',value:'guide'},{label:'все функции и статус проверки',value:'features'},
-    {label:'инструкция по функциям клиента',value:'commands'},{label:'информация о версии и сервере',value:'info'},
-    {label:'расшифровать тег',value:'tag-decode'},{label:'расшифровать код лобби',value:'room-code'},
-    {label:'проверить обновление',value:'update-check'},{label:'применить обновление',value:'update'},
-    {label:'статус фонового fleet',value:'fleet-status'},{label:'назад',value:'back'}]);
-   if(!selected||selected==='back')return;
-   try{
-    if(selected==='guide')await this.view('tui',fs.readFileSync(path.join(this.root,'docs/tui.md'),'utf8'));
-    if(selected==='commands')await this.view('команды',fs.readFileSync(path.join(this.root,'docs/COMMANDS.md'),'utf8'));
-    if(selected==='features')await this.view('функции',this.features);
-    if(selected==='info'){const c=Store.read(path.join(this.root,'config.json'));await this.view('клиент',{version:VERSION,host:c.host,binary:c.appBinaryVersion,root:this.root});}
-    if(selected==='tag-decode')await this.view('тег',require('./utils/TagCodec').describeTag(await this.prompt('тег (#...)',undefined,true)));
-    if(selected==='room-code')await this.view('код лобби',require('./utils/TeamCode').decode(await this.prompt('код',undefined,true)));
-    if(selected==='fleet-status')await this.tool('tools/fleet.js',['status']);
-    if(selected==='update-check')await this.tool('tools/update.js',['--check']);
-    if(selected==='update'){if([...this.sessions.values()].some(c=>!c.closed))throw Error('сначала отключите сессии, затем обновляйте настройки.');await this.tool('tools/update.js',[]);}
-   }catch(e){if(e instanceof Exit)throw e;if(!(e instanceof Cancel))await this.view('ошибка',e.message);}
-  }
- }
- async tool(file,args){
-  let output='',error='';this.log('выполнение…');
-  const child=this.child=spawn(process.execPath,[path.join(this.root,file),...args],{cwd:this.root,stdio:['ignore','pipe','pipe']});
-  child.stdout.on('data',b=>{output=(output+b).slice(-150000);});child.stderr.on('data',b=>{error=(error+b).slice(-150000);});
-  const status=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve);});
-  this.child=null;await this.view('результат · код '+status,output+error);
- }
- async run(){
-  if(!process.stdin.isTTY||!process.stdout.isTTY)throw Error('tui нужен интерактивный терминал. запуск: node nulls.js; для команд: node nulls.js help');
-  global.Debugger=Object.fromEntries(['info','warn','error','fatal'].map(k=>[k,(...v)=>this.log(v.join(' '))]));
-  const stop=()=>{this.closing=true;for(const c of this.sessions.values())c.close();this.child?.kill('SIGTERM');this.abort?.();};
-  process.once('SIGTERM',stop);process.once('SIGINT',stop);
-  try{
-   for(;;){
-    const selected=await this.choose('главное меню',[...groups.map((g,value)=>({label:g[0],value})),{label:'закрыть tui и отключить его сессии',value:'exit'}]);
-    if(selected===null||selected==='exit')break;
-    if(selected===0){await this.accounts();continue;}if(selected===7){await this.utilities();continue;}
-    const [title,ids]=groups[selected];
-    for(;;){
-     const id=await this.choose(title,ids.map(value=>({value,label:commands[value][0]+(this.features.commands.find(f=>f.command===value)?.experimental?' [эксперимент]':'')})));
-     if(!id)break;
-     try{await this.action(id);}catch(e){if(e instanceof Exit)throw e;if(!(e instanceof Cancel))await this.view('ошибка',e.message);}
+  async view(title, value) {
+    const lines = (typeof value === 'string' ? clean(value) : publicJSON(value)).split('\n'),
+      pages = [],
+      size = Math.max(3, (process.stdout.rows || 24) - 18);
+    for (let n = 0; n < lines.length; n += size) pages.push(lines.slice(n, n + size).join('\n'));
+    let page = 0;
+    for (;;) {
+      const action = await this.choose(
+        title + '\n\n' + pages[page] + '\n\n' + t('tui.view.page', { page: page + 1, total: pages.length }),
+        [
+          { label: t('tui.view.back'), value: 'back' },
+          ...(page > 0 ? [{ label: t('tui.view.prev'), value: 'prev' }] : []),
+          ...(page + 1 < pages.length ? [{ label: t('tui.view.next'), value: 'next' }] : []),
+        ],
+      );
+      if (!action || action === 'back') return;
+      page += action === 'next' ? 1 : -1;
     }
-   }
-  }catch(e){if(!(e instanceof Exit))throw e;}
-  finally{stop();process.removeListener('SIGTERM',stop);process.removeListener('SIGINT',stop);global.Debugger=this.previousDebugger;if(process.stdin.isRaw)process.stdin.setRawMode(false);process.stdin.pause();process.stdout.write('\x1b[2J\x1b[Hсессии tui закрыты.\n');}
- }
+  }
+  async fields(id) {
+    const args = {};
+    for (const [key, labelKey, kind, defaultValue, required] of commands[id][1]) {
+      const label = t(labelKey);
+      let values;
+      if (kind === 'choice') values = defaultValue.map((o) => ({ label: t(o.label), value: o.value }));
+      if (kind === 'regions')
+        values = Store.read(path.join(this.root, 'data/regions.json'), []).map((r) => ({
+          label: r.Name + ' · ' + (r.DisplayName || ''),
+          value: r.reference,
+        }));
+      if (kind === 'badges')
+        values = Store.read(path.join(this.root, 'data/club-badges.json'), []).map((r) => ({
+          label: r.Name,
+          value: r.reference,
+        }));
+      if (kind === 'maps')
+        values = Store.read(path.join(this.root, 'data/maps.json'), []).map((r) => ({
+          label: r.mode + ' · ' + r.name,
+          value: r.reference,
+        }));
+      if (kind === 'modes')
+        values = [...new Set(Store.read(path.join(this.root, 'data/maps.json'), []).map((r) => r.mode))].map(
+          (value) => ({ label: value, value }),
+        );
+      if (kind === 'tv-channel') {
+        const r = await this.execute(this.active, 'brawl-tv-channels', { experimental: true, timeout: 15000 });
+        values = r.channels.map((c) => ({ label: c.id + ' · ' + (c.title || t('tui.channel.unnamed')), value: c.id }));
+        if (!values.length) throw Error(t('tui.error.noChannels'));
+      }
+      if (values) {
+        const selected = await this.choose(
+          label,
+          required ? values : [{ label: t('tui.view.skip'), value: '__skip__' }, ...values],
+        );
+        if (selected === null) throw new Cancel();
+        if (selected !== '__skip__') args[key] = selected;
+      } else {
+        const value = await this.prompt(label, defaultValue, required, kind);
+        if (value !== undefined) args[key] = value;
+      }
+    }
+    return args;
+  }
+  attach(file, client) {
+    this.sessions.set(file, client);
+    this.active = client;
+    for (const c of this.sessions.values()) c.peers = this.sessions;
+    client.on('state', (s) =>
+      this.log(
+        t('tui.log.state', { name: client.account.name || path.basename(file), state: s.state }) +
+          (s.error ? ' · ' + s.error : ''),
+      ),
+    );
+    client.on('warning', (e) => this.log(e.message));
+    client.on('battle-vision', () => {
+      client.tuiFrames = (client.tuiFrames || 0) + 1;
+    });
+  }
+  async connectAccount(file, name) {
+    file = path.resolve(this.root, file);
+    const saved = Store.read(file, {});
+    if (saved.passToken && !saved.hi && !saved.lo) throw Error(t('tui.error.accountNoId'));
+    if (!saved.passToken && !name) throw Error(t('tui.error.newAccountName'));
+    if (this.sessions.has(file)) {
+      this.active = this.sessions.get(file);
+      if (this.active.state !== 'online') await this.active.connect();
+      return;
+    }
+    const client = new this.Client({ root: this.root, account: file, ...this.connection, ...(name ? { name } : {}) });
+    this.attach(file, client);
+    this.log(t('tui.log.connecting'));
+    try {
+      await client.connect();
+      this.log(t('tui.log.connected'));
+    } catch (e) {
+      client.close();
+      this.sessions.delete(file);
+      this.active = [...this.sessions.values()].at(-1) || null;
+      throw e;
+    }
+  }
+  saveLanguage(code) {
+    const file = path.join(this.root, 'config.json');
+    const config = Store.read(file, {});
+    Store.write(file, { ...config, uiLanguage: code });
+  }
+  async language() {
+    const current = I18N.getLanguage();
+    const code = await this.choose(
+      t('tui.lang.pick'),
+      I18N.SUPPORTED.map((value) => ({
+        value,
+        label: (value === current ? '* ' : '  ') + I18N.label(value) + ' (' + value + ')',
+      })),
+    );
+    if (!code) return;
+    if (code === current) {
+      this.log(t('tui.lang.unchanged'));
+      return;
+    }
+    I18N.setLanguage(code);
+    this.saveLanguage(code);
+    this.log(t('tui.lang.saved', { language: I18N.label(code) }));
+  }
+  async accounts() {
+    for (;;) {
+      const choice = await this.choose(t('tui.menu.accounts'), [
+        { label: t('tui.accounts.load'), value: 'load' },
+        { label: t('tui.accounts.new'), value: 'new' },
+        { label: t('tui.accounts.switch'), value: 'switch' },
+        { label: t('tui.accounts.info'), value: 'info' },
+        { label: t('tui.accounts.reconnect'), value: 'reconnect' },
+        { label: t('tui.accounts.close'), value: 'close' },
+        { label: t('tui.accounts.settings'), value: 'settings' },
+        { label: t('tui.view.back'), value: 'back' },
+      ]);
+      if (!choice || choice === 'back') return;
+      try {
+        if (choice === 'load') {
+          const files = [];
+          if (fs.existsSync(path.join(this.root, 'account.json'))) files.push('account.json');
+          const dir = path.join(this.root, 'accounts');
+          if (fs.existsSync(dir))
+            for (const n of fs.readdirSync(dir).filter((n) => n.endsWith('.json'))) files.push('accounts/' + n);
+          const picked = await this.choose(t('tui.accounts.pick'), [
+            ...files.map((value) => ({ label: value, value })),
+            { label: t('tui.accounts.otherPath'), value: '__path__' },
+          ]);
+          if (!picked) continue;
+          const file = picked === '__path__' ? await this.prompt(t('tui.accounts.path'), undefined, true) : picked;
+          if (!fs.existsSync(path.resolve(this.root, file))) throw Error(t('tui.error.fileMissing'));
+          await this.connectAccount(file);
+        } else if (choice === 'new') {
+          const file = await this.prompt(t('tui.accounts.newFile'), 'accounts/tui-' + Date.now() + '.json', true);
+          if (fs.existsSync(path.resolve(this.root, file))) throw Error(t('tui.error.fileExists'));
+          await this.connectAccount(file, await this.prompt(t('tui.accounts.newName'), undefined, true));
+        } else if (choice === 'switch') {
+          const file = await this.choose(
+            t('tui.accounts.sessions'),
+            [...this.sessions].map(([value, c]) => ({
+              label: (c.account.name || path.basename(value)) + ' · ' + c.state,
+              value,
+            })),
+          );
+          if (file) this.active = this.sessions.get(file);
+        } else if (choice === 'settings') {
+          const transport = await this.choose(t('tui.settings.transport'), [
+            { label: 'udp', value: 'udp' },
+            { label: t('tui.settings.tcpOnly'), value: 'none' },
+          ]);
+          if (!transport) continue;
+          const proxyPoolFile = await this.prompt(t('tui.settings.proxy'), '');
+          this.connection = {
+            reconnect: true,
+            battleTransport: transport,
+            ...(proxyPoolFile ? { proxyPoolFile: path.resolve(this.root, proxyPoolFile) } : {}),
+          };
+          await this.view(t('tui.settings.title'), this.connection);
+        } else {
+          if (!this.active) throw Error(t('tui.error.needAccount'));
+          if (choice === 'info')
+            await this.view(t('tui.title.account'), {
+              file: this.active.file,
+              account: this.active.account,
+              state: this.active.state,
+              team: this.active.team,
+              club: this.active.club,
+              matchmaking: this.active.matchmaking,
+              udpFrames: this.active.tuiFrames || 0,
+            });
+          if (choice === 'reconnect') await this.active.reconnect();
+          if (choice === 'close') {
+            this.active.close();
+            this.sessions.delete(this.active.file);
+            this.active = [...this.sessions.values()].at(-1) || null;
+          }
+        }
+      } catch (e) {
+        if (e instanceof Exit) throw e;
+        if (!(e instanceof Cancel)) await this.view(t('tui.view.error'), e.message);
+      }
+    }
+  }
+  async action(id) {
+    if (!this.active || this.active.state !== 'online') throw Error(t('tui.error.loginFirst'));
+    const feature = this.features.commands.find((f) => f.command === id);
+    if (feature?.status === 'unavailable')
+      return this.view(t('tui.feature.unavailableTitle'), t('tui.feature.unavailable'));
+    if (feature?.experimental) {
+      const yes = await this.choose(t('tui.feature.experimentalTitle'), [
+        { label: t('tui.view.back'), value: 'back' },
+        { label: t('tui.feature.experimentalRun'), value: 'yes' },
+      ]);
+      if (yes !== 'yes') return;
+    }
+    const args = await this.fields(id);
+    if (id === 'brawl-tv') {
+      const pick = await this.choose(t('tui.brawltv.title'), [
+        { label: t('tui.brawltv.auto'), value: 'auto' },
+        { label: t('tui.brawltv.channel'), value: 'channel' },
+        { label: t('tui.brawltv.tag'), value: 'tag' },
+      ]);
+      if (!pick) throw new Cancel();
+      if (pick === 'channel') args.channel = (await this.fields('brawl-tv-next')).channel;
+      if (pick === 'tag') args.tag = await this.prompt(t('tui.field.tag'), undefined, true);
+    }
+    args.experimental = !!feature?.experimental;
+    this.log(t('tui.log.waiting'));
+    const result = await this.execute(this.active, id, args);
+    await this.view(result.confirmed === false ? t('tui.result.notConfirmed') : t('tui.result.server'), result);
+  }
+  async utilities() {
+    for (;;) {
+      const selected = await this.choose(t('tui.menu.utilities'), [
+        { label: t('tui.utilities.guide'), value: 'guide' },
+        { label: t('tui.utilities.features'), value: 'features' },
+        { label: t('tui.utilities.commands'), value: 'commands' },
+        { label: t('tui.utilities.info'), value: 'info' },
+        { label: t('tui.utilities.tagDecode'), value: 'tag-decode' },
+        { label: t('tui.utilities.roomCode'), value: 'room-code' },
+        { label: t('tui.utilities.lang'), value: 'language' },
+        { label: t('tui.utilities.updateCheck'), value: 'update-check' },
+        { label: t('tui.utilities.update'), value: 'update' },
+        { label: t('tui.utilities.fleetStatus'), value: 'fleet-status' },
+        { label: t('tui.view.back'), value: 'back' },
+      ]);
+      if (!selected || selected === 'back') return;
+      try {
+        if (selected === 'language') {
+          await this.language();
+          continue;
+        }
+        if (selected === 'guide')
+          await this.view(t('tui.title.tui'), fs.readFileSync(path.join(this.root, 'docs/tui.md'), 'utf8'));
+        if (selected === 'commands')
+          await this.view(t('tui.title.commands'), fs.readFileSync(path.join(this.root, 'docs/COMMANDS.md'), 'utf8'));
+        if (selected === 'features') await this.view(t('tui.title.features'), this.features);
+        if (selected === 'info') {
+          const c = Store.read(path.join(this.root, 'config.json'));
+          await this.view(t('tui.title.client'), {
+            version: VERSION,
+            host: c.host,
+            binary: c.appBinaryVersion,
+            root: this.root,
+            language: I18N.getLanguage(),
+          });
+        }
+        if (selected === 'tag-decode')
+          await this.view(
+            t('tui.title.tag'),
+            require('./utils/TagCodec').describeTag(await this.prompt(t('tui.field.tagPlain'), undefined, true)),
+          );
+        if (selected === 'room-code')
+          await this.view(
+            t('tui.title.roomCode'),
+            require('./utils/TeamCode').decode(await this.prompt(t('tui.field.codeInput'), undefined, true)),
+          );
+        if (selected === 'fleet-status') await this.tool('tools/fleet.js', ['status']);
+        if (selected === 'update-check') await this.tool('tools/update.js', ['--check']);
+        if (selected === 'update') {
+          if ([...this.sessions.values()].some((c) => !c.closed)) throw Error(t('tui.error.sessionsFirst'));
+          await this.tool('tools/update.js', []);
+        }
+      } catch (e) {
+        if (e instanceof Exit) throw e;
+        if (!(e instanceof Cancel)) await this.view(t('tui.view.error'), e.message);
+      }
+    }
+  }
+  async tool(file, args) {
+    let output = '',
+      error = '';
+    this.log(t('tui.log.running'));
+    const child = (this.child = spawn(process.execPath, [path.join(this.root, file), ...args], {
+      cwd: this.root,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }));
+    child.stdout.on('data', (b) => {
+      output = (output + b).slice(-150000);
+    });
+    child.stderr.on('data', (b) => {
+      error = (error + b).slice(-150000);
+    });
+    const status = await new Promise((resolve, reject) => {
+      child.once('error', reject);
+      child.once('close', resolve);
+    });
+    this.child = null;
+    await this.view(t('tui.result.toolCode', { code: status }), output + error);
+  }
+  async run() {
+    if (!process.stdin.isTTY || !process.stdout.isTTY) throw Error(t('tui.error.terminalRequired'));
+    global.Debugger = Object.fromEntries(
+      ['info', 'warn', 'error', 'fatal'].map((k) => [k, (...v) => this.log(v.join(' '))]),
+    );
+    const stop = () => {
+      this.closing = true;
+      for (const c of this.sessions.values()) c.close();
+      this.child?.kill('SIGTERM');
+      this.abort?.();
+    };
+    process.once('SIGTERM', stop);
+    process.once('SIGINT', stop);
+    try {
+      for (;;) {
+        const selected = await this.choose(t('tui.menu.main'), [
+          ...groups.map((g, value) => ({ label: t(g[0]), value })),
+          { label: t('tui.menu.language'), value: 'lang' },
+          { label: t('tui.menu.exit'), value: 'exit' },
+        ]);
+        if (selected === null || selected === 'exit') break;
+        if (selected === 'lang') {
+          await this.language();
+          continue;
+        }
+        if (selected === 0) {
+          await this.accounts();
+          continue;
+        }
+        if (selected === 7) {
+          await this.utilities();
+          continue;
+        }
+        const [title, ids] = groups[selected];
+        for (;;) {
+          const id = await this.choose(
+            t(title),
+            ids.map((value) => ({
+              value,
+              label:
+                t(commands[value][0]) +
+                (this.features.commands.find((f) => f.command === value)?.experimental ? t('tui.feature.tag') : ''),
+            })),
+          );
+          if (!id) break;
+          try {
+            await this.action(id);
+          } catch (e) {
+            if (e instanceof Exit) throw e;
+            if (!(e instanceof Cancel)) await this.view(t('tui.view.error'), e.message);
+          }
+        }
+      }
+    } catch (e) {
+      if (!(e instanceof Exit)) throw e;
+    } finally {
+      stop();
+      process.removeListener('SIGTERM', stop);
+      process.removeListener('SIGINT', stop);
+      global.Debugger = this.previousDebugger;
+      if (process.stdin.isRaw) process.stdin.setRawMode(false);
+      process.stdin.pause();
+      process.stdout.write('\x1b[2J\x1b[H' + clean(t('tui.menu.closed')) + '\n');
+    }
+  }
 }
-async function main(){await new App().run();}
-module.exports={App,commands,groups,main};
-if(require.main===module)main().catch(e=>{console.error(e.message);process.exitCode=1;});
+async function main() {
+  await new App().run();
+}
+module.exports = { App, commands, groups, main };
+if (require.main === module)
+  main().catch((e) => {
+    console.error(e.message);
+    process.exitCode = 1;
+  });

@@ -18,7 +18,9 @@ module.exports = class Nonce {
       throw new Error('Bad Nonce input');
     }
   }
-  bytes() { return this.nonce; }
+  bytes() {
+    return this.nonce;
+  }
   increment() {
     const temp = Buffer.from(this.nonce);
     temp.writeInt32LE(temp.readInt32LE(0) + 2, 0);

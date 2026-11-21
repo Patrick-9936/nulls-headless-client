@@ -1,0 +1,31 @@
+# Редакторные настройки. Форматирование остаётся за prettier (.prettierrc.json),
+# editorconfig задаёт только базовые вещи, чтобы не ломать существующий плотный стиль.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.{js,json,yml,yaml,mjs,cjs}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+# В markdown два пробела в конце строки — значимый перенос, их не трогаем.
+trim_trailing_whitespace = false
+insert_final_newline = true
+
+[*.{sh,bash}]
+indent_style = space
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[Nulls.js]
+# Собранный бандл: не форматируем и не трогаем.
+insert_final_newline = false
