@@ -5,6 +5,15 @@
 [Semantic Versioning](https://semver.org/lang/ru/). Незавершённые изменения
 собираются в секции `Unreleased`, при выпуске она получает номер версии и дату.
 
+## [Unreleased]
+
+### Добавлено
+- **Диагностика `LoginFailed`**: известные коды входа теперь печатают, что делать, а не
+  только число. Для `error=8` (блок лицензии не от этой сборки) в лог уходит подсказка
+  про `client-license.bin` и `docs/APK-UPDATE.md`; при расхождении версий сервера и
+  клиента выводится `LoginFailed version mismatch: server expects X, this client sends Y`.
+  3 теста в `tests/login-failed.test.js`.
+
 ## [0.3.4] — 2026-11-21
 
 ### Добавлено

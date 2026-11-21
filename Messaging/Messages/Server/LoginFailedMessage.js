@@ -1,5 +1,15 @@
 const ByteStream = require('../../../DataStream/ByteStream');
 
+// Код ошибки входа -> что с этим делать. Сервер отдаёт только число, поэтому
+// без подсказки пользователь видит "login failed 8" и не понимает, что делать.
+const HINTS = {
+  8: 'the client build or its license block is stale: client-license.bin is bound to one '
+   + 'APK build and its size. Update to the latest release and re-cut the block '
+   + '(docs/APK-UPDATE.md).',
+  9: 'the server replied with a redirect (ServerHost). The client does not follow it automatically.',
+  10: 'the server rejected the session, usually after a duplicate login of the same account.',
+};
+
 function safe(fn, fallback = null) {
   try {
     return fn();
@@ -39,10 +49,12 @@ module.exports = class LoginFailedMessage {
     if (this.updateHost) extra.push(`updateHost=${this.updateHost}`);
     if (this.remaining.length) extra.push(`tail=${this.remaining.length}B`);
 
-    Debugger.error(`LoginFailed phase=${phase} error=${this.errorCode}${extra.length ? ' ' + extra.join(' ') : ''}`);
+    this.hint = HINTS[this.errorCode] || '';
+    globalThis.Debugger?.error?.(`LoginFailed phase=${phase} error=${this.errorCode}${extra.length ? ' ' + extra.join(' ') : ''}`);
+    if (this.hint) globalThis.Debugger?.warn?.(`LoginFailed error=${this.errorCode}: ${this.hint}`);
 
     if (this.errorCode === 9 && this.serverHost && /stage\.brawlstarsgame\.com/i.test(this.serverHost)) {
-      Debugger.warn(
+      globalThis.Debugger?.warn?.(
         'The stage.brawlstarsgame.com string is a ServerHost field in the Brawl LoginFailed layout; it is not automatically followed as a redirect.',
       );
     }
@@ -60,9 +72,17 @@ module.exports = class LoginFailedMessage {
           }
         }
         messaging.saveConfig();
-        Debugger.info('Saved fingerprint/version from server response.');
+        globalThis.Debugger?.info?.('Saved fingerprint/version from server response.');
+        const server = `${v[0]}.${v[1]}.${v[2]}`;
+        const client = `${messaging.config.major}.${messaging.config.minor}.${messaging.config.build}`;
+        if (server !== client) {
+          globalThis.Debugger?.warn?.(
+            `LoginFailed version mismatch: server expects ${server}, this client sends ${client}. `
+            + 'Update the client before re-cutting the license block.',
+          );
+        }
       } catch {
-        Debugger.warn('Fingerprint field was present but was not JSON.');
+        globalThis.Debugger?.warn?.('Fingerprint field was present but was not JSON.');
       }
     }
     messaging.close('LoginFailed');
