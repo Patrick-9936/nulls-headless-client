@@ -63,21 +63,25 @@ module.exports = class LoginFailedMessage {
       try {
         const fp = JSON.parse(this.fingerprint);
         if (fp.sha) messaging.config.fingerprintHash = fp.sha;
+        // Capture what this client currently sends BEFORE we overwrite config
+        // with the server's version, otherwise the mismatch check below always
+        // compares the saved value against itself.
+        const client = `${messaging.config.major}.${messaging.config.minor}.${messaging.config.build}`;
+        let serverVersion = null;
         if (fp.version) {
           const v = String(fp.version).split('.').map(Number);
           if (v.length >= 3) {
             messaging.config.major = v[0];
             messaging.config.minor = v[1];
             messaging.config.build = v[2];
+            serverVersion = `${v[0]}.${v[1]}.${v[2]}`;
           }
         }
         messaging.saveConfig();
         globalThis.Debugger?.info?.('Saved fingerprint/version from server response.');
-        const server = `${v[0]}.${v[1]}.${v[2]}`;
-        const client = `${messaging.config.major}.${messaging.config.minor}.${messaging.config.build}`;
-        if (server !== client) {
+        if (serverVersion && serverVersion !== client) {
           globalThis.Debugger?.warn?.(
-            `LoginFailed version mismatch: server expects ${server}, this client sends ${client}. `
+            `LoginFailed version mismatch: server expects ${serverVersion}, this client sends ${client}. `
             + 'Update the client before re-cutting the license block.',
           );
         }

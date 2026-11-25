@@ -33,7 +33,7 @@ function apply(config, root) {
       license,
       Buffer.from(
         JSON.stringify({
-          features: ['high_memory'],
+          features: [config.memoryClass || 'low_memory'],
           timestamp: Date.now(),
           connection: 'Keep-Alive',
           modificationIds: [],

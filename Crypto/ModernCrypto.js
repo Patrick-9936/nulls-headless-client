@@ -8,6 +8,27 @@ function parseKey(hex) {
   return Buffer.from(clean, 'hex');
 }
 
+// Brawl's VInt, used for the length prefix of the login plaintext.
+function writeVInt(value) {
+  let v = value | 0;
+  let first = ((v >> 25) & 0x40) | (v & 0x3f);
+  let rest = (v ^ (v >> 31)) >> 6;
+  v >>= 6;
+  if (rest === 0) return Buffer.from([first]);
+  const out = [first | 0x80];
+  rest >>= 7;
+  let more = rest > 0 ? 0x80 : 0;
+  out.push((v & 0x7f) | more);
+  v >>= 7;
+  while (rest !== 0) {
+    rest >>= 7;
+    more = rest > 0 ? 0x80 : 0;
+    out.push((v & 0x7f) | more);
+    v >>= 7;
+  }
+  return Buffer.from(out);
+}
+
 class CounterNonce {
   constructor(bytes) {
     if (bytes) this.buf = Buffer.from(bytes);
@@ -33,6 +54,7 @@ class CounterNonce {
 }
 
 module.exports = class ModernCrypto {
+  static writeVInt = writeVInt;
   constructor(config) {
     this.config = config;
     this.primitives = config.cryptoMode === 'native19' ? Native19 : V3;
@@ -76,16 +98,26 @@ module.exports = class ModernCrypto {
       if (!this.sessionKey) throw new Error('No session key from ServerHello');
       this.sendNonce = new CounterNonce();
       const tempNonce = this.primitives.blake2b24(this.clientPublicKey, this.serverPublicKey);
-      const response = this.config.cryptoMode === 'native19' ? this.challengeResponse : this.sessionKey;
-      if (!response) throw new Error('Native SDK challenge response has not been prepared');
-      const prefix = this.config.cryptoMode === 'native19' ? Buffer.from([response.length]) : Buffer.alloc(0);
-      const padded = Buffer.concat([
-        prefix,
-        response,
-        this.sendNonce.bytes(),
-        body,
-        Buffer.alloc(this.config.promonPadSize ?? 508),
-      ]);
+      // `loginLayout` selects the plaintext the native client seals:
+      //   native — [VInt len(body)][body][clientNonce 24]   (RE-SEAL / RE-CONTAINER,
+      //            captured from libg70 itself: 65-byte plaintext for a 40-byte body)
+      //   hello  — [u8 len(ServerHello)][ServerHello][clientNonce][body]  (v69 shape)
+      const layout = this.config.loginLayout === 'hello' ? 'hello' : 'native';
+      let padded;
+      if (layout === 'native') {
+        padded = Buffer.concat([writeVInt(body.length), body, this.sendNonce.bytes()]);
+      } else {
+        const response = this.config.cryptoMode === 'native19' ? this.challengeResponse : this.sessionKey;
+        if (!response) throw new Error('Native SDK challenge response has not been prepared');
+        const prefix = this.config.cryptoMode === 'native19' ? Buffer.from([response.length]) : Buffer.alloc(0);
+        padded = Buffer.concat([
+          prefix,
+          response,
+          this.sendNonce.bytes(),
+          body,
+          Buffer.alloc(this.config.promonPadSize ?? 508),
+        ]);
+      }
       const encrypted = this.primitives.box(padded, tempNonce, this.serverPublicKey, this.clientPrivateKey);
       return Buffer.concat([this.clientPublicKey, encrypted]);
     }

@@ -290,7 +290,9 @@ class Messaging {
         return;
       }
     }
-    const Cls = this.config.loginLayout === 'legacy' ? LegacyLoginMessage : ModernLoginMessage;
+    // RE-BODY proved v70 still uses the 34-field Login encoder, so that is the default;
+    // `loginLayout` now only selects the crypto plaintext shape (see Crypto/ModernCrypto).
+    const Cls = this.config.loginEncoder === 'modern' ? ModernLoginMessage : LegacyLoginMessage;
     const m = new Cls(this.config, this.account);
     m.encode();
     this.send(this.config.packetIds.login, m.ByteStream.getBytes());

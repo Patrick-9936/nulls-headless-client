@@ -1,6 +1,6 @@
 {
   "name": "nulls-headless-client",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "private": true,
   "description": "Headless Node.js client for the Nulls Brawl protocol: accounts, clubs, lobby and bot fleets.",
   "license": "MIT",
@@ -27,7 +27,7 @@
   },
   "scripts": {
     "start": "node Program.js help",
-    "check": "node --check Program.js && node --check TUI.js && node --check lib/Client.js && node --check lib/CLI.js && node --check lib/i18n.js && node --check lib/Connect.js && node --check lib/Fleet.js && node --check tools/fleet.js && node --check tools/connect.js && node --check tools/i18n-check.js && node Program.js info && node tools/i18n-check.js && node --check tools/candidates.js && node --check tools/proxy-watch.js && node --check tools/test-session.js",
+    "check": "node --check Program.js && node --check TUI.js && node --check lib/Client.js && node --check lib/CLI.js && node --check lib/i18n.js && node --check lib/Connect.js && node --check lib/Fleet.js && node --check tools/fleet.js && node --check tools/connect.js && node --check tools/i18n-check.js && node Program.js info && node tools/i18n-check.js && node --check tools/candidates.js && node --check tools/proxy-watch.js && node --check tools/proxy-sync.js && node --check tools/test-session.js",
     "lint": "eslint .",
     "lint:eslint": "eslint .",
     "format": "prettier --write .",

@@ -7,12 +7,49 @@
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-11-25
+
+### Изменено
+- **Протокол обновлён до v70 (70.877, content 70.877.22)**: `config.json` — `major=70`,
+  `keyVersion=60`, `protocolVersion=2`, fingerprint `7a43eaf6…`, `cryptoMode=nulls-native19`.
+- **Login-плейнтекст `native`** (`Crypto/ModernCrypto.js`, `config.loginLayout="native"`):
+  `[VInt len(body)][body][clientNonce 24]` — раскладка libg70, подтверждена живым дампом
+  официального клиента (Login 335 Б = `pub32 ‖ tag16 ‖ VInt(261) ‖ body 261 ‖ nonce 24`).
+  Nonce конверта = `blake2b-192(clientPub ‖ SERVER_PK)`. Прежняя v69-раскладка доступна как
+  `loginLayout="hello"`.
+- **Тело Login** (`Messaging/Messages/Client/LoginMessage.js`): 34 поля приведены к нативным
+  значениям по дизассемблеру (`+0x140=1`, `+0x110=""`, `+0x120`=Android ID, seed=2, `+0x168=0`);
+  выбор энкодера теперь через `config.loginEncoder`, а не `loginLayout`.
+- **ID устройства** (`lib/Client.js`): `deviceId`/`openDeviceId` — 32-hex без дефисов,
+  `androidId` — 16-hex `Settings.Secure.ANDROID_ID` (размер на проводе как у нативного клиента).
+- **Hello**: `features: low_memory` (`utils/NullsLicense.js`, `config.memoryClass`) → 776 Б,
+  байт-в-байт как у живого клиента (кроме timestamp).
+- **Прокси**: SOCKS4/4a в `utils/ProxyConnect.js`; общий сбор и проверка пула вынесены в
+  `lib/ProxySync.js`; расширен `lib/ProxySources.js`.
+
+### Исправлено
+- **`LoginFailedMessage`**: переменная `v` использовалась вне блока `if (fp.version)` —
+  `ReferenceError` на любом `LoginFailed` без версии в fingerprint; сравнение версий
+  сравнивало сохранённое значение само с собой. Версия клиента теперь фиксируется до
+  перезаписи конфигом, предупреждение о расхождении срабатывает корректно.
+
 ### Добавлено
 - **Диагностика `LoginFailed`**: известные коды входа теперь печатают, что делать, а не
   только число. Для `error=8` (блок лицензии не от этой сборки) в лог уходит подсказка
   про `client-license.bin` и `docs/APK-UPDATE.md`; при расхождении версий сервера и
   клиента выводится `LoginFailed version mismatch: server expects X, this client sends Y`.
   3 теста в `tests/login-failed.test.js`.
+- **`docs/V70-STATUS.md`**: полная сводка реверса v70 — доказанное, изменённое и
+  оставшийся блокер (сервер молча закрывает `10101`).
+- Инструменты: `tools/proxy-sync.js`, `tools/relay.js`, `tools/club-check.js`,
+  `tools/club-rush.js`, `tools/team-spam.js`, `tools/patch-license.js`.
+
+### Известные проблемы
+- **Вход (`10101`) не принимается сервером.** Крипта и длина тела байт-в-байт совпадают с
+  живым клиентом, но сервер закрывает сокет на любом `10101` — включая побайтовый реплей
+  настоящего кадра из дампа, — не присылая кода ошибки. На проводе «не расшифровал» и
+  «не понравилось тело» неотличимы. Единственный оставшийся источник истины — плейнтекст
+  тела логина живого клиента (hook/frida/root). Подробности — `docs/V70-STATUS.md`.
 
 ## [0.3.4] — 2026-11-21
 

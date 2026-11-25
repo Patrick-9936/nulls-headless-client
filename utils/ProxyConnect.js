@@ -25,8 +25,8 @@ function parseProxy(value) {
   } catch (error) {
     throw proxyFailure('Invalid proxy URL', { field: 'url', cause: error.message });
   }
-  if (!['socks5:', 'http:'].includes(url.protocol))
-    throw proxyFailure('Proxy must use socks5:// or http://', { field: 'protocol' });
+  if (!['socks5:', 'socks4:', 'http:'].includes(url.protocol))
+    throw proxyFailure('Proxy must use socks5://, socks4:// or http://', { field: 'protocol' });
   const port = Number(url.port || (url.protocol === 'http:' ? 80 : 1080));
   const username =
     typeof value === 'object' && value.username !== undefined
@@ -144,6 +144,21 @@ async function tunnel(socket, host, port, proxy, command = 1, timeoutMs = 10000)
       });
       if (!/^HTTP\/1\.[01] 200(?:\s|$)/.test(header.toString('latin1')))
         throw proxyFailure('HTTP proxy CONNECT rejected', { host, port });
+    } else if (proxy.type === 'socks4') {
+      // SOCKS4 has no authentication; SOCKS4a carries the hostname so names and
+      // IPv4 targets both work. Only CONNECT is defined here (UDP is rejected above).
+      if (proxy.username || proxy.password) throw proxyFailure('SOCKS4 does not support authentication', { host, port });
+      const targetPort = Buffer.alloc(2);
+      targetPort.writeUInt16BE(port);
+      const ipv4 = /^\d+\.\d+\.\d+\.\d+$/.test(host);
+      const request = ipv4
+        ? Buffer.concat([Buffer.from([4, 1]), targetPort, Buffer.from(host.split('.').map(Number)), Buffer.from([0])])
+        : Buffer.concat([Buffer.from([4, 1]), targetPort, Buffer.from([0, 0, 0, 1]), Buffer.from([0]), Buffer.from(host + '\0', 'latin1')]);
+      socket.write(request);
+      const reply = await exact(8);
+      if (reply[0] !== 0) throw proxyFailure('SOCKS4 reply version mismatch', { host, port, version: reply[0] });
+      if (reply[1] !== 0x5a) throw proxyFailure('SOCKS4 CONNECT rejected: ' + reply[1], { host, port, reply: reply[1] });
+      bound = { host: [...reply.subarray(4, 8)].join('.'), port: reply.readUInt16BE(2) };
     } else if (proxy.type === 'socks5') {
       const method = proxy.username ? 2 : 0;
       socket.write(Buffer.from([5, 1, method]));
