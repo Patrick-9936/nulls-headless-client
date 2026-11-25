@@ -8,7 +8,7 @@
   "build": 22,
   "protocolVersion": 2,
   "keyVersion": 60,
-  "serverPublicKeyHex": "7107A093895781D774710E621650D78312C0C58EA3097526F6A5C7130FC5C78F",
+  "serverPublicKeyHex": "656AA590749960FCFD2A8567A21AC610753DDCF37CA185966F2AEC372B0E8656",
   "cryptoMode": "nulls-native19",
   "loginLayout": "native",
   "loginBodyProfile": "native70",
