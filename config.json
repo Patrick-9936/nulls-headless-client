@@ -11,6 +11,7 @@
   "serverPublicKeyHex": "656AA590749960FCFD2A8567A21AC610753DDCF37CA185966F2AEC372B0E8656",
   "cryptoMode": "nulls-native19",
   "loginLayout": "native",
+  "loginBodyProfile": "native70",
   "loginEncoder": "legacy",
   "deviceType": 2,
   "appStore": 2,
