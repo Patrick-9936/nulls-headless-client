@@ -103,7 +103,7 @@ function runOnce(overrides, account, timeout) {
     let settled = false;
     const result = {
       layout: config.loginLayout === 'hello' ? 'hello' : 'native',
-      body: config.loginBodyProfile === 'legacy69' ? 'legacy69' : 'native70',
+      body: ['libwire', 'legacy69'].includes(config.loginBodyProfile) ? config.loginBodyProfile : 'native70',
       conn: config.loginConnectionValue ?? 1448,
       gotHello: false,
       replyType: null,
@@ -204,7 +204,7 @@ function overridesFrom(extra) {
   let runs;
   if (args.sweep) {
     const layouts = args.layout ? [args.layout] : ['native', 'hello'];
-    const bodies = args.body ? [args.body] : ['native70', 'legacy69'];
+    const bodies = args.body ? [args.body] : ['libwire', 'native70', 'legacy69'];
     runs = [];
     for (const loginLayout of layouts)
       for (const loginBodyProfile of bodies)
