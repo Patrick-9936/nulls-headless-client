@@ -102,7 +102,20 @@ module.exports = class ModernCrypto {
     if (type === this.config.packetIds.login && !this.established) {
       if (!this.sessionKey) throw new Error('No session key from ServerHello');
       this.sendNonce = new CounterNonce();
-      const tempNonce = this.primitives.blake2b24(this.clientPublicKey, this.serverPublicKey);
+      // Nonce for the login box. The replay test proved the login depends on
+      // the per-connection ServerHello nonce (this.sessionKey, 24 bytes), so
+      // it must feed the nonce. Source selectable via config.b2b.nonce:
+      //   server              — the raw 24-byte ServerHello nonce
+      //   blake_server_cpk_spk— blake2b24(serverNonce, cpk, spk)
+      //   blake_cpk_spk_server— blake2b24(cpk, spk, serverNonce)
+      //   blake_cpk_spk       — blake2b24(cpk, spk)   (old behaviour, no server nonce)
+      const sv = this.sessionKey;
+      const ns = (this.config.b2b && this.config.b2b.nonce) || 'blake_cpk_spk';
+      let tempNonce;
+      if (ns === 'server' && sv && sv.length === 24) tempNonce = Buffer.from(sv);
+      else if (ns === 'blake_server_cpk_spk' && sv) tempNonce = this.primitives.blake2b24(sv, this.clientPublicKey, this.serverPublicKey);
+      else if (ns === 'blake_cpk_spk_server' && sv) tempNonce = this.primitives.blake2b24(this.clientPublicKey, this.serverPublicKey, sv);
+      else tempNonce = this.primitives.blake2b24(this.clientPublicKey, this.serverPublicKey);
       // `loginLayout` selects the plaintext the native client seals:
       //   native — [VInt len(body)][body][clientNonce 24]   (RE-SEAL / RE-CONTAINER,
       //            captured from libg70 itself: 65-byte plaintext for a 40-byte body)
