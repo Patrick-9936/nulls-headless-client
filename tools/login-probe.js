@@ -105,6 +105,7 @@ function runOnce(overrides, account, timeout) {
       layout: config.loginLayout === 'hello' ? 'hello' : 'native',
       body: ['libwire', 'legacy69'].includes(config.loginBodyProfile) ? config.loginBodyProfile : 'native70',
       conn: config.loginConnectionValue ?? 1448,
+      b2b: config.b2b ? `${config.b2b.keyKdf}/${config.b2b.counter}/${config.b2b.macInput}/${config.b2b.macKey}` : null,
       gotHello: false,
       replyType: null,
       code: null,
@@ -202,7 +203,21 @@ function overridesFrom(extra) {
       : [undefined];
 
   let runs;
-  if (args.sweep) {
+  if (args.b2b) {
+    // Sweep the v70 "blake2b box" reconstruction (cryptoMode nulls-blake2b).
+    // Tries every keyKdf x counter x macInput x macKey combination and reports
+    // which, if any, stops the server silently dropping the 10101.
+    const keyKdf = ['blake2b64', 'shared_dup', 'shared_zero'];
+    const counter = ['le32', 'le64', 'u8', 'none'];
+    const macInput = ['nonce_ct', 'key_nonce_ct', 'ct'];
+    const macKey = ['keyed', 'unkeyed'];
+    runs = [];
+    for (const kk of keyKdf)
+      for (const ct of counter)
+        for (const mi of macInput)
+          for (const mk of macKey)
+            runs.push(overridesFrom({ cryptoMode: 'nulls-blake2b', b2b: { keyKdf: kk, counter: ct, macInput: mi, macKey: mk } }));
+  } else if (args.sweep) {
     const layouts = args.layout ? [args.layout] : ['native', 'hello'];
     const bodies = args.body ? [args.body] : ['libwire', 'native70', 'legacy69'];
     runs = [];
@@ -218,24 +233,23 @@ function overridesFrom(extra) {
   const port = Number(args.port) || baseConfig.port;
   if (!args.json) {
     console.log(`probe -> ${host}:${port}  account=${account.hi || account.lo ? `${account.hi}/${account.lo}` : 'fresh (registration)'}  timeout=${timeout}ms`);
-    console.log('layout   body       conn        outcome   reply   code    ms');
-    console.log('-------- ---------- ----------- --------- ------- ------- ------');
+    if (args.b2b) {
+      console.log('keyKdf/counter/macInput/macKey             outcome   reply   code    ms');
+      console.log('------------------------------------------ --------- ------- ------- ------');
+    } else {
+      console.log('layout   body       conn        outcome   reply   code    ms');
+      console.log('-------- ---------- ----------- --------- ------- ------- ------');
+    }
   }
   const results = [];
   for (const ov of runs) {
     const r = await runOnce(ov, account, timeout);
     results.push(r);
     if (!args.json) {
+      const left = args.b2b ? (r.b2b || '').padEnd(42) : [r.layout.padEnd(8), r.body.padEnd(10), String(r.conn).padEnd(11)].join(' ');
       console.log(
-        [
-          r.layout.padEnd(8),
-          r.body.padEnd(10),
-          String(r.conn).padEnd(11),
-          r.outcome.padEnd(9),
-          String(r.replyType ?? '').padEnd(7),
-          String(r.code ?? '').padEnd(7),
-          String(r.ms),
-        ].join(' ') + (r.error ? `   (${r.error})` : ''),
+        [left, r.outcome.padEnd(9), String(r.replyType ?? '').padEnd(7), String(r.code ?? '').padEnd(7), String(r.ms)].join(' ') +
+          (r.error ? `   (${r.error})` : ''),
       );
     }
   }

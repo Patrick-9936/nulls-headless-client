@@ -57,7 +57,12 @@ module.exports = class ModernCrypto {
   static writeVInt = writeVInt;
   constructor(config) {
     this.config = config;
-    this.primitives = config.cryptoMode === 'native19' ? Native19 : V3;
+    this.primitives =
+      config.cryptoMode === 'nulls-blake2b'
+        ? require('./NullsBlake2bPrimitives')(config)
+        : config.cryptoMode === 'native19'
+          ? Native19
+          : V3;
     this.serverPublicKey = parseKey(config.serverPublicKeyHex);
     this.clientPrivateKey = crypto.randomBytes(32);
     this.clientPublicKey = this.primitives.scalarMultBase(this.clientPrivateKey);
