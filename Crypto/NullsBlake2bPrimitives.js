@@ -51,8 +51,6 @@ function deriveKey64(shared, opt) {
 
 function counterBytes(i, opt) {
   switch (opt) {
-    case 'none':
-      return Buffer.alloc(0);
     case 'u8':
       return Buffer.from([i & 0xff]);
     case 'le64': {
@@ -60,21 +58,37 @@ function counterBytes(i, opt) {
       b.writeUInt32LE(i >>> 0, 0);
       return b;
     }
-    case 'le32':
-    default: {
+    case 'le32': {
       const b = Buffer.alloc(4);
       b.writeUInt32LE(i >>> 0, 0);
       return b;
     }
+    default:
+      return Buffer.alloc(0);
   }
 }
 
+// nonce + i, little-endian add (NaCl-secretbox-style per-block nonce).
+function addNonce(nonce, i) {
+  const n = Buffer.from(nonce);
+  let carry = i;
+  for (let k = 0; k < n.length && carry; k++) {
+    const s = n[k] + (carry & 0xff);
+    n[k] = s & 0xff;
+    carry = (carry >>> 8) + (s >>> 8);
+  }
+  return n;
+}
+
 function keystream(nonce, key64, length, opt) {
-  const blockLen = 24; // matches observed digest_size=24
+  const blockLen = 24; // matches the observed blake2b digest_size=24
   const out = Buffer.alloc(Math.ceil(length / blockLen) * blockLen);
   for (let i = 0, off = 0; off < out.length; i++, off += blockLen) {
-    const blk = Buffer.from(blake2b(U8(cat(nonce, key64, counterBytes(i, opt))), null, blockLen));
-    blk.copy(out, off);
+    // 'nonce_add' (default): block i hashes (nonce+i)||key64, so block 0 is
+    // exactly blake2b(nonce||key64,24) — the operation captured from libg.so.
+    // Other modes append an explicit counter after the key.
+    const input = opt === 'nonce_add' || opt === undefined ? cat(addNonce(nonce, i), key64) : cat(nonce, key64, counterBytes(i, opt));
+    Buffer.from(blake2b(U8(input), null, blockLen)).copy(out, off);
   }
   return out.subarray(0, length);
 }
@@ -122,7 +136,7 @@ function cfgFrom(config) {
   const b = (config && config.b2b) || {};
   return {
     keyKdf: b.keyKdf || 'blake2b64',
-    counter: b.counter || 'le32',
+    counter: b.counter || 'nonce_add',
     macInput: b.macInput || 'nonce_ct',
     macKey: b.macKey || 'keyed',
   };

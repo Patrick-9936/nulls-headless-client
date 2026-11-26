@@ -208,7 +208,7 @@ function overridesFrom(extra) {
     // Tries every keyKdf x counter x macInput x macKey combination and reports
     // which, if any, stops the server silently dropping the 10101.
     const keyKdf = ['blake2b64', 'shared_dup', 'shared_zero'];
-    const counter = ['le32', 'le64', 'u8', 'none'];
+    const counter = ['nonce_add', 'le32', 'le64', 'u8'];
     const macInput = ['nonce_ct', 'key_nonce_ct', 'ct'];
     const macKey = ['keyed', 'unkeyed'];
     runs = [];
