@@ -87,3 +87,46 @@ in `docs/V70-CRYPTO-RE-FINDINGS.md`.
 - Remaining for a full login: the correct 284-byte Login (10101) **plaintext
   body** for v70, and wiring this engine into the handshake (the receive
   direction uses the same custom primitives via the session key).
+
+## Wiring into the Node client (Termux)
+
+The client seals the login with this engine when `cryptoMode` is set to
+`v70-engine`. In `config.json`:
+
+```json
+{
+  "cryptoMode": "v70-engine",
+  "libg64Path": "/data/data/com.termux/files/home/libg64.so",
+  "v70Plaintext": "raw"
+}
+```
+
+Optional config keys: `pythonPath` (default `python3`), `v70EngineDir`
+(default `tools/v70-engine`), `v70EngineTimeoutMs` (default 120000),
+`v70Plaintext` = `raw` | `native` | `hello` (the plaintext shape that gets
+boxed; `raw` = the Login body exactly as encoded).
+
+Then run the probe against the live server. The probe now prints the raw
+inbound frame types (`frames=[type:len …]`), which are plaintext, so you can
+see the server's answer even before the receive side is wired:
+
+```bash
+pkg install nodejs python
+pip install unicorn pynacl
+node tools/login-probe.js --sweep        # tries each body profile
+```
+
+What the result means:
+- **`CRYPTO OK` / a reply frame after Login** — the server accepted the box and
+  parsed the body. If the reply is `20104` it is LoginOk; if `20103`
+  (LoginFailed) read its code and adjust the body profile / fields.
+- **still `SILENT`** with `cryptoMode=v70-engine` — the crypto is correct
+  (self-test proves it), so the remaining issue is the body content, not the box.
+
+### Still TODO for a full session (beyond login)
+
+The **receive** direction (decrypting ServerHello follow-ups and gameplay
+frames) uses the same custom primitives keyed by the session key. Only the
+login **send** path is wired so far. Decrypting replies needs the engine's
+stream/MAC applied in the open direction with the session key — a
+straightforward extension of `engine.py` once the login is accepted.

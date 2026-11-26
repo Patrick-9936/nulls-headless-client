@@ -164,7 +164,27 @@ function runOnce(overrides, account, timeout) {
         finish('ERROR');
       }
     });
+    // Raw-wire frame tap: the 7-byte frame header (type u16, len u24, version
+    // u16) is plaintext, so we can classify every inbound frame — including an
+    // encrypted LoginFailed/LoginOk whose payload we cannot decrypt yet.
+    result.frames = result.frames || [];
+    let rawBuf = Buffer.alloc(0);
+    const tap = (bytes) => {
+      rawBuf = Buffer.concat([rawBuf, bytes]);
+      while (rawBuf.length >= 7) {
+        const type = rawBuf.readUInt16BE(0);
+        const len = rawBuf.readUIntBE(2, 3);
+        if (rawBuf.length < 7 + len) break;
+        result.frames.push({ type, len });
+        if (!result.firstReplyAfterHello && result.gotHello && type !== config.packetIds.serverHello)
+          result.firstReplyAfterHello = type;
+        rawBuf = rawBuf.subarray(7 + len);
+      }
+    };
     socket.on('data', (bytes) => {
+      try {
+        tap(bytes);
+      } catch {}
       queue.add(bytes);
       try {
         while (messaging.pendingJob()) messaging.update();
@@ -250,9 +270,11 @@ function overridesFrom(extra) {
     results.push(r);
     if (!args.json) {
       const left = args.b2b ? (r.b2b || '').padEnd(48) : [r.layout.padEnd(8), r.body.padEnd(10), String(r.conn).padEnd(11)].join(' ');
+      const framesTxt = r.frames && r.frames.length ? `  frames=[${r.frames.map((f) => `${f.type}:${f.len}`).join(' ')}]` : '';
       console.log(
         [left, r.outcome.padEnd(9), String(r.replyType ?? '').padEnd(7), String(r.code ?? '').padEnd(7), String(r.ms)].join(' ') +
-          (r.error ? `   (${r.error})` : ''),
+          (r.error ? `   (${r.error})` : '') +
+          framesTxt,
       );
     }
   }
@@ -260,6 +282,10 @@ function overridesFrom(extra) {
 
   const win = results.find((r) => r.outcome === 'OK');
   const progress = results.find((r) => r.outcome === 'FAILED' || r.outcome === 'REPLY');
+  // A reply frame after ServerHello (even one we cannot decrypt) means the
+  // server accepted the login envelope's crypto and parsed the body — the
+  // decisive signal that the v70 crypto is now correct.
+  const replied = results.find((r) => r.firstReplyAfterHello);
   if (!args.json) {
     console.log('');
     if (win) console.log(`ACCEPTED: layout=${win.layout} body=${win.body} conn=${win.conn} -> LoginOk. Put these in config.json.`);
@@ -267,7 +293,12 @@ function overridesFrom(extra) {
       console.log(
         `PROGRESS: layout=${progress.layout} body=${progress.body} conn=${progress.conn} got a reply (type ${progress.replyType}, code ${progress.code}) instead of a silent drop — the envelope decrypts and the body parses. Chase the code from here.`,
       );
-    else console.log('All combinations were silently dropped (SILENT) or blocked before login. The body content is still wrong; see docs/V70-STATUS.md.');
+    else if (replied)
+      console.log(
+        `CRYPTO OK: the server sent a reply frame (type ${replied.firstReplyAfterHello}) after Login instead of silently dropping — the v70 box is accepted. ` +
+          `If it was LoginFailed (20103), read its code to fix the body; if 20104, it is LoginOk.`,
+      );
+    else console.log('All combinations were silently dropped (SILENT) or blocked before login. If using cryptoMode=v70-engine, the crypto is correct, so the body content is the remaining issue; otherwise the crypto is still wrong.');
   }
   process.exitCode = win ? 0 : 1;
 })();

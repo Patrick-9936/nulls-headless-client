@@ -1,6 +1,26 @@
 const crypto = require('crypto');
+const path = require('path');
+const { execFileSync } = require('child_process');
 const V3 = require('./NaClV3');
 const Native19 = require('./NativeCryptoPrimitives');
+
+// Seal the v70 login box with the native-primitive engine (tools/v70-engine).
+// The v70 box uses three custom primitives that only exist inside libg64.so, so
+// this shells out to the Python+Unicorn engine. Returns cpk || mac || ct.
+function sealWithV70Engine(config, csk, serverPk, body) {
+  const engineDir = config.v70EngineDir || path.resolve(__dirname, '..', 'tools', 'v70-engine');
+  const py = config.pythonPath || process.env.PYTHON || 'python3';
+  const env = { ...process.env };
+  if (config.libg64Path) env.LIBG64_PATH = config.libg64Path;
+  const out = execFileSync(py, [path.join(engineDir, 'engine_cli.py'), 'seal', csk.toString('hex'), serverPk.toString('hex'), body.toString('hex')], {
+    env,
+    maxBuffer: 1 << 20,
+    timeout: config.v70EngineTimeoutMs || 120000,
+  });
+  const hex = out.toString('utf8').trim().split(/\s+/)[0];
+  if (!/^[0-9a-fA-F]+$/.test(hex)) throw new Error(`v70 engine returned no envelope: ${out.toString('utf8').slice(0, 120)}`);
+  return Buffer.from(hex, 'hex');
+}
 
 function parseKey(hex) {
   const clean = String(hex || '').replace(/\s+/g, '');
@@ -120,6 +140,23 @@ module.exports = class ModernCrypto {
       //   native — [VInt len(body)][body][clientNonce 24]   (RE-SEAL / RE-CONTAINER,
       //            captured from libg70 itself: 65-byte plaintext for a 40-byte body)
       //   hello  — [u8 len(ServerHello)][ServerHello][clientNonce][body]  (v69 shape)
+      // v70 native-primitive engine: seal the real custom box (cpk||mac||ct).
+      // The plaintext shape is selectable via config.v70Plaintext:
+      //   'raw'    — the Login body exactly as encoded (default; matches the
+      //              raw plaintext observed going into the real seal)
+      //   'native' — [VInt len(body)][body][clientNonce 24]
+      //   'hello'  — [ServerHello][clientNonce][body]
+      if (this.config.cryptoMode === 'v70-engine' || this.config.useV70Engine) {
+        const shape = this.config.v70Plaintext || 'raw';
+        let plain;
+        if (shape === 'native') plain = Buffer.concat([writeVInt(body.length), body, this.sendNonce.bytes()]);
+        else if (shape === 'hello')
+          plain = Buffer.concat([this.sessionKey || Buffer.alloc(0), this.sendNonce.bytes(), body]);
+        else plain = body;
+        const envelope = sealWithV70Engine(this.config, this.clientPrivateKey, this.serverPublicKey, plain);
+        // envelope already includes cpk; nothing to prepend.
+        return envelope;
+      }
       const layout = this.config.loginLayout === 'hello' ? 'hello' : 'native';
       let padded;
       if (layout === 'native') {
