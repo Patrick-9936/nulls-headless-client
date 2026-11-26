@@ -118,7 +118,7 @@ function runOnce(overrides, account, timeout) {
       settled = true;
       result.outcome = outcome;
       result.ms = Date.now() - start;
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       try {
         socket.destroy();
       } catch {}
@@ -154,8 +154,35 @@ function runOnce(overrides, account, timeout) {
       return finish('REPLY');
     };
 
-    const timer = setTimeout(() => finish(result.gotHello ? 'TIMEOUT' : 'NOHELLO'), timeout);
-    socket.setTimeout(timeout + 3000);
+    // Start the clock when the Login frame actually goes out. Sealing with the
+    // v70 engine shells out to Python+Unicorn (~55 s), and execFileSync blocks
+    // the event loop, so a timer armed at connect time would fire the moment
+    // the seal returns — before the server has had any chance to answer.
+    let timer = null;
+    const arm = (ms) => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => finish(result.gotHello ? 'TIMEOUT' : 'NOHELLO'), ms);
+    };
+    arm(timeout);
+    // Watch the Login frame at the Messaging level: send() seals (a ~55 s
+    // blocking Python call with the v70 engine) and only then writes, so this
+    // is where "the login actually left" can be timed reliably.
+    const rawEncrypt = messaging.crypto.encrypt.bind(messaging.crypto);
+    messaging.crypto.encrypt = (type, payload) => {
+      const out = rawEncrypt(type, payload);
+      if (type === config.packetIds.login) result.loginLen = out.length;
+      return out;
+    };
+    const rawSend = messaging.send.bind(messaging);
+    messaging.send = (type, payload, version, onFlushed) => {
+      const ret = rawSend(type, payload, version, onFlushed);
+      if (!result.loginSentMs && type === config.packetIds.login) {
+        result.loginSentMs = Date.now();
+
+        arm(timeout);
+      }
+      return ret;
+    };
     socket.on('connect', () => {
       try {
         messaging.sendPepperAuthentication();
@@ -208,6 +235,7 @@ function overridesFrom(extra) {
   if (args.port) o.port = Number(args.port);
   if (args.layout) o.loginLayout = args.layout;
   if (args.body) o.loginBodyProfile = args.body;
+  if (args.plain) o.v70Plaintext = args.plain;
   return { ...o, ...extra };
 }
 
@@ -271,10 +299,12 @@ function overridesFrom(extra) {
     if (!args.json) {
       const left = args.b2b ? (r.b2b || '').padEnd(48) : [r.layout.padEnd(8), r.body.padEnd(10), String(r.conn).padEnd(11)].join(' ');
       const framesTxt = r.frames && r.frames.length ? `  frames=[${r.frames.map((f) => `${f.type}:${f.len}`).join(' ')}]` : '';
+      const sentTxt = r.loginLen ? `  login=${r.loginLen}B` : '';
       console.log(
         [left, r.outcome.padEnd(9), String(r.replyType ?? '').padEnd(7), String(r.code ?? '').padEnd(7), String(r.ms)].join(' ') +
           (r.error ? `   (${r.error})` : '') +
-          framesTxt,
+          framesTxt +
+          sentTxt,
       );
     }
   }

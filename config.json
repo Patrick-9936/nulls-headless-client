@@ -1,5 +1,5 @@
 {
-  "host": "brawl.server.dnull.xyz",
+  "host": "nb.nullsproxy.com",
   "port": 9339,
   "appBinaryVersion": "70.877",
   "fingerprintHash": "7a43eaf696d48fa587fcf76c8518b5a792ecf65d",
@@ -9,7 +9,7 @@
   "protocolVersion": 2,
   "keyVersion": 60,
   "serverPublicKeyHex": "656AA590749960FCFD2A8567A21AC610753DDCF37CA185966F2AEC372B0E8656",
-  "cryptoMode": "nulls-native19",
+  "cryptoMode": "v70-engine",
   "loginLayout": "native",
   "loginBodyProfile": "native70",
   "loginEncoder": "legacy",
@@ -62,5 +62,7 @@
   "clientLicensePath": "client-license.bin",
   "androidId": "9e4854e16d9cb977",
   "loginContentFp": "invalid_files_content_update",
-  "loginSeed": 2
+  "loginSeed": 2,
+  "libg64Path": "/data/data/com.termux/files/home/libg64.so",
+  "v70Plaintext": "hello"
 }

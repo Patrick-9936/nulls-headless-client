@@ -45,6 +45,28 @@ def main(argv):
               % (info["cpk"], info["nonce"], info["K"][:16] + "…", info["mac"], len(body)),
               file=sys.stderr)
         return 0
+    if cmd == "derivek":
+        # Slow step (~60s): compute K and cpk for a csk. Pre-run before connecting.
+        if len(argv) != 3:
+            print("usage: derivek <csk_hex32> <server_pk_hex32>", file=sys.stderr); return 2
+        csk = os.urandom(32) if argv[1] == "-" else bytes.fromhex(argv[1])
+        spk = bytes.fromhex(argv[2])
+        import nacl.bindings as nb, hashlib
+        K = engine.derive_K(csk, spk)
+        cpk = nb.crypto_scalarmult_base(csk)
+        nonce = hashlib.blake2b(cpk + spk, digest_size=24).digest()
+        print("%s %s %s %s" % (csk.hex(), cpk.hex(), nonce.hex(), K.hex()))
+        return 0
+    if cmd == "sealk":
+        # Fast step: seal a plaintext with a precomputed K (skips derive_K).
+        if len(argv) != 5:
+            print("usage: sealk <csk_hex32> <server_pk_hex32> <K_hex32> <plaintext_hex>", file=sys.stderr); return 2
+        csk = bytes.fromhex(argv[1]); spk = bytes.fromhex(argv[2]); K = bytes.fromhex(argv[3])
+        body = bytes.fromhex(argv[4]) if argv[4] else b""
+        env, info = engine.seal_login(csk, spk, body, K=K)
+        print(env.hex())
+        print("engine: cpk=%s mac=%s ctlen=%d" % (info["cpk"], info["mac"], len(body)), file=sys.stderr)
+        return 0
     print("unknown command: %s" % cmd, file=sys.stderr)
     return 2
 
